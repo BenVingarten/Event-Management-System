@@ -1,0 +1,7 @@
+{
+  "dependencies": {
+    "@reduxjs/toolkit": "^2.2.3",
+    "flowbite-react": "^0.8.0",
+    "react-redux": "^9.1.0"
+  }
+}

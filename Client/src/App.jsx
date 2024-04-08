@@ -7,10 +7,13 @@ import EventDetails from "./pages/EventDetails";
 import GuestList from "./pages/GuestList";
 import TaskList from "./pages/TaskList";
 import Vendors from "./pages/Vendors";
+import MyEvents from "./pages/MyEvents";
+import Header from "./components/Header";
 
 function App() {
   return (
     <BrowserRouter>
+      <Header />
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<Login />} />
@@ -20,6 +23,7 @@ function App() {
         <Route path="/guestList" element={<GuestList />} />
         <Route path="/taskList" element={<TaskList />} />
         <Route path="/vendors" element={<Vendors />} />
+        <Route path="/myEvents" element={<MyEvents />} />
       </Routes>
     </BrowserRouter>
   );
