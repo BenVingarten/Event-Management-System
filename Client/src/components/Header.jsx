@@ -7,7 +7,7 @@ const Header = () => {
   const [userConnected, setUserConnected] = useState(false);
 
   return (
-    <header className="py-4 px-6 flex justify-between border-b-2 border-b-black">
+    <header className="py-4 px-6 flex justify-between">
       <Link to="/" className="flex items-center">
         <span className="text-xl font-bold mr-4 bg bg-gradient-to-r from-indigo-500 to-blue-400 rounded-lg text-white px-2 py-1 ">
           Event Planner
