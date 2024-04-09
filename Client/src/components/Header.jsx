@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Button, Dropdown } from "flowbite-react";
+import { Dropdown } from "flowbite-react";
 import { IoIosArrowDropdownCircle } from "react-icons/io";
 
 const Header = () => {
