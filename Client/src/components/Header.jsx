@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Dropdown } from "flowbite-react";
+import { Button, Dropdown } from "flowbite-react";
 import { IoIosArrowDropdownCircle } from "react-icons/io";
 
 const Header = () => {
@@ -40,13 +40,13 @@ const Header = () => {
         <div className="flex ">
           <Link
             to="/login"
-            className="mr-4 outline outline-1 outline-offset-0 py-1 px-1 rounded-2xl outline-blue-500 hover:bg-gradient-to-r from-indigo-500 to-blue-400 hover:outline-transparent"
+            className="text-white mr-4 outline outline-2 outline-offset-1 py-1 px-2 rounded-2xl outline-white hover:bg-gradient-to-r from-indigo-500 to-blue-400 hover:outline-transparent"
           >
             Login
           </Link>
           <Link
             to="/signup"
-            className="outline outline-1 outline-offset-0 py-1 px-1 rounded-2xl outline-blue-500 hover:bg-gradient-to-r from-indigo-500 to-blue-400 hover:outline-transparent"
+            className="text-white mr-4 outline outline-2 outline-offset-1 py-1 px-2 rounded-2xl outline-white hover:bg-gradient-to-r from-indigo-500 to-blue-400 hover:outline-transparent"
           >
             Sign-Up
           </Link>
