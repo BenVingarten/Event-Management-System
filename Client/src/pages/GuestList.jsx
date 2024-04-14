@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import {
   Table,
   Checkbox,
@@ -42,6 +42,23 @@ const GuestListPage = () => {
     setNewGuestPhoneNumber("");
     setNewGuestStatus("");
     setNewGuestComments("");
+
+    handleClearFields();
+  };
+
+  const nameRef = useRef("");
+  const peopleCountRef = useRef(1);
+  const groupRef = useRef("");
+  const phoneNumberRef = useRef("");
+  const statusRef = useRef("");
+  const commentsRef = useRef("");
+  const handleClearFields = () => {
+    nameRef.current.value = "";
+    peopleCountRef.current.value = 1;
+    groupRef.current.value = "";
+    phoneNumberRef.current.value = "";
+    statusRef.current.value = "";
+    commentsRef.current.value = "";
   };
 
   const handleRemoveGuests = () => {
@@ -70,7 +87,7 @@ const GuestListPage = () => {
       <Table.Row key={index}>
         <Table.Cell>
           {" "}
-          <Checkbox />{" "}
+          <Checkbox onChange={() => handleSelectGuest(index)} />{" "}
         </Table.Cell>
         <Table.Cell className="px-4 py-2">{guest.name}</Table.Cell>
         <Table.Cell className="px-4 py-2">{guest.peopleCount}</Table.Cell>
@@ -97,7 +114,6 @@ const GuestListPage = () => {
 
   useEffect(() => {
     presentList();
-    console.log(guests);
   }, [guests]);
 
   return (
@@ -112,6 +128,7 @@ const GuestListPage = () => {
             id="name1"
             type="text"
             placeholder="name"
+            ref={nameRef}
             onChange={(e) => setNewGuestName(e.target.value)}
             required
           />
@@ -124,6 +141,7 @@ const GuestListPage = () => {
             id="People"
             type="number"
             min="0"
+            ref={peopleCountRef}
             onChange={(e) => setNewGuestPeopleCount(e.target.value)}
             required
           />
@@ -135,6 +153,7 @@ const GuestListPage = () => {
           <TextInput
             id="Group"
             type="text"
+            ref={groupRef}
             onChange={(e) => setNewGuestGroup(e.target.value)}
             required
           />
@@ -166,6 +185,7 @@ const GuestListPage = () => {
               className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
               pattern="[0-9]{3}-[0-9]{3}[0-9]{4}"
               placeholder="050-4567890"
+              ref={phoneNumberRef}
               onChange={(e) => setNewGuestPhoneNumber(e.target.value)}
               required
             />
@@ -177,6 +197,7 @@ const GuestListPage = () => {
           </div>
           <Select
             id="status"
+            ref={statusRef}
             onChange={(e) => setNewGuestStatus(e.target.value)}
             required
           >
@@ -195,6 +216,7 @@ const GuestListPage = () => {
           <TextInput
             id="Comments"
             type="text"
+            ref={commentsRef}
             onChange={(e) => setNewGuestComments(e.target.value)}
             required
           />
@@ -212,7 +234,11 @@ const GuestListPage = () => {
         </Button>
       </form>
       <div className="pb-2">
-        <Button className="flex items-center justify-center" color="red">
+        <Button
+          className="flex items-center justify-center"
+          color="red"
+          onClick={handleRemoveGuests}
+        >
           {" "}
           <IoIosRemoveCircleOutline size={20} />
           Remove Selected Guests
