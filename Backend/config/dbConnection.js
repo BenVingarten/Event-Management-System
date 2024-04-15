@@ -5,6 +5,7 @@ import './loadEnv.js';
         await mongoose.connect(process.env.DATABASE_URL);
     } catch(err) {
         console.error(err);
+        //stam
     }
 }
 
