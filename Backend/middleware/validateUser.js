@@ -1,38 +1,57 @@
 import { checkSchema, body } from "express-validator";
 
-const validFilter = ['username', 'role'];
+const validFilter = ["username", "role"];
 function queryValidationSchema() {
-    return {
-        filter: {
-            in: ['query'],
-            optional: {
-                options: {
-                    nullable: true,
-                }
-            },
-            custom: {
-                options: (value) => {
-                  return (
-                    value &&
-                    validFilter.some(filter => filter === value)
-                  );
-                },
-                errorMessage: 'Filter must be included in the filter list',
-            }
-        }
-    };
+  return {
+    filter: {
+      in: ["query"],
+      optional: {
+        options: {
+          nullable: true,
+        },
+      },
+      custom: {
+        options: (value) => {
+          return value && validFilter.some((filter) => filter === value);
+        },
+        errorMessage: "Filter must be included in the filter list",
+      },
+    },
+  };
 }
 
 function createUserValidation() {
   return {
     username: {
       notEmpty: { errorMessage: "username can't be empty" },
-      isLength: { options: { min: 3, max: 15 }, errorMessage: "username needs to be at range of 3 to 15 characters long" }
+      isLength: {
+        options: { min: 3, max: 15 },
+        errorMessage:
+          "username needs to be at range of 3 to 15 characters long",
+      },
+    },
+    email: {
+      notEmpty: { errorMessage: "email cant be empty" },
+      isEmail: { errorMessage: "invalid email format" },
     },
     password: {
       notEmpty: { errorMessage: "password can't be empty" },
-      isLength: { options: { min: 5, max: 20 }, errorMessage: "username needs to be at range of 5 to 20 characters long" }
-    }
+      isLength: {
+        options: { min: 5, max: 20 },
+        errorMessage:
+          "username needs to be at range of 5 to 20 characters long",
+      },
+      custom: {
+        options: (value, { req }) => {
+          if (!/[a-z]/.test(value) || !/[A-Z]/.test(value)) {
+            throw new Error(
+              "Password must contain at least one lowercase and one uppercase letter"
+            );
+          }
+          return true;
+        },
+      },
+    },
   };
 }
 function patchUserValidation() {
@@ -40,16 +59,24 @@ function patchUserValidation() {
     username: {
       optional: { options: { nullable: true } },
       notEmpty: { errorMessage: "username can't be empty" },
-      isLength: { options: { min: 3, max: 15 }, errorMessage: "username needs to be at range of 3 to 15 characters long" }
+      isLength: {
+        options: { min: 3, max: 15 },
+        errorMessage:
+          "username needs to be at range of 3 to 15 characters long",
+      },
     },
     password: {
       optional: { options: { nullable: true } },
       notEmpty: { errorMessage: "password can't be empty" },
-      isLength: { options: { min: 5, max: 20 }, errorMessage: "username needs to be at range of 5 to 20 characters long" }
-    }
+      isLength: {
+        options: { min: 5, max: 20 },
+        errorMessage:
+          "username needs to be at range of 5 to 20 characters long",
+      },
+    },
   };
 }
 
-  export const validateCreateUser =  checkSchema(createUserValidation());
-  export const validatePatchUser = checkSchema(patchUserValidation());
-  export const validateUsersQuery = checkSchema(queryValidationSchema());
+export const validateCreateUser = checkSchema(createUserValidation());
+export const validatePatchUser = checkSchema(patchUserValidation());
+export const validateUsersQuery = checkSchema(queryValidationSchema());

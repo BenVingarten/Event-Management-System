@@ -1,27 +1,30 @@
-import mongoose from 'mongoose';
-import { rolesEnum } from '../constants/roles.js';
+import mongoose from "mongoose";
+import { rolesEnum } from "../constants/roles.js";
 const { Schema } = mongoose;
 
-
 const userSchema = new Schema({
-  "username": {
+  username: {
     type: String,
-    required: true
+    required: true,
   },
-  "password": {
+  email: {
     type: String,
-    required: true
+    required: true,
   },
-  "role": {
+  password: {
     type: String,
-    default: rolesEnum[1]
+    required: true,
   },
-  "refreshToken": {
-    type: String
-  }
+  role: {
+    type: String,
+    default: rolesEnum[1],
+  },
+  refreshToken: {
+    type: String,
+  },
 });
 
-userSchema.index({ "username": 1 }, { unique: true });
+userSchema.index({ username: 1 }, { unique: true });
 
-const userModel = mongoose.model('User', userSchema);
+const userModel = mongoose.model("User", userSchema);
 export default userModel;

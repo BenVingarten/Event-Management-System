@@ -8,7 +8,7 @@ export const handleRegister = async (req, res) => {
             return res.status(400).json({error: errors.array()});
         const userInfo = matchedData(req);
 
-        const newUser = await createUser(userInfo.username, userInfo.password);
+        const newUser = await createUser(userInfo);
             return res.status(201).json({successfull: `new user ${newUser.username} created!`});
     } catch(err) {
         return res.status(err.statusCode).json({err: err.message});
