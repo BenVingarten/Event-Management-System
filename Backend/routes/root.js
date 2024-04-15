@@ -1,9 +1,10 @@
-import { Router } from 'express';
-
+import { Router } from "express";
 const router = Router();
 
-router.get('/', (request, response) => {
-    response.send({msg: "Hello welcome to the root page"});
+router.get('/', (req, res) => {
+    res.send("Movie App Website!");
 });
 
 export default router;
+
+

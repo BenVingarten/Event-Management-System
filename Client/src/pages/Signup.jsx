@@ -24,10 +24,6 @@ const SignupPage = () => {
 
   async function handleSubmit(e) {
     e.preventDefault();
-    // signup logic, (sending the email and password to a server)
-    console.log("Email:", email);
-    console.log("Password:", password);
-    console.log("Confirm Password:", confirmPassword);
 
     const userData = {
       username: userName,
@@ -36,7 +32,7 @@ const SignupPage = () => {
     };
 
     try {
-      const response = await fetch(`http://localhost:3001/register`, {
+      const response = await fetch(`http://localhost:4000/register`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

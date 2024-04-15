@@ -1,8 +1,10 @@
 import { Router } from "express";
-import handleRefreshToken from "../controllers/refreshToken.js";
+import { handleRefresh } from "../Controllers/refreshController.js";
 
 const router = Router();
 
-router.get('/', handleRefreshToken);
+router.get('/refresh', handleRefresh);
 
 export default router;
+
+

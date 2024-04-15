@@ -1,21 +1,21 @@
-import jwt from "jsonwebtoken";
-import { config } from "dotenv";
+import jwt from 'jsonwebtoken';
+import '../config/loadEnv.js';
 
-config();
-
-export const verifyJWT = async (request, response, next) => {
-    const authHeader = request.headers.authorization || request.headers.Authorization;
-    if(!authHeader?.startsWith('Bearer ')) return response.sendStatus(401); //unauthorized
+export const verifyJWT = (req, res, next) => {
+   const authHeader = req.headers.authorization || req.headers.Authorization;
+   if(!authHeader?.startsWith('Bearer'))
+        return res.status(401).json({ Unauthorized: "missing  token"});
 
     const token = authHeader.split(' ')[1];
-    jwt.verify(
-        token,
-        process.env.ACCESS_TOKEN_SECRET,
-        (err, decoded) => {
-            if(err) return response.sendStatus(403) //forbbiden
-            request.user = decoded.UserInfo.username;
-            request.roles = decoded.UserInfo.roles;
-            next();
-        }
-    );
+    try {
+        const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+        console.log('here');
+        req.user = decoded.userInfo.username;
+        req.role = decoded.userInfo.role;
+        next();
+
+    } catch(err) {
+        return res.status(401).json({ Unauthorized: "wrong or expired token"});
+    }
+    
 }

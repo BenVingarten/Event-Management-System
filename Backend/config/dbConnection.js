@@ -1,13 +1,11 @@
 import mongoose from "mongoose";
-import { config } from "dotenv";
-
-config();
-
-const URI = process.env.DATABASE_URI;
-export const connectDB = async () => {
+import './loadEnv.js';
+ const connectDB = async() => {
     try {
-        await mongoose.connect(URI);
-    } catch (err){
+        await mongoose.connect(process.env.DATABASE_URL);
+    } catch(err) {
         console.error(err);
     }
 }
+
+export default connectDB;
