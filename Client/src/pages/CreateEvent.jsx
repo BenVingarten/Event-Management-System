@@ -1,11 +1,22 @@
 import { useState } from "react";
+import { TextInput } from "flowbite-react";
 
 const CreateEventPage = () => {
   const [eventType, setEventType] = useState("");
   const [eventDate, setEventDate] = useState("");
   const [eventName, setEventName] = useState("");
+  const [budget, setBudget] = useState("");
+  const [location, setLocation] = useState("");
   const [additionalInfo, setAdditionalInfo] = useState([]);
   const [additionalInfoInput, setAdditionalInfoInput] = useState("");
+
+  const handleBudgetChange = (e) => {
+    setBudget(e.target.value);
+  };
+
+  const handleLocationChange = (e) => {
+    setLocation(e.target.value);
+  };
 
   const handleEventTypeChange = (e) => {
     setEventType(e.target.value);
@@ -96,6 +107,40 @@ const CreateEventPage = () => {
             <option value="Other">Other</option>
           </select>
         </div>
+
+        <div className="mb-4">
+          <label
+            htmlFor="budget"
+            className="block text-gray-700 font-bold mb-2"
+          >
+            Budget
+          </label>
+          <input
+            type="number"
+            id="budget"
+            value={budget}
+            onChange={handleBudgetChange}
+            className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-500"
+            required
+          />
+        </div>
+        <div className="mb-4">
+          <label
+            htmlFor="location"
+            className="block text-gray-700 font-bold mb-2"
+          >
+            Location
+          </label>
+          <input
+            type="text"
+            id="location"
+            value={location}
+            onChange={handleLocationChange}
+            className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-500"
+            required
+          />
+        </div>
+
         <div className="mb-4">
           <label
             htmlFor="additionalInfo"

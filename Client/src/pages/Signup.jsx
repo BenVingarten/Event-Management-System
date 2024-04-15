@@ -2,11 +2,16 @@ import { useState } from "react";
 
 const SignupPage = () => {
   const [email, setEmail] = useState("");
+  const [userName, setUserName] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
   const handleEmailChange = (e) => {
     setEmail(e.target.value);
+  };
+
+  const handleUserNameChange = (e) => {
+    setUserName(e.target.value);
   };
 
   const handlePasswordChange = (e) => {
@@ -43,8 +48,27 @@ const SignupPage = () => {
             onChange={handleEmailChange}
             className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-500"
             required
+            placeholder="Someone@gmail.com"
           />
         </div>
+
+        <div className="mb-4">
+          <label
+            htmlFor="userName"
+            className="block text-gray-700 font-bold mb-2"
+          >
+            User Name
+          </label>
+          <input
+            type="text"
+            id="userName"
+            value={userName}
+            onChange={handleUserNameChange}
+            className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-500"
+            required
+          />
+        </div>
+
         <div className="mb-4">
           <label
             htmlFor="password"
@@ -59,7 +83,6 @@ const SignupPage = () => {
             onChange={handlePasswordChange}
             className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-500"
             required
-            placeholder="Someone@gmail.com"
           />
         </div>
         <div className="mb-6">
