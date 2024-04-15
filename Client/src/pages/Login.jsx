@@ -1,11 +1,11 @@
 import { useState } from "react";
 
 const LoginPage = () => {
-  const [email, setEmail] = useState("");
+  const [userName, setUserName] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleEmailChange = (e) => {
-    setEmail(e.target.value);
+  const handleUserNameChange = (e) => {
+    setUserName(e.target.value);
   };
 
   const handlePasswordChange = (e) => {
@@ -15,7 +15,7 @@ const LoginPage = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     // login logic, ( sending the email and password to a server )
-    console.log("Email:", email);
+    console.log("User Name:", userName);
     console.log("Password:", password);
   };
 
@@ -27,14 +27,17 @@ const LoginPage = () => {
       >
         <h2 className="text-2xl font-bold mb-4">Login</h2>
         <div className="mb-4">
-          <label htmlFor="email" className="block text-gray-700 font-bold mb-2">
-            Email
+          <label
+            htmlFor="userName"
+            className="block text-gray-700 font-bold mb-2"
+          >
+            User Name
           </label>
           <input
-            type="email"
-            id="email"
-            value={email}
-            onChange={handleEmailChange}
+            type="name"
+            id="userName"
+            value={userName}
+            onChange={handleUserNameChange}
             className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-500"
             required
           />
