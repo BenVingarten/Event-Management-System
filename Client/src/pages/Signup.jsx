@@ -22,13 +22,44 @@ const SignupPage = () => {
     setConfirmPassword(e.target.value);
   };
 
-  const handleSubmit = (e) => {
+  async function handleSubmit(e) {
     e.preventDefault();
     // signup logic, (sending the email and password to a server)
     console.log("Email:", email);
     console.log("Password:", password);
     console.log("Confirm Password:", confirmPassword);
-  };
+
+    const userData = {
+      username: userName,
+      email: email,
+      password: password,
+    };
+
+    try {
+      const response = await fetch(`http://localhost:3001/register`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          // You might need to include additional headers like authorization token, etc.
+        },
+        body: JSON.stringify(userData), // Assuming userData is an object containing registration data
+      });
+
+      if (!response.ok) {
+        // Handle error response
+        const errorMessage = await response.text();
+        throw new Error(errorMessage);
+      }
+
+      // Registration successful
+      const responseData = await response.json();
+      console.log("Registration successful:", responseData);
+      // You can handle the successful response here
+    } catch (error) {
+      console.error("Registration failed:", error);
+      // Handle error
+    }
+  }
 
   return (
     <div className="flex justify-center items-center h-screen">
