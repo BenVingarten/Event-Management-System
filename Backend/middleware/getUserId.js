@@ -9,6 +9,6 @@ export const getUserId = (req, res, next) => {
     if(!ObjectId.isValid(id))  
         return res.status(400).json({error: "user id is not valid"});
     
-    req.userId = id;
+    req.resourceId = id;
     next();
  }

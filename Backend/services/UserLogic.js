@@ -22,16 +22,26 @@ export const getAllUsers = async (filter, value) => {
 
 export const createUser = async (userInfo) => {
   try {
-    const { username, email, password } = userInfo;
+    const { username, email, password, role } = userInfo;
+    const findUser = await userModel
+      .findOne({
+        $or: [
+          { username: { $regex: new RegExp("^" + username + "$", "i") } },
+          { email },
+        ],
+      })
+      .exec();
+    if (findUser) throw new DuplicateUsernameError();
     const hashedPwd = await bcrypt.hash(password, 10);
     const newUser = await userModel.create({
       username,
       email,
       password: hashedPwd,
+      role,
     });
     return newUser;
   } catch (err) {
-    if (err.code === 11000) throw new DuplicateUsernameError();
+    if (err instanceof DuplicateUsernameError) throw err;
     else throw new GeneralServerError();
   }
 };
@@ -49,9 +59,28 @@ export const getUserById = async (id) => {
 
 export const patchUser = async (id, updatedValues) => {
   try {
-    const updatedUser = await userModel.findByIdAndUpdate(id, updatedValues, {
-      new: true,
-    });
+    if (updatedValues?.username) {
+      const foundUser = await userModel
+        .findOne({
+          username: {
+            $regex: new RegExp("^" + updatedValues.username + "$", "i"),
+          },
+        })
+        .exec();
+      if (foundUser)
+        throw new DuplicateUsernameError(
+          "There is already a user with that username"
+        );
+    }
+
+    if (updatedValues?.email) {
+      const foundUser = await userModel.findOne({ email }).exec();
+      if (foundUser)
+        throw new DuplicateUsernameError(
+          "There is already a user with that email"
+        );
+    }
+    const updatedUser = await userModel.findByIdAndUpdate(id, updatedValues);
     if (!updatedUser) throw new DataNotFoundError();
     return updatedUser;
   } catch (err) {
@@ -76,7 +105,9 @@ export const deleteUser = async (id) => {
 export const authenticateUser = async (user) => {
   try {
     const { username, password } = user;
-    const findUser = await userModel.findOne({ username }).exec();
+    const findUser = await userModel
+      .findOne({ username: { $regex: new RegExp("^" + username + "$", "i") } })
+      .exec();
     if (!findUser)
       throw new DataNotFoundError("There is no user with that username");
     const isPasswordMatch = await bcrypt.compare(password, findUser.password);
@@ -85,17 +116,17 @@ export const authenticateUser = async (user) => {
     const accessToken = jwt.sign(
       {
         userInfo: {
-          username: findUser.username,
+          id: findUser._id,
           role: findUser.role,
         },
       },
       process.env.ACCESS_TOKEN_SECRET,
-      { expiresIn: "25s" }
+      { expiresIn: "60s" }
     );
     const refreshToken = jwt.sign(
       {
         userInfo: {
-          username: findUser.username,
+          id: findUser._id,
           role: findUser.role,
         },
       },
@@ -120,18 +151,17 @@ export const assignNewAccessToken = async (refreshToken) => {
     if (!findUser) throw new DataNotFoundError();
 
     const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
-    if (decoded.userInfo.username !== findUser.username)
-      throw new UnauthorizedError();
+    if (decoded.userInfo.id !== findUser._id) throw new UnauthorizedError();
 
     const accessToken = jwt.sign(
       {
         userInfo: {
-          username: decoded.userInfo.username,
+          id: decoded.userInfo.id,
           role: decoded.userInfo.role,
         },
       },
       process.env.ACCESS_TOKEN_SECRET,
-      { expiresIn: "25s" }
+      { expiresIn: "60s" }
     );
     return accessToken;
   } catch (err) {

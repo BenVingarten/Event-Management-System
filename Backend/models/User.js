@@ -17,7 +17,7 @@ const userSchema = new Schema({
   },
   role: {
     type: String,
-    default: rolesEnum[1],
+    required: true,
   },
   refreshToken: {
     type: String,

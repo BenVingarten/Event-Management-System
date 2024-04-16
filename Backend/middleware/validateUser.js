@@ -1,6 +1,7 @@
 import { checkSchema, body } from "express-validator";
+import { rolesEnum } from "../constants/roles.js";
+import { validFilter } from "../constants/queryFilter.js";
 
-const validFilter = ["username", "role"];
 function queryValidationSchema() {
   return {
     filter: {
@@ -42,14 +43,19 @@ function createUserValidation() {
           "username needs to be at range of 5 to 20 characters long",
       },
       custom: {
-        options: (value, { req }) => {
-          if (!/[a-z]/.test(value) || !/[A-Z]/.test(value)) {
-            throw new Error(
-              "Password must contain at least one lowercase and one uppercase letter"
-            );
-          }
-          return true;
+        options: (value) => {
+          if (value && /[a-z]/.test(value) && /[A-Z]/.test(value)) return true;
         },
+        errorMessage:
+          "passowrd must contain at least 1 uppercase and lowercase letters",
+      },
+    },
+    role: {
+      custom: {
+        options: (value) => {
+          return value && rolesEnum.some((role) => role === value);
+        },
+        errorMessage: "role must be user/vendor",
       },
     },
   };
