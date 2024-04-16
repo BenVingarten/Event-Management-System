@@ -1,11 +1,14 @@
 import { useState } from "react";
 import { Toaster, toast } from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 
 const SignupPage = () => {
   const [email, setEmail] = useState("");
   const [userName, setUserName] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+
+  const navigate = useNavigate();
 
   const handleEmailChange = (e) => {
     setEmail(e.target.value);
@@ -46,14 +49,15 @@ const SignupPage = () => {
       });
 
       if (!response.ok) {
-        // Handle error response
         const resData = await response.json();
         const errorMessage = resData.err;
         throw new Error(errorMessage);
       }
 
-      // Registration successful
-      toast.success("Registration successful");
+      if (response.ok) {
+        toast.success("Registration successful");
+        navigate("/login");
+      }
     } catch (error) {
       toast.error("Error: " + error.message);
     }

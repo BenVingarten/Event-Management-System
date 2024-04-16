@@ -1,12 +1,24 @@
+import { Spinner } from "flowbite-react";
 import { useState } from "react";
 import { Toaster, toast } from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
+import {
+  signInStart,
+  signInSuccess,
+  signInFailure,
+} from "../redux/user/userSlice";
+import { useDispatch, useSelector } from "react-redux";
 
 const LoginPage = () => {
   const [userName, setUserName] = useState("");
   const [password, setPassword] = useState("");
+  const loading = useSelector((state) => state.user.loading);
+
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const handleUserNameChange = (e) => {
-    setUserName(e.target.value);
+    setUserName(e.target.value.trim());
   };
 
   const handlePasswordChange = (e) => {
@@ -22,6 +34,7 @@ const LoginPage = () => {
     };
 
     try {
+      dispatch(signInStart());
       const response = await fetch(`http://localhost:4000/login`, {
         method: "POST",
         headers: {
@@ -31,17 +44,22 @@ const LoginPage = () => {
         body: JSON.stringify(userData), // Assuming userData is an object containing registration data
       });
 
+      // Check if response is not okay
       if (!response.ok) {
-        // Handle error response
         const resData = await response.json();
         const errorMessage = resData.err;
         throw new Error(errorMessage);
       }
 
-      // Registration successful
-      toast.success("Login successful");
+      // Login successful
+      if (response.ok) {
+        toast.success("Login successful");
+        dispatch(signInSuccess(userData)); // Should I send back the user data? or response data?
+        navigate("/");
+      }
     } catch (error) {
       toast.error("Error: " + error.message);
+      dispatch(signInFailure(error.message));
     }
   }
 
@@ -89,7 +107,14 @@ const LoginPage = () => {
           type="submit"
           className="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
         >
-          Log In
+          {loading ? (
+            <>
+              <Spinner size="sm" />
+              <span className="pl-3">Loading...</span>
+            </>
+          ) : (
+            "Log In"
+          )}
         </button>
       </form>
     </div>

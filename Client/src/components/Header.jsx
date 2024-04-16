@@ -1,10 +1,10 @@
-import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Dropdown } from "flowbite-react";
 import { IoIosArrowDropdownCircle } from "react-icons/io";
+import { useSelector } from "react-redux";
 
 const Header = () => {
-  const [userConnected, setUserConnected] = useState(false);
+  const userConnected = useSelector((state) => state.user.currentUser);
 
   return (
     <header className="py-4 px-6 flex justify-between">
