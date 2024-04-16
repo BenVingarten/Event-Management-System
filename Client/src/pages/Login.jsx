@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Toaster, toast } from "react-hot-toast";
 
 const LoginPage = () => {
   const [userName, setUserName] = useState("");
@@ -32,22 +33,21 @@ const LoginPage = () => {
 
       if (!response.ok) {
         // Handle error response
-        const errorMessage = await response.text();
+        const resData = await response.json();
+        const errorMessage = resData.err;
         throw new Error(errorMessage);
       }
 
       // Registration successful
-      const responseData = await response.json();
-      console.log("Login successful:", responseData);
-      // You can handle the successful response here
+      toast.success("Login successful");
     } catch (error) {
-      console.error("Login failed:", error);
-      // Handle error
+      toast.error("Error: " + error.message);
     }
   }
 
   return (
     <div className="flex justify-center items-center h-screen">
+      <Toaster position="top-center" reverseOrder={true} />
       <form
         onSubmit={handleSubmit}
         className="w-full max-w-sm p-6 bg-white shadow-md rounded-lg"

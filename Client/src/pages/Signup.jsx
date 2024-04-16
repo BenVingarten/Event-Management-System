@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Toaster, toast } from "react-hot-toast";
 
 const SignupPage = () => {
   const [email, setEmail] = useState("");
@@ -32,6 +33,9 @@ const SignupPage = () => {
     };
 
     try {
+      if (password !== confirmPassword)
+        throw new Error("Passwords do not match");
+
       const response = await fetch(`http://localhost:4000/register`, {
         method: "POST",
         headers: {
@@ -43,22 +47,21 @@ const SignupPage = () => {
 
       if (!response.ok) {
         // Handle error response
-        const errorMessage = await response.text();
+        const resData = await response.json();
+        const errorMessage = resData.err;
         throw new Error(errorMessage);
       }
 
       // Registration successful
-      const responseData = await response.json();
-      console.log("Registration successful:", responseData);
-      // You can handle the successful response here
+      toast.success("Registration successful");
     } catch (error) {
-      console.error("Registration failed:", error);
-      // Handle error
+      toast.error("Error: " + error.message);
     }
   }
 
   return (
     <div className="flex justify-center items-center h-screen">
+      <Toaster position="top-center" reverseOrder={true} />
       <form
         onSubmit={handleSubmit}
         className="w-full max-w-sm p-6 bg-white shadow-md rounded-lg"
