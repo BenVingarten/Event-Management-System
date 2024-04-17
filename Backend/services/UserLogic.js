@@ -4,6 +4,7 @@ import { DuplicateUsernameError } from "../errors/DuplicateUserError.js";
 import { DataNotFoundError } from "../errors/DataNotFoundError.js";
 import { UnauthorizedError } from "../errors/UnauthorizedError.js";
 import { GeneralServerError } from "../errors/GeneralServerError.js";
+import crypto from "crypto";
 import jwt from "jsonwebtoken";
 import "../config/loadEnv.js";
 
@@ -20,18 +21,64 @@ export const getAllUsers = async (filter, value) => {
   }
 };
 
+export const isUsernameExists = async (username) => {
+  if (username) {
+    const foundUser = await userModel
+      .findOne({
+        username: {
+          $regex: new RegExp("^" + username + "$", "i"),
+        },
+      })
+      .exec();
+
+    return foundUser !== null;
+  }
+};
+
+export const isEmailExists = async (email) => {
+  if (email) {
+    const foundUser = await userModel.findOne({ email }).exec();
+    return foundUser !== null;
+  }
+};
+
+export const issueAccessToken = () => {
+  const accessToken = jwt.sign(
+    {
+      userInfo: {
+        id: findUser._id,
+        role: findUser.role,
+      },
+    },
+    process.env.ACCESS_TOKEN_SECRET,
+    { expiresIn: "60s" }
+  );
+
+  return accessToken;
+};
+
+export const issueRefreshToken = () => {
+  const refreshToken = jwt.sign(
+    {
+      userInfo: {
+        id: findUser._id,
+        role: findUser.role,
+      },
+    },
+    process.env.REFRESH_TOKEN_SECRET,
+    { expiresIn: "1d" }
+  );
+  return refreshToken;
+};
+
 export const createUser = async (userInfo) => {
   try {
     const { username, email, password, role } = userInfo;
-    const findUser = await userModel
-      .findOne({
-        $or: [
-          { username: { $regex: new RegExp("^" + username + "$", "i") } },
-          { email },
-        ],
-      })
-      .exec();
-    if (findUser) throw new DuplicateUsernameError();
+    if (isUsernameExists(username) || isEmailExists(email))
+      throw new DuplicateUsernameError();
+    if (password === "") {
+      password = crypto.randomBytes(64).tostring("hex");
+    }
     const hashedPwd = await bcrypt.hash(password, 10);
     const newUser = await userModel.create({
       username,
@@ -105,38 +152,19 @@ export const deleteUser = async (id) => {
 export const authenticateUser = async (user) => {
   try {
     const { username, password } = user;
-    const findUser = await userModel
-      .findOne({ username: { $regex: new RegExp("^" + username + "$", "i") } })
-      .exec();
-    if (!findUser)
+    if (!isUsernameExists(username))
       throw new DataNotFoundError("There is no user with that username");
+
     const isPasswordMatch = await bcrypt.compare(password, findUser.password);
     if (!isPasswordMatch) throw new UnauthorizedError("incorrect password");
 
-    const accessToken = jwt.sign(
-      {
-        userInfo: {
-          id: findUser._id,
-          role: findUser.role,
-        },
-      },
-      process.env.ACCESS_TOKEN_SECRET,
-      { expiresIn: "60s" }
-    );
-    const refreshToken = jwt.sign(
-      {
-        userInfo: {
-          id: findUser._id,
-          role: findUser.role,
-        },
-      },
-      process.env.REFRESH_TOKEN_SECRET,
-      { expiresIn: "1d" }
-    );
+    const accessToken = issueAccessToken();
+    const refreshToken = issueRefreshToken();
 
     findUser.refreshToken = refreshToken;
     await findUser.save();
     const tokens = [accessToken, refreshToken];
+
     return tokens;
   } catch (err) {
     if (err instanceof DataNotFoundError || err instanceof UnauthorizedError)

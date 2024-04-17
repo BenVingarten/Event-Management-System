@@ -17,16 +17,13 @@ function OAuthLogin() {
     provider.setCustomParameters({ prompt: "select_account" });
     try {
       const resultsFromGoogle = await signInWithPopup(auth, provider);
-      const res = await fetch("http://localhost:4000/google", {
+      const res = await fetch("http://localhost:4000/google/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          userName: resultsFromGoogle.user.displayName,
           email: resultsFromGoogle.user.email,
-          isVendor: "",
-          google: true,
         }),
       });
 
