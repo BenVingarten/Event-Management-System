@@ -12,6 +12,7 @@ const router = Router();
 router.use(rootRoute);
 router.use(registerRoute);
 router.use(loginRoute);
+
 router.use(refreshRoute);
 
 router.use(verifyJWT);

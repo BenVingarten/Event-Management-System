@@ -8,6 +8,7 @@ import {
   signInFailure,
 } from "../redux/user/userSlice";
 import { useDispatch, useSelector } from "react-redux";
+import OAuthLogin from "../components/OAuthLogIn";
 
 const LoginPage = () => {
   const [userName, setUserName] = useState("");
@@ -31,6 +32,7 @@ const LoginPage = () => {
     const userData = {
       username: userName,
       password: password,
+      google: false,
     };
 
     try {
@@ -105,7 +107,7 @@ const LoginPage = () => {
         </div>
         <button
           type="submit"
-          className="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+          className="w-full mb-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
         >
           {loading ? (
             <>
@@ -116,6 +118,7 @@ const LoginPage = () => {
             "Log In"
           )}
         </button>
+        <OAuthLogin />
       </form>
     </div>
   );

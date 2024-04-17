@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { TextInput } from "flowbite-react";
 
 const CreateEventPage = () => {
   const [eventType, setEventType] = useState("");

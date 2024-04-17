@@ -1,17 +1,24 @@
+import { Label, Select } from "flowbite-react";
 import { useState } from "react";
 import { Toaster, toast } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
+import OAuthSignUp from "../components/OAuthSignUp";
 
 const SignupPage = () => {
   const [email, setEmail] = useState("");
   const [userName, setUserName] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [role, setRole] = useState("Event Planner");
 
   const navigate = useNavigate();
 
   const handleEmailChange = (e) => {
     setEmail(e.target.value);
+  };
+
+  const handleRoleChange = (e) => {
+    setRole(e.target.value);
   };
 
   const handleUserNameChange = (e) => {
@@ -33,8 +40,10 @@ const SignupPage = () => {
       username: userName,
       email: email,
       password: password,
+      role: role,
+      google: false,
     };
-
+    console.log(userData);
     try {
       if (password !== confirmPassword)
         throw new Error("Passwords do not match");
@@ -135,12 +144,24 @@ const SignupPage = () => {
             required
           />
         </div>
+
+        <div className="max-w-md mb-5">
+          <div className="mb-2 block">
+            <Label htmlFor="role" value="Select your account type" />
+          </div>
+          <Select id="role" required onChange={handleRoleChange}>
+            <option>Event Planner</option>
+            <option>Vendor</option>
+          </Select>
+        </div>
         <button
           type="submit"
-          className="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+          className="w-full mb-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
         >
           Sign Up
         </button>
+
+        <OAuthSignUp role={role} />
       </form>
     </div>
   );
