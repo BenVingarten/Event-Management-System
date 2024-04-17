@@ -41,7 +41,6 @@ const SignupPage = () => {
       email: email,
       password: password,
       role: role,
-      google: false,
     };
     console.log(userData);
     try {

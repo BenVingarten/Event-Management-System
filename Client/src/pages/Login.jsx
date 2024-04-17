@@ -32,7 +32,6 @@ const LoginPage = () => {
     const userData = {
       username: userName,
       password: password,
-      google: false,
     };
 
     try {

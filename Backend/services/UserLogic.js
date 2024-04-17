@@ -21,63 +21,63 @@ export const getAllUsers = async (filter, value) => {
   }
 };
 
-export const isUsernameExists = async (username) => {
-  if (username) {
-    const foundUser = await userModel
-      .findOne({
-        username: {
-          $regex: new RegExp("^" + username + "$", "i"),
+export const getUserByUsername = async (username) => {
+  const foundUser = await userModel
+    .findOne({ username: { $regex: new RegExp("^" + username + "$", "i") } })
+    .exec();
+  return foundUser;
+};
+
+export const getUserByEmail = async (email) => {
+  const foundUser = await userModel.findOne({ email }).exec();
+  return foundUser;
+};
+
+export const issueAccessToken = (user) => {
+  try {
+    const accessToken = jwt.sign(
+      {
+        userInfo: {
+          id: user._id,
+          role: user.role,
         },
-      })
-      .exec();
-
-    return foundUser !== null;
+      },
+      process.env.ACCESS_TOKEN_SECRET,
+      { expiresIn: "60s" }
+    );
+    return accessToken;
+  } catch (err) {
+    throw new GeneralServerError();
   }
 };
 
-export const isEmailExists = async (email) => {
-  if (email) {
-    const foundUser = await userModel.findOne({ email }).exec();
-    return foundUser !== null;
+export const issueRefreshToken = (user) => {
+  try {
+    const refreshToken = jwt.sign(
+      {
+        userInfo: {
+          id: user._id,
+          role: user.role,
+        },
+      },
+      process.env.REFRESH_TOKEN_SECRET,
+      { expiresIn: "1d" }
+    );
+    return refreshToken;
+  } catch (error) {
+    throw new GeneralServerError();
   }
-};
-
-export const issueAccessToken = () => {
-  const accessToken = jwt.sign(
-    {
-      userInfo: {
-        id: findUser._id,
-        role: findUser.role,
-      },
-    },
-    process.env.ACCESS_TOKEN_SECRET,
-    { expiresIn: "60s" }
-  );
-
-  return accessToken;
-};
-
-export const issueRefreshToken = () => {
-  const refreshToken = jwt.sign(
-    {
-      userInfo: {
-        id: findUser._id,
-        role: findUser.role,
-      },
-    },
-    process.env.REFRESH_TOKEN_SECRET,
-    { expiresIn: "1d" }
-  );
-  return refreshToken;
 };
 
 export const createUser = async (userInfo) => {
   try {
     const { username, email, password, role } = userInfo;
-    if (isUsernameExists(username) || isEmailExists(email))
+    if ((await isUsernameExists(username)) || (await isEmailExists(email))) {
       throw new DuplicateUsernameError();
+    }
+
     if (password === "") {
-      password = crypto.randomBytes(64).tostring("hex");
+      password = crypto.randomBytes(10).tostring("hex");
     }
     const hashedPwd = await bcrypt.hash(password, 10);
     const newUser = await userModel.create({
@@ -152,14 +152,15 @@ export const deleteUser = async (id) => {
 export const authenticateUser = async (user) => {
   try {
     const { username, password } = user;
-    if (!isUsernameExists(username))
+    const findUser = await getUserByUsername(username);
+    if (!findUser)
       throw new DataNotFoundError("There is no user with that username");
 
     const isPasswordMatch = await bcrypt.compare(password, findUser.password);
     if (!isPasswordMatch) throw new UnauthorizedError("incorrect password");
 
-    const accessToken = issueAccessToken();
-    const refreshToken = issueRefreshToken();
+    const accessToken = issueAccessToken(findUser);
+    const refreshToken = issueRefreshToken(findUser);
 
     findUser.refreshToken = refreshToken;
     await findUser.save();
