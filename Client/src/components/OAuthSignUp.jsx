@@ -6,6 +6,7 @@ import { useDispatch } from "react-redux";
 import { signInSuccess } from "../redux/user/userSlice.js";
 import { useNavigate } from "react-router-dom";
 import PropTypes from "prop-types";
+import { Toaster, toast } from "react-hot-toast";
 
 function OAuthSignUp({ role }) {
   const dispatch = useDispatch();
@@ -31,25 +32,30 @@ function OAuthSignUp({ role }) {
 
       const data = await res.json();
       if (res.ok) {
+        toast.success("Register successful");
         dispatch(signInSuccess(data));
         navigate("/");
       }
     } catch (error) {
-      console.error(error);
+      toast.error("Error: " + error.message);
     }
   };
 
   return (
-    <Button
-      type="button"
-      gradientDuoTone="pinkToOrange"
-      outline
-      onClick={handleGoogleClick}
-      className="w-full"
-    >
-      <AiFillGoogleCircle className="w-6 h-6 mr-2" />
-      Continue with Google
-    </Button>
+    <>
+      <Toaster position="top-center" reverseOrder={true} />
+
+      <Button
+        type="button"
+        gradientDuoTone="pinkToOrange"
+        outline
+        onClick={handleGoogleClick}
+        className="w-full"
+      >
+        <AiFillGoogleCircle className="w-6 h-6 mr-2" />
+        Continue with Google
+      </Button>
+    </>
   );
 }
 
