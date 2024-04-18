@@ -2,6 +2,7 @@ import { createUser } from "../services/UserLogic.js";
 
 export const handleUserGoogleRegister = async (req, res) => {
   try {
+    
     if (!req?.body?.username || !req?.body?.email || !req?.body?.role)
       return res.status(400).json({ msg: "some fields are missing" });
     const userInfo = {
@@ -11,9 +12,9 @@ export const handleUserGoogleRegister = async (req, res) => {
       role: req.body.role,
     };
     const newUser = await createUser(userInfo);
-    return res
-      .status(201)
-      .json({ successfull: `new user ${newUser.username} created!` });
+    return res.status(201).json({
+      successfull: `new user ${newUser.username} has been registered with google email!`,
+    });
   } catch (err) {
     return res.status(err.statusCode).json({ err: err.message });
   }

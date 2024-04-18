@@ -1,10 +1,9 @@
 import userModel from "../models/User.js";
 import bcrypt from "bcrypt";
-import { DuplicateUsernameError } from "../errors/DuplicateUserError.js";
+import { DuplicateUserError } from "../errors/DuplicateUserError.js";
 import { DataNotFoundError } from "../errors/DataNotFoundError.js";
 import { UnauthorizedError } from "../errors/UnauthorizedError.js";
 import { GeneralServerError } from "../errors/GeneralServerError.js";
-import crypto from "crypto";
 import jwt from "jsonwebtoken";
 import "../config/loadEnv.js";
 
@@ -22,15 +21,23 @@ export const getAllUsers = async (filter, value) => {
 };
 
 export const getUserByUsername = async (username) => {
-  const foundUser = await userModel
-    .findOne({ username: { $regex: new RegExp("^" + username + "$", "i") } })
-    .exec();
-  return foundUser;
+  try {
+    const foundUser = await userModel
+      .findOne({ username: { $regex: new RegExp("^" + username + "$", "i") } })
+      .exec();
+    return foundUser;
+  } catch (error) {
+    throw new GeneralServerError();
+  }
 };
 
 export const getUserByEmail = async (email) => {
-  const foundUser = await userModel.findOne({ email }).exec();
-  return foundUser;
+  try {
+    const foundUser = await userModel.findOne({ email }).exec();
+    return foundUser;
+  } catch (error) {
+    throw new GeneralServerError();
+  }
 };
 
 export const issueAccessToken = (user) => {
@@ -71,13 +78,18 @@ export const issueRefreshToken = (user) => {
 
 export const createUser = async (userInfo) => {
   try {
-    const { username, email, password, role } = userInfo;
-    if ((await isUsernameExists(username)) || (await isEmailExists(email))) {
-      throw new DuplicateUsernameError();
-    }
+    const { username, email, role } = userInfo;
+    let { password } = userInfo;
 
-    if (password === "") {
-      password = crypto.randomBytes(10).tostring("hex");
+    if (await getUserByUsername(username))
+      throw new DuplicateUserError("user with that username already exists");
+    if (await getUserByEmail(email))
+      throw new DuplicateUserError("user with that email already exists");
+
+    if (password.length === 0) {
+      password =
+        Math.random().toString(36).slice(-8) +
+        Math.random().toString(36).slice(-8);
     }
     const hashedPwd = await bcrypt.hash(password, 10);
     const newUser = await userModel.create({
@@ -88,7 +100,7 @@ export const createUser = async (userInfo) => {
     });
     return newUser;
   } catch (err) {
-    if (err instanceof DuplicateUsernameError) throw err;
+    if (err instanceof DuplicateUserError) throw err;
     else throw new GeneralServerError();
   }
 };
@@ -115,7 +127,7 @@ export const patchUser = async (id, updatedValues) => {
         })
         .exec();
       if (foundUser)
-        throw new DuplicateUsernameError(
+        throw new DuplicateUserError(
           "There is already a user with that username"
         );
     }
@@ -123,15 +135,13 @@ export const patchUser = async (id, updatedValues) => {
     if (updatedValues?.email) {
       const foundUser = await userModel.findOne({ email }).exec();
       if (foundUser)
-        throw new DuplicateUsernameError(
-          "There is already a user with that email"
-        );
+        throw new DuplicateUserError("There is already a user with that email");
     }
     const updatedUser = await userModel.findByIdAndUpdate(id, updatedValues);
     if (!updatedUser) throw new DataNotFoundError();
     return updatedUser;
   } catch (err) {
-    if ((err.code = 11000)) throw new DuplicateUsernameError();
+    if ((err.code = 11000)) throw new DuplicateUserError();
     if (err instanceof DataNotFoundError) throw err;
     throw new GeneralServerError();
   }
@@ -171,6 +181,23 @@ export const authenticateUser = async (user) => {
     if (err instanceof DataNotFoundError || err instanceof UnauthorizedError)
       throw err;
     throw new GeneralServerError();
+  }
+};
+
+export const authenticateUserWithGoogle = async (email) => {
+  try {
+    const findUser = await userModel.findOne({ email }).exec();
+    if (!findUser) throw new DataNotFoundError();
+
+    const accessToken = issueAccessToken(findUser);
+    const refreshToken = issueRefreshToken(findUser);
+    findUser.refreshToken = refreshToken;
+    await findUser.save();
+    const tokens = [accessToken, refreshToken];
+    return tokens;
+  } catch (error) {
+    if (err instanceof DataNotFoundError) throw err;
+    else throw GeneralServerError();
   }
 };
 
