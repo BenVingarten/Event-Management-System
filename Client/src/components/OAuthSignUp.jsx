@@ -3,7 +3,7 @@ import { AiFillGoogleCircle } from "react-icons/ai";
 import { GoogleAuthProvider, getAuth, signInWithPopup } from "firebase/auth";
 import { app } from "../firebase.js";
 import { useDispatch } from "react-redux";
-import { signInSuccess } from "../redux/user/userSlice.js";
+import { signUpSuccess, signUpFailure } from "../redux/user/userSlice.js";
 import { useNavigate } from "react-router-dom";
 import PropTypes from "prop-types";
 import { Toaster, toast } from "react-hot-toast";
@@ -33,11 +33,14 @@ function OAuthSignUp({ role }) {
       const data = await res.json();
       if (res.ok) {
         toast.success("Register successful");
-        dispatch(signInSuccess(data));
-        navigate("/");
+        dispatch(signUpSuccess(data));
+        navigate("/login");
+      } else {
+        throw new Error(data.err);
       }
     } catch (error) {
       toast.error("Error: " + error.message);
+      dispatch(signUpFailure(error.message));
     }
   };
 

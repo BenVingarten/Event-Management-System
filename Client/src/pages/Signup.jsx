@@ -3,6 +3,11 @@ import { useState } from "react";
 import { Toaster, toast } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import OAuthSignUp from "../components/OAuthSignUp";
+import { useDispatch } from "react-redux";
+import { signUpSuccess, signUpFailure } from "../redux/user/userSlice";
+
+import axios from "../api/axios";
+const SIGNUP_URL = "http://localhost:4000/register";
 
 const SignupPage = () => {
   const [email, setEmail] = useState("");
@@ -12,6 +17,7 @@ const SignupPage = () => {
   const [role, setRole] = useState("Event Planner");
 
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const handleEmailChange = (e) => {
     setEmail(e.target.value);
@@ -47,27 +53,24 @@ const SignupPage = () => {
       if (password !== confirmPassword)
         throw new Error("Passwords do not match");
 
-      const response = await fetch(`http://localhost:4000/register`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          // You might need to include additional headers like authorization token, etc.
-        },
-        body: JSON.stringify(userData), // Assuming userData is an object containing registration data
-      });
+      const response = await axios.post(
+        SIGNUP_URL,
+        JSON.stringify({
+          username: userName,
+          email: email,
+          password: password,
+          role: role,
+        }),
+        {
+          headers: { "Content-Type": "application/json" },
+          withCredentials: true,
+        }
+      );
 
-      if (!response.ok) {
-        const resData = await response.json();
-        const errorMessage = resData.err;
-        throw new Error(errorMessage);
-      }
-
-      if (response.ok) {
-        toast.success("Registration successful");
-        navigate("/login");
-      }
+      console.log(response.accessToken);
     } catch (error) {
-      toast.error("Error: " + error.message);
+      if (!error?.response) toast.error("Error: No response from server.");
+      else toast.error("Error: " + error.message);
     }
   }
 

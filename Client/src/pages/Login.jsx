@@ -1,5 +1,5 @@
 import { Spinner } from "flowbite-react";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { Toaster, toast } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import {
@@ -9,6 +9,10 @@ import {
 } from "../redux/user/userSlice";
 import { useDispatch, useSelector } from "react-redux";
 import OAuthLogin from "../components/OAuthLogIn";
+import AuthContext from "../context/AuthProvider";
+import axios from "../api/axios.js";
+
+const LOGIN_URL = "http://localhost:4000/login";
 
 const LoginPage = () => {
   const [userName, setUserName] = useState("");
@@ -17,6 +21,7 @@ const LoginPage = () => {
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const { setAuth } = useContext(AuthContext);
 
   const handleUserNameChange = (e) => {
     setUserName(e.target.value.trim());
@@ -35,32 +40,22 @@ const LoginPage = () => {
     };
 
     try {
-      dispatch(signInStart());
-      const response = await fetch(`http://localhost:4000/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          // You might need to include additional headers like authorization token, etc.
-        },
-        body: JSON.stringify(userData), // Assuming userData is an object containing registration data
-      });
+      const res = await axios.post(
+        LOGIN_URL,
+        JSON.stringify({ username: userName, password: password }),
+        {
+          headers: { "Content-Type": "application/json" },
+          withCredentials: true,
+        }
+      );
 
-      // Check if response is not okay
-      if (!response.ok) {
-        const resData = await response.json();
-        const errorMessage = resData.err;
-        throw new Error(errorMessage);
-      }
+      const accessToken = res?.data?.accessToken;
+      const role = res?.data?.role;
 
-      // Login successful
-      if (response.ok) {
-        toast.success("Login successful");
-        dispatch(signInSuccess(userData)); // Should I send back the user data? or response data?
-        navigate("/");
-      }
+      setAuth({ user, password, role, accessToken });
     } catch (error) {
-      toast.error("Error: " + error.message);
-      dispatch(signInFailure(error.message));
+      if (!error?.response) toast.error("Error: No response from server.");
+      else toast.error("Error: " + error.response.data.message);
     }
   }
 

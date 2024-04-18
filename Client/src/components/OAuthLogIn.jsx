@@ -33,6 +33,8 @@ function OAuthLogin() {
         toast.success("Login successful");
         dispatch(signInSuccess(data));
         navigate("/");
+      } else {
+        throw new Error(data.err);
       }
     } catch (error) {
       toast.error("Error: " + error.message);

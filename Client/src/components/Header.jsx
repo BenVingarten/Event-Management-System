@@ -4,7 +4,7 @@ import { IoIosArrowDropdownCircle } from "react-icons/io";
 import { useSelector } from "react-redux";
 
 const Header = () => {
-  const userConnected = useSelector((state) => state.user.currentUser);
+  const userConnected = useSelector((state) => state.user.accessToken);
 
   return (
     <header className="py-4 px-6 flex justify-between">
