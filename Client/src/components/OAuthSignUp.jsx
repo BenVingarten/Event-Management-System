@@ -2,14 +2,14 @@ import { Button } from "flowbite-react";
 import { AiFillGoogleCircle } from "react-icons/ai";
 import { GoogleAuthProvider, getAuth, signInWithPopup } from "firebase/auth";
 import { app } from "../firebase.js";
-import { useDispatch } from "react-redux";
-import { signUpSuccess, signUpFailure } from "../redux/user/userSlice.js";
 import { useNavigate } from "react-router-dom";
 import PropTypes from "prop-types";
 import { Toaster, toast } from "react-hot-toast";
 
+import axios from "../api/axios";
+const GOOGLE_SIGNUP_URL = "http://localhost:4000/google/register";
+
 function OAuthSignUp({ role }) {
-  const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const auth = getAuth(app);
@@ -18,29 +18,25 @@ function OAuthSignUp({ role }) {
     provider.setCustomParameters({ prompt: "select_account" });
     try {
       const resultsFromGoogle = await signInWithPopup(auth, provider);
-      const res = await fetch("http://localhost:4000/google/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
+      const response = await axios.post(
+        GOOGLE_SIGNUP_URL,
+        JSON.stringify({
           username: resultsFromGoogle.user.displayName,
           email: resultsFromGoogle.user.email,
           role: role,
         }),
-      });
+        {
+          headers: { "Content-Type": "application/json" },
+          withCredentials: true,
+        }
+      );
 
-      const data = await res.json();
-      if (res.ok) {
-        toast.success("Register successful");
-        dispatch(signUpSuccess(data));
-        navigate("/login");
-      } else {
-        throw new Error(data.err);
-      }
+      console.log(JSON.stringify(response));
+      toast.success("Register successful");
+      navigate("/login");
     } catch (error) {
-      toast.error("Error: " + error.message);
-      dispatch(signUpFailure(error.message));
+      if (!error?.response) toast.error("Error: No response from server.");
+      else toast.error("Error: " + error.message);
     }
   };
 

@@ -3,8 +3,6 @@ import { useState } from "react";
 import { Toaster, toast } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import OAuthSignUp from "../components/OAuthSignUp";
-import { useDispatch } from "react-redux";
-import { signUpSuccess, signUpFailure } from "../redux/user/userSlice";
 
 import axios from "../api/axios";
 const SIGNUP_URL = "http://localhost:4000/register";
@@ -17,7 +15,7 @@ const SignupPage = () => {
   const [role, setRole] = useState("Event Planner");
 
   const navigate = useNavigate();
-  const dispatch = useDispatch();
+
 
   const handleEmailChange = (e) => {
     setEmail(e.target.value);
@@ -42,13 +40,6 @@ const SignupPage = () => {
   async function handleSubmit(e) {
     e.preventDefault();
 
-    const userData = {
-      username: userName,
-      email: email,
-      password: password,
-      role: role,
-    };
-    console.log(userData);
     try {
       if (password !== confirmPassword)
         throw new Error("Passwords do not match");
@@ -67,7 +58,9 @@ const SignupPage = () => {
         }
       );
 
-      console.log(response.accessToken);
+      console.log(JSON.stringify(response));
+      toast.success("Register successful");
+      navigate("/login");
     } catch (error) {
       if (!error?.response) toast.error("Error: No response from server.");
       else toast.error("Error: " + error.message);

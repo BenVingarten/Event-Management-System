@@ -2,12 +2,6 @@ import { Spinner } from "flowbite-react";
 import { useContext, useState } from "react";
 import { Toaster, toast } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
-import {
-  signInStart,
-  signInSuccess,
-  signInFailure,
-} from "../redux/user/userSlice";
-import { useDispatch, useSelector } from "react-redux";
 import OAuthLogin from "../components/OAuthLogIn";
 import AuthContext from "../context/AuthProvider";
 import axios from "../api/axios.js";
@@ -17,10 +11,10 @@ const LOGIN_URL = "http://localhost:4000/login";
 const LoginPage = () => {
   const [userName, setUserName] = useState("");
   const [password, setPassword] = useState("");
-  const loading = useSelector((state) => state.user.loading);
+  const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
-  const dispatch = useDispatch();
+
   const { setAuth } = useContext(AuthContext);
 
   const handleUserNameChange = (e) => {
@@ -33,11 +27,7 @@ const LoginPage = () => {
 
   async function handleSubmit(e) {
     e.preventDefault();
-
-    const userData = {
-      username: userName,
-      password: password,
-    };
+    setLoading(true);
 
     try {
       const res = await axios.post(
@@ -49,11 +39,14 @@ const LoginPage = () => {
         }
       );
 
+      console.log(JSON.stringify(res?.data));
+      toast.success("Logged in successfully");
       const accessToken = res?.data?.accessToken;
       const role = res?.data?.role;
-
-      setAuth({ user, password, role, accessToken });
+      setAuth({ userName, password, role, accessToken });
+      navigate("/");
     } catch (error) {
+      setLoading(false);
       if (!error?.response) toast.error("Error: No response from server.");
       else toast.error("Error: " + error.response.data.message);
     }
