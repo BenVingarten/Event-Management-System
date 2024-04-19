@@ -1,11 +1,11 @@
 import { Spinner } from "flowbite-react";
-import { useContext, useState } from "react";
+import { useState } from "react";
 import { Toaster, toast } from "react-hot-toast";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import OAuthLogin from "../components/OAuthLogIn";
-import AuthContext from "../context/AuthProvider";
-import axios from "../api/axios.js";
 
+import axios from "../api/axios.js";
+import useAuth from "../hooks/useAuth.js";
 const LOGIN_URL = "http://localhost:4000/login";
 
 const LoginPage = () => {
@@ -14,8 +14,9 @@ const LoginPage = () => {
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
-
-  const { setAuth } = useContext(AuthContext);
+  const location = useLocation();
+  const from = location.state?.from?.pathname || "/";
+  const { setAuth } = useAuth(); //axios auth -- context
 
   const handleUserNameChange = (e) => {
     setUserName(e.target.value.trim());
@@ -39,12 +40,13 @@ const LoginPage = () => {
         }
       );
 
-      console.log(JSON.stringify(res?.data));
+      //console.log(JSON.stringify(res?.data));
       toast.success("Logged in successfully");
       const accessToken = res?.data?.accessToken;
       const role = res?.data?.role;
       setAuth({ userName, password, role, accessToken });
-      navigate("/");
+      // navigate to the previous page or home page
+      navigate(from, { replace: true });
     } catch (error) {
       setLoading(false);
       if (!error?.response) toast.error("Error: No response from server.");
