@@ -55,7 +55,7 @@ function createUserValidation() {
         options: (value) => {
           return value && rolesEnum.some((role) => role === value);
         },
-        errorMessage: "role must be user/vendor",
+        errorMessage: "role must be Event Planner/vendor",
       },
     },
   };
