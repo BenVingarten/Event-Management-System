@@ -11,6 +11,7 @@ import TaskList from "./pages/TaskList";
 import MyEvents from "./pages/MyEvents";
 import Header from "./components/Header";
 import Layout from "./components/Layout";
+import Admin from "./pages/Admin";
 
 function App() {
   return (
@@ -44,6 +45,11 @@ function App() {
             {/* will be added later */}
             <Route element={<RequireAuth allowedRoles={["Vendor"]} />}>
               <Route path="vendors" element={<h1>Only Vendors</h1>} />
+            </Route>
+
+            {/* Admin */}
+            <Route element={<RequireAuth allowedRoles={["admin"]} />}>
+              <Route path="admin" element={<Admin />} />
             </Route>
           </Route>
         </Routes>

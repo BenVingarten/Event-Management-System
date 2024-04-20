@@ -6,6 +6,7 @@ import usersRoute from "./users.js";
 import loginRoute from "./login.js";
 import googleLoginRoute from "./googleLogin.js";
 import refreshRoute from "./refresh.js";
+
 import { verifyJWT } from "../middleware/verifyJWT.js";
 
 const router = Router();

@@ -205,9 +205,9 @@ export const assignNewAccessToken = async (refreshToken) => {
   try {
     const findUser = await userModel.findOne({ refreshToken }).exec();
     if (!findUser) throw new DataNotFoundError();
-
     const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
-    if (decoded.userInfo.id !== findUser._id) throw new UnauthorizedError();
+    //console.log(decoded.userInfo.id, findUser._id.toString());
+    if (decoded.userInfo.id !== findUser._id.toString()) throw new UnauthorizedError();
 
     const accessToken = jwt.sign(
       {
