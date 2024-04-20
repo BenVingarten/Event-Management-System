@@ -13,17 +13,12 @@ export const handleUserGoogleLogin = async (req, res) => {
     } = req;
 
     const tokens = await authenticateUserWithGoogle(email);
-    const userFromDataBase = await getUserByEmail(email);
 
     res.cookie("jwt", tokens[1], {
       httpOnly: true,
       maxAge: 24 * 60 * 60 * 1000,
     });
-    return res.status(200).json({
-      userName: userFromDataBase.username,
-      role: userFromDataBase.role,
-      accessToken: tokens[0],
-    });
+    return res.status(200).json({ accessToken: tokens[0] });
   } catch (err) {
     return res.status(err.statusCode).json({ err: err.message });
   }

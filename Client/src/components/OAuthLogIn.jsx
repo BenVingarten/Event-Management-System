@@ -11,6 +11,7 @@ import axios from "../api/axios.js";
 const GOOGLE_LOGIN_URL = "http://localhost:4000/google/login";
 
 import useAuth from "../hooks/useAuth.js";
+import { jwtDecode } from "jwt-decode";
 
 function OAuthLogin() {
   const [loading, setLoading] = useState(false);
@@ -43,8 +44,9 @@ function OAuthLogin() {
       //console.log(JSON.stringify(res?.data));
       toast.success("Logged in successfully");
       const accessToken = res?.data?.accessToken;
-      const role = res?.data?.role;
-      setAuth({ role, accessToken });
+      const role = jwtDecode(accessToken).userInfo.role;
+      const user = jwtDecode(accessToken).userInfo.id;
+      setAuth({ user, role, accessToken });
       // navigate to the previous page or home page
       navigate(from, { replace: true });
     } catch (error) {

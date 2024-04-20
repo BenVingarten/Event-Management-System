@@ -8,6 +8,8 @@ import axios from "../api/axios.js";
 import useAuth from "../hooks/useAuth.js";
 const LOGIN_URL = "http://localhost:4000/login";
 
+import { jwtDecode } from "jwt-decode";
+
 const LoginPage = () => {
   const [userName, setUserName] = useState("");
   const [password, setPassword] = useState("");
@@ -43,8 +45,9 @@ const LoginPage = () => {
       //console.log(JSON.stringify(res?.data));
       toast.success("Logged in successfully");
       const accessToken = res?.data?.accessToken;
-      const role = res?.data?.role;
-      setAuth({ userName, password, role, accessToken });
+      const role = jwtDecode(accessToken).userInfo.role;
+      const user = jwtDecode(accessToken).userInfo.id;
+      setAuth({ user, role, accessToken });
       // navigate to the previous page or home page
       navigate(from, { replace: true });
     } catch (error) {
