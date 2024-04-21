@@ -230,12 +230,11 @@ export const assignNewAccessToken = async (refreshToken) => {
 export const logoutUser = async (refreshToken) => {
   try {
     const findUser = await userModel.findOne({ refreshToken }).exec();
-    if(findUser) {
+    if (findUser) {
       findUser.refreshToken = "";
       await findUser.save();
     }
-  }catch(err) {
+  } catch (err) {
     throw new GeneralServerError();
   }
-
 };

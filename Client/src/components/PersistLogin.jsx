@@ -6,7 +6,7 @@ import useAuth from "../hooks/useAuth";
 const PersistLogin = () => {
   const [isLoadind, setIsLoading] = useState(true);
   const refresh = useRefreshToken();
-  const { auth } = useAuth();
+  const { auth, persist } = useAuth();
 
   useEffect(() => {
     const verifyRefreshToken = async () => {
@@ -32,7 +32,11 @@ const PersistLogin = () => {
     console.log(`aToken: ${auth?.accessToken}`);
   }, [isLoadind]);
 
-  return <>{isLoadind ? <div>Loading...</div> : <Outlet />}</>;
+  return (
+    <>
+      {!persist ? <Outlet /> : isLoadind ? <div>Loading...</div> : <Outlet />}
+    </>
+  );
 };
 
 export default PersistLogin;

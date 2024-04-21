@@ -1,5 +1,5 @@
-import { Spinner } from "flowbite-react";
-import { useState } from "react";
+import { Checkbox, Label, Spinner } from "flowbite-react";
+import { useEffect, useState } from "react";
 import { Toaster, toast } from "react-hot-toast";
 import { useNavigate, useLocation } from "react-router-dom";
 import OAuthLogin from "../components/OAuthLogIn";
@@ -18,7 +18,7 @@ const LoginPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const from = location.state?.from?.pathname || "/";
-  const { setAuth } = useAuth(); //axios auth -- context
+  const { setAuth, persist, setPersist } = useAuth(); //axios auth -- context
 
   const handleUserNameChange = (e) => {
     setUserName(e.target.value.trim());
@@ -56,6 +56,13 @@ const LoginPage = () => {
       else toast.error("Error: " + error.response.data.message);
     }
   }
+
+  const togglePersist = () => {
+    setPersist((prev) => !prev);
+  };
+  useEffect(() => {
+    localStorage.setItem("persist", persist);
+  }, [persist]);
 
   return (
     <div className="flex justify-center items-center h-screen">
@@ -111,6 +118,12 @@ const LoginPage = () => {
           )}
         </button>
         <OAuthLogin />
+        <div>
+          <Checkbox id="persist" checked={persist} onChange={togglePersist} />
+          <Label htmlFor="persist" className="ml-2">
+            Trust this device
+          </Label>
+        </div>
       </form>
     </div>
   );

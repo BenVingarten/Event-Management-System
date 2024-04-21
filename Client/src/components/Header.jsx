@@ -1,9 +1,29 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Dropdown } from "flowbite-react";
 import { IoIosArrowDropdownCircle } from "react-icons/io";
+import useLogout from "../hooks/useLogout";
+
+import useAuth from "../hooks/useAuth";
+import { useEffect, useRef } from "react";
 
 const Header = () => {
-  const userConnected = false;
+  const { auth } = useAuth();
+  const navigate = useNavigate();
+  const logout = useLogout();
+
+  const userConnectedRef = useRef(false);
+
+  useEffect(() => {
+    userConnectedRef.current = auth?.user ? true : false;
+  }, [auth, auth?.user]);
+
+  console.log(auth.user);
+
+  const signout = async () => {
+    await logout();
+    navigate("/login", { replace: true });
+  };
+
   return (
     <header className="py-4 px-6 flex justify-between">
       <Link to="/" className="flex items-center">
@@ -12,7 +32,7 @@ const Header = () => {
         </span>
       </Link>
 
-      {userConnected ? (
+      {userConnectedRef.current ? (
         <Dropdown
           dismissOnClick={false}
           color="Blue"
@@ -32,7 +52,9 @@ const Header = () => {
             <Dropdown.Item>Create Event</Dropdown.Item>
           </Link>
           <Dropdown.Divider />
-          <Dropdown.Item className="font-medium ">Sign out</Dropdown.Item>
+          <Dropdown.Item className="font-medium " onClick={signout}>
+            Sign out
+          </Dropdown.Item>
         </Dropdown>
       ) : (
         <div className="flex ">
