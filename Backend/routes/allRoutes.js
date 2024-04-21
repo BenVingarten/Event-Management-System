@@ -6,6 +6,7 @@ import usersRoute from "./users.js";
 import loginRoute from "./login.js";
 import googleLoginRoute from "./googleLogin.js";
 import refreshRoute from "./refresh.js";
+import logoutRoute from "./logout.js";
 
 import { verifyJWT } from "../middleware/verifyJWT.js";
 
@@ -17,6 +18,7 @@ router.use(registerRoute);
 router.use(googleLoginRoute);
 router.use(loginRoute);
 router.use(refreshRoute);
+router.use(logoutRoute);
 
 router.use(verifyJWT);
 router.use(usersRoute);

@@ -206,7 +206,7 @@ export const assignNewAccessToken = async (refreshToken) => {
     const findUser = await userModel.findOne({ refreshToken }).exec();
     if (!findUser) throw new DataNotFoundError();
     const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
-    if (decoded.userInfo.id !== findUser._id.toString())
+    if (decoded && decoded.userInfo.id !== findUser._id.toString())
       throw new UnauthorizedError();
 
     const accessToken = jwt.sign(
@@ -225,4 +225,17 @@ export const assignNewAccessToken = async (refreshToken) => {
       throw err;
     throw new GeneralServerError();
   }
+};
+
+export const logoutUser = async (refreshToken) => {
+  try {
+    const findUser = await userModel.findOne({ refreshToken }).exec();
+    if(findUser) {
+      findUser.refreshToken = "";
+      await findUser.save();
+    }
+  }catch(err) {
+    throw new GeneralServerError();
+  }
+
 };
