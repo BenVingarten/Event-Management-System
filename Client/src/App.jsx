@@ -1,5 +1,6 @@
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
 import RequireAuth from "./components/RequireAuth";
+import PersistLogin from "./components/PersistLogin";
 
 import HomePage from "./pages/HomePage";
 import Login from "./pages/Login";
@@ -16,17 +17,17 @@ import Admin from "./pages/Admin";
 function App() {
   return (
     <div className="bg-gradient-to-b from-indigo-300 to-transparent">
-      <BrowserRouter>
-        <Header />
-        <Routes>
-          <Route path="/" element={<Layout />}>
-            {/* public routes */}
-            <Route path="/" element={<HomePage />} />
-            <Route path="login" element={<Login />} />
-            <Route path="signup" element={<Signup />} />
-            <Route path="unauthorized" element={<h1>Unauthorized</h1>} />
+      <Header />
+      <Routes>
+        <Route path="/" element={<Layout />}>
+          {/* public routes */}
+          <Route path="/" element={<HomePage />} />
+          <Route path="login" element={<Login />} />
+          <Route path="signup" element={<Signup />} />
+          <Route path="unauthorized" element={<h1>Unauthorized</h1>} />
 
-            {/* private routes - Event Planner, Vendor & Admin */}
+          {/* private routes - Event Planner, Vendor & Admin */}
+          <Route element={<PersistLogin />}>
             {/* All */}
             <Route
               element={
@@ -52,8 +53,8 @@ function App() {
               <Route path="admin" element={<Admin />} />
             </Route>
           </Route>
-        </Routes>
-      </BrowserRouter>
+        </Route>
+      </Routes>
     </div>
   );
 }

@@ -1,11 +1,9 @@
 import { Link } from "react-router-dom";
 import { Dropdown } from "flowbite-react";
 import { IoIosArrowDropdownCircle } from "react-icons/io";
-import { useSelector } from "react-redux";
 
 const Header = () => {
-  const userConnected = useSelector((state) => state.user.accessToken);
-
+  const userConnected = false;
   return (
     <header className="py-4 px-6 flex justify-between">
       <Link to="/" className="flex items-center">
