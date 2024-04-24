@@ -1,3 +1,4 @@
+import { jwtDecode } from "jwt-decode";
 import axios from "../api/axios";
 import useAuth from "./useAuth";
 
@@ -9,13 +10,16 @@ const useRefreshToken = () => {
       const response = await axios.get("/refresh", {
         withCredentials: true,
       });
+      const accessToken = response.data?.accessToken;
       setAuth((prev) => {
         console.log(JSON.stringify(prev));
         console.log(response.data.accessToken);
-        return { 
-          ...prev, 
-          roles: response.data.roles,
-          accessToken: response.data.accessToken };
+        return {
+          ...prev,
+          role: jwtDecode(accessToken).userInfo.role,
+          user: jwtDecode(accessToken).userInfo.id,
+          accessToken: accessToken,
+        };
       });
       return response.data.accessToken;
     };

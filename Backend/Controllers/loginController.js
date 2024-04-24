@@ -12,12 +12,18 @@ export const handleUserLogin = async (req, res) => {
 
     const user = { username, password };
     const tokens = await authenticateUser(user);
+    const userData = await getUserByUsername(username);
+    const email = userData.email;
 
     res.cookie("jwt", tokens[1], {
       httpOnly: true,
       maxAge: 24 * 60 * 60 * 1000,
     });
-    return res.status(200).json({ accessToken: tokens[0] });
+    return res.status(200).json({
+      accessToken: tokens[0],
+      userName: username,
+      email: email,
+    });
   } catch (err) {
     return res.status(err.statusCode).json({ err: err.message });
   }

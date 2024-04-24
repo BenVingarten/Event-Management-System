@@ -22,7 +22,8 @@ function Users() {
         if (isMounted) setUsers(response.data);
       } catch (error) {
         toast.error("Error: " + error.message);
-        navigate("/login", { state: { from: location }, replace: true });
+        console.error(error);
+        navigate("/unauthorized", { state: { from: location }, replace: true });
       }
     };
 

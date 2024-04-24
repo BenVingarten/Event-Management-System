@@ -3,7 +3,7 @@ export const verifyRoles = (...allowedRoles) => {
     if (!req?.role)
       return res
         .status(401)
-        .json({ msg: "Your role has No Access to this resoruce" });
+        .json({ msg: "No role provided!" });
     const rolesArray = [...allowedRoles];
     const result = rolesArray.some((role) => role === req.role);
     if (!result)

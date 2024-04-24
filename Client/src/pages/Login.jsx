@@ -17,7 +17,7 @@ const LoginPage = () => {
 
   const navigate = useNavigate();
   const location = useLocation();
-  const from = location.state?.from?.pathname || "/";
+  const from = location.state?.from?.pathname || "/myEvents";
   const { setAuth, persist, setPersist } = useAuth(); //axios auth -- context
 
   const handleUserNameChange = (e) => {
@@ -47,6 +47,8 @@ const LoginPage = () => {
       const accessToken = res?.data?.accessToken;
       const role = jwtDecode(accessToken).userInfo.role;
       const user = jwtDecode(accessToken).userInfo.id;
+      localStorage.setItem("userName", res?.data?.userName);
+      localStorage.setItem("email", res?.data?.email);
       setAuth({ user, role, accessToken });
       // navigate to the previous page or home page
       navigate(from, { replace: true });

@@ -4,38 +4,38 @@ import useRefreshToken from "../hooks/useRefreshToken";
 import useAuth from "../hooks/useAuth";
 
 const PersistLogin = () => {
-  const [isLoadind, setIsLoading] = useState(true);
+  console.log("PersistLogin");
+  const [isLoading, setIsLoading] = useState(true);
   const refresh = useRefreshToken();
   const { auth, persist } = useAuth();
 
   useEffect(() => {
+    let isMounted = true;
+
     const verifyRefreshToken = async () => {
       try {
         await refresh();
-        setIsLoading(false);
-      } catch (error) {
-        console.error(error);
+      } catch (err) {
+        console.error(err);
       } finally {
-        setIsLoading(false);
+        isMounted && setIsLoading(false);
       }
     };
 
-    if (!auth?.accessToken) {
-      verifyRefreshToken();
-    } else {
-      setIsLoading(false);
-    }
+    // persist added here AFTER tutorial video
+    // Avoids unwanted call to verifyRefreshToken
+    !auth?.accessToken && persist ? verifyRefreshToken() : setIsLoading(false);
+
+    return () => (isMounted = false);
   }, []);
 
   useEffect(() => {
-    console.log(`PersistLogin: ${isLoadind}`);
-    console.log(`aToken: ${auth?.accessToken}`);
-  }, [isLoadind]);
+    console.log(`isLoading: ${isLoading}`);
+    console.log(`aT: ${JSON.stringify(auth?.accessToken)}`);
+  }, [isLoading]);
 
   return (
-    <>
-      {!persist ? <Outlet /> : isLoadind ? <div>Loading...</div> : <Outlet />}
-    </>
+    <>{!persist ? <Outlet /> : isLoading ? <p>Loading...</p> : <Outlet />}</>
   );
 };
 
