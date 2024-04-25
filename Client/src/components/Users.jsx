@@ -16,7 +16,7 @@ function Users() {
 
     const getUsers = async () => {
       try {
-        const response = await axiosPrivate.get("/users", {
+        const response = await axiosPrivate.get("http://localhost:4000/users", {
           signal: controller.signal,
         });
         if (isMounted) setUsers(response.data);
