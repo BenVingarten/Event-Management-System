@@ -1,5 +1,4 @@
 import mongoose from "mongoose";
-import { rolesEnum } from "../constants/roles.js";
 const { Schema } = mongoose;
 
 const getCurrentTime = () => {
@@ -8,31 +7,27 @@ const getCurrentTime = () => {
   return threeHoursLater;
 };
 
-const userSchema = new Schema({
-  username: {
-    type: String,
-    required: true,
-    unique: true,
-  },
-  email: {
+const eventSchema = new Schema({
+  name: {
     type: String,
     required: true,
   },
-  password: {
+  date: {
+    type: Date,
+    required: true,
+  },
+  type: {
     type: String,
     required: true,
   },
-  role: {
-    type: String,
-    required: true,
+  budget: {
+    type: Number,
+    default: 1000, //todo {}
   },
-  refreshToken: {
-    type: String,
-  },
-  events: [
+  collaborators: [
     {
       type: Schema.Types.ObjectId,
-      ref: "Event",
+      ref: "User",
     },
   ],
   createdAt: {
@@ -45,11 +40,10 @@ const userSchema = new Schema({
   },
 });
 
-userSchema.pre("save", function (next) {
+eventSchema.pre("save", function (next) {
   this.updatedAt = getCurrentTime();
   next();
 });
-userSchema.index({ username: 1 }, { unique: true });
 
-const userModel = mongoose.model("User", userSchema);
-export default userModel;
+const eventModel = mongoose.model("Event", eventSchema);
+export default eventModel;
