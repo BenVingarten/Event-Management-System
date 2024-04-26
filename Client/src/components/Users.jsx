@@ -12,17 +12,18 @@ function Users() {
 
   useEffect(() => {
     let isMounted = true;
-    const controller = new AbortController(); // helps to cancel fetch requests
+    const controller = new AbortController();
 
     const getUsers = async () => {
       try {
-        const response = await axiosPrivate.get("http://localhost:4000/users", {
+        const response = await axiosPrivate.get("/users", {
           signal: controller.signal,
         });
-        if (isMounted) setUsers(response.data);
-      } catch (error) {
-        toast.error("Error: " + error.message);
-        console.error(error);
+        console.log(response.data);
+        isMounted && setUsers(response.data);
+      } catch (err) {
+        console.log(err);
+        toast.error("Failed to fetch users");
         navigate("/unauthorized", { state: { from: location }, replace: true });
       }
     };
@@ -34,6 +35,7 @@ function Users() {
       controller.abort();
     };
   }, []);
+
   return (
     <div>
       <Toaster />

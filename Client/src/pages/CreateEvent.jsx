@@ -1,6 +1,9 @@
 import { useState } from "react";
+import useAxiosPrivate from "../hooks/useAxiosPrivate";
 
 const CreateEventPage = () => {
+  const axiosPrivate = useAxiosPrivate();
+
   const [eventType, setEventType] = useState("");
   const [eventDate, setEventDate] = useState("");
   const [eventName, setEventName] = useState("");
@@ -40,10 +43,30 @@ const CreateEventPage = () => {
     }
   };
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    const eventData = {
+      eventName,
+      eventType,
+      eventDate,
+      budget,
+      location,
+      additionalInfo,
+    };
+
+    try {
+      const response = await axiosPrivate.post("/createEvent", eventData);
+      console.log("Event created successfully:", response.data);
+    } catch (error) {
+      console.error("Error creating event:", error);
+    }
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
       <h2 className="text-2xl font-bold mb-4">Create Event</h2>
-      <form>
+      <form onSubmit={handleSubmit}>
         <div className="mb-4">
           <div className="mb-4">
             <label
