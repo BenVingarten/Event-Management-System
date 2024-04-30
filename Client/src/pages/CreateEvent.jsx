@@ -1,5 +1,8 @@
 import { useState } from "react";
 import useAxiosPrivate from "../hooks/useAxiosPrivate";
+import { IoIosRemoveCircleOutline } from "react-icons/io";
+import { Button, TextInput } from "flowbite-react";
+import { Toaster, toast } from "react-hot-toast";
 
 const CreateEventPage = () => {
   const axiosPrivate = useAxiosPrivate();
@@ -11,6 +14,37 @@ const CreateEventPage = () => {
   const [location, setLocation] = useState("");
   const [additionalInfo, setAdditionalInfo] = useState([]);
   const [additionalInfoInput, setAdditionalInfoInput] = useState("");
+
+  const [collaborators, setCollaborators] = useState([]);
+  const [emailInput, setEmailInput] = useState("");
+
+  const handleEmailInputChange = (e) => {
+    setEmailInput(e.target.value);
+  };
+
+  const addCollaborator = () => {
+    if (emailInput.trim() !== "") {
+      //TODO: Add email validation
+      if (collaborators.includes(emailInput)) {
+        toast.error("Email already added");
+        return;
+      }
+      if (!/^\S+@\S+\.\S+$/.test(emailInput)) {
+        toast.error("Invalid email");
+        return;
+      }
+      setCollaborators([...collaborators, emailInput]);
+      setEmailInput("");
+    } else {
+      toast.error("Please enter an email");
+    }
+  };
+
+  const deleteCollaborator = (index) => {
+    const updatedCollaborators = [...collaborators];
+    updatedCollaborators.splice(index, 1);
+    setCollaborators(updatedCollaborators);
+  };
 
   const handleBudgetChange = (e) => {
     setBudget(e.target.value);
@@ -65,6 +99,7 @@ const CreateEventPage = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
+      <Toaster />
       <h2 className="text-2xl font-bold mb-4">Create Event</h2>
       <form onSubmit={handleSubmit}>
         <div className="mb-4">
@@ -200,6 +235,56 @@ const CreateEventPage = () => {
             </div>
           ))}
         </div>
+
+        <div>
+          <label
+            htmlFor="emailInput"
+            className="block text-gray-700 font-bold mb-2 mr-2"
+          >
+            Add Collaborator by Email:
+          </label>
+          <div className="flex items-center mb-4">
+            <TextInput
+              id="email"
+              type="email"
+              placeholder="name@mail.com"
+              required
+              shadow
+              className="w-1/2"
+              onChange={handleEmailInputChange}
+            />
+            <button
+              type="button"
+              onClick={addCollaborator}
+              className="bg-blue-500 text-white font-bold px-4 py-2 rounded-r-lg hover:bg-blue-700 focus:outline-none focus:bg-blue-700"
+            >
+              Add
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <h3 className="block text-gray-700 font-bold mb-2 ">
+            Collaborators:
+          </h3>
+          <ul>
+            {collaborators.map((email, index) => (
+              <li key={index} className="text-lg mr-10 pr-5 flex align-middle ">
+                {email}
+                <Button
+                  size={"xs"}
+                  className="ml-2"
+                  color="red"
+                  onClick={() => deleteCollaborator(index)}
+                >
+                  {" "}
+                  <IoIosRemoveCircleOutline size={20} />
+                </Button>
+              </li>
+            ))}
+          </ul>
+        </div>
+
         <button
           type="submit"
           className="mt-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"

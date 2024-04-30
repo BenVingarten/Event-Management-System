@@ -24,12 +24,7 @@ const eventSchema = new Schema({
     type: Number,
     default: 1000, //todo {}
   },
-  collaborators: [
-    {
-      type: Schema.Types.ObjectId,
-      ref: "User",
-    },
-  ],
+  collaborators: [String],
   createdAt: {
     type: Date,
     default: getCurrentTime(),
