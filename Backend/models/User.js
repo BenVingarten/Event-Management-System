@@ -1,22 +1,16 @@
 import mongoose from "mongoose";
-import { rolesEnum } from "../constants/roles.js";
 const { Schema } = mongoose;
-
-const getCurrentTime = () => {
-  const currentTimestamp = Date.now();
-  const threeHoursLater = new Date(currentTimestamp + 3 * 60 * 60 * 1000);
-  return threeHoursLater;
-};
 
 const userSchema = new Schema({
   username: {
     type: String,
     required: true,
-    unique: true,
+    index: true,
   },
   email: {
     type: String,
     required: true,
+    index: true,
   },
   password: {
     type: String,
@@ -37,7 +31,7 @@ const userSchema = new Schema({
   ],
   createdAt: {
     type: Date,
-    default: getCurrentTime(),
+    default: Date.now(),
     immutable: true,
   },
   updatedAt: {
@@ -45,11 +39,15 @@ const userSchema = new Schema({
   },
 });
 
-userSchema.pre("save", function (next) {
-  this.updatedAt = getCurrentTime();
-  next();
-});
-userSchema.index({ username: 1 }, { unique: true });
+userSchema.pre(
+  ["save", "updateOne", "updateMany", "findOneAndUpdate"],
+  function (next) {
+    this.updatedAt = Date.now()
+    next();
+  }
+);
+userSchema.index({ username: 1 });
+userSchema.index({ email: 1 });
 
 const userModel = mongoose.model("User", userSchema);
 export default userModel;

@@ -1,12 +1,11 @@
 import {
   authenticateUserWithGoogle,
-  getUserByEmail,
 } from "../services/UserLogic.js";
 
 export const handleUserGoogleLogin = async (req, res) => {
   try {
     if (!req?.body?.email)
-      return res.status(400).json({ err: "email is required" });
+      return res.status(400).json({ msg: "email is required" });
 
     const {
       body: { email },
@@ -14,11 +13,11 @@ export const handleUserGoogleLogin = async (req, res) => {
 
     const tokens = await authenticateUserWithGoogle(email);
 
-    res.cookie("jwt", tokens[1], {
+    res.cookie("jwt", tokens.refreshToken, {
       httpOnly: true,
       maxAge: 24 * 60 * 60 * 1000,
     });
-    return res.status(200).json({ accessToken: tokens[0] });
+    return res.status(200).json({ accessToken: tokens.accessToken });
   } catch (err) {
     console.error(err);
     return res.status(err.statusCode).json({ err: err.message });

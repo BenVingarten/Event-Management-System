@@ -7,6 +7,7 @@ import loginRoute from "./login.js";
 import googleLoginRoute from "./googleLogin.js";
 import refreshRoute from "./refresh.js";
 import logoutRoute from "./logout.js";
+import eventsRoute from "./events.js";
 
 import { verifyJWT } from "../middleware/verifyJWT.js";
 
@@ -22,5 +23,6 @@ router.use(logoutRoute);
 
 router.use(verifyJWT);
 router.use(usersRoute);
+router.use(eventsRoute);
 
 export default router;

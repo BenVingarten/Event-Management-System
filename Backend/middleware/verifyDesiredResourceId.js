@@ -1,6 +1,6 @@
 import { ObjectId } from "mongodb";
 
-export const getUserId = (req, res, next) => {
+export const verifyDesiredResourceId = (req, res, next) => {
     if(!req?.params?.id)
         return res.status(400).json({error: "user id is missing in the request"});
 

@@ -167,15 +167,14 @@ export const authenticateUser = async (user) => {
       throw new DataNotFoundError("There is no user with that username");
 
     const isPasswordMatch = await bcrypt.compare(password, findUser.password);
-    if (!isPasswordMatch) throw new UnauthorizedError("incorrect password");
+    if (!isPasswordMatch) throw new UnauthorizedError("incorrect credentials");
 
     const accessToken = issueAccessToken(findUser);
     const refreshToken = issueRefreshToken(findUser);
 
     findUser.refreshToken = refreshToken;
     await findUser.save();
-    const tokens = [accessToken, refreshToken];
-
+    const tokens = { accessToken, refreshToken };
     return tokens;
   } catch (err) {
     if (err instanceof DataNotFoundError || err instanceof UnauthorizedError)
@@ -193,9 +192,10 @@ export const authenticateUserWithGoogle = async (email) => {
     const refreshToken = issueRefreshToken(findUser);
     findUser.refreshToken = refreshToken;
     await findUser.save();
-    const tokens = [accessToken, refreshToken];
+
+    const tokens = { accessToken, refreshToken };
     return tokens;
-  } catch (error) {
+  } catch (err) {
     if (err instanceof DataNotFoundError) throw err;
     else throw GeneralServerError();
   }
