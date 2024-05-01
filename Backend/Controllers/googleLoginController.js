@@ -20,6 +20,7 @@ export const handleUserGoogleLogin = async (req, res) => {
     });
     return res.status(200).json({ accessToken: tokens[0] });
   } catch (err) {
+    console.error(err);
     return res.status(err.statusCode).json({ err: err.message });
   }
 };
