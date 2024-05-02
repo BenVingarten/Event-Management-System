@@ -9,9 +9,9 @@ import {
   validatePatchUser,
   validateUsersQuery,
 } from "../middleware/validateUser.js";
-import { verifyDesiredResourceId } from "../middleware/verifyDesiredResourceId.js";
+import { verifyValidResourceId} from "../middleware/verifyValidResourceId.js";
 import { verifyRoles } from "../middleware/verifyRoles.js";
-import { verifyAccessToResource } from "../middleware/verifyAccessToResource.js";
+import { verifyUserIdMatchAuthId } from "../middleware/verifyUserIdMatchAuthId.js";
 
 const router = Router();
 
@@ -21,8 +21,8 @@ router
 
 router
   .route("/users/:id")
-  .get(verifyDesiredResourceId, verifyAccessToResource, handleGetUserById)
-  .patch(verifyDesiredResourceId, validatePatchUser, verifyAccessToResource, hadnlePatchUser)
-  .delete(verifyDesiredResourceId, verifyAccessToResource, handleDeleteUser);
+  .get(verifyValidResourceId, verifyUserIdMatchAuthId, handleGetUserById)
+  .patch(verifyValidResourceId, validatePatchUser, verifyUserIdMatchAuthId, hadnlePatchUser)
+  .delete(verifyValidResourceId, verifyUserIdMatchAuthId, handleDeleteUser);
 
 export default router;
