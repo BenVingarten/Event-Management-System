@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 const { Schema } = mongoose;
+import { taskStatus, guestStatus } from "../constants/event.js";
 
 const eventSchema = new Schema({
   name: {
@@ -8,7 +9,7 @@ const eventSchema = new Schema({
   },
   date: {
     type: Date,
-    required: true,
+    required: true
   },
   type: {
     type: String,
@@ -23,10 +24,31 @@ const eventSchema = new Schema({
     type: String,
     required: true
   },
+  additionalInfo: String,
   collaborators: [
     {
       type: Schema.Types.ObjectId,
       ref: 'User'
+    }
+  ],
+  taskList: [
+    {
+      task: String,
+      status: {
+        type: String,
+        default: taskStatus[0]
+      }
+
+    }
+  ],
+  guestList: [
+    {
+      name: String,
+      phoneNumber: String,
+      status: {
+        type: String,
+        default: guestStatus[guestStatus.length - 1]
+      } 
     }
   ],
   createdAt: {

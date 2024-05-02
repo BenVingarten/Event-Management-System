@@ -17,7 +17,7 @@ const router = Router();
 
 router
   .route("/users")
-  .get(validateUsersQuery, verifyRoles("admin"), handleGetUsers);
+  .get(validateUsersQuery, verifyRoles("Admin"), handleGetUsers);
 
 router
   .route("/users/:id")

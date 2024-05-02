@@ -20,6 +20,20 @@ export const getAllUsers = async (filter, value) => {
   }
 };
 
+export const getIdbyEmail = async (email) => {
+  try {
+      const userId = await userModel.findOne({email}, '_id');
+      if(!userId)
+        throw new DataNotFoundError();
+      return userId;
+  } catch(err) {
+      if(err instanceof DataNotFoundError)
+        throw err;
+      else
+        throw new GeneralServerError();
+  }
+}
+
 export const getUserByUsername = async (username) => {
   try {
     const foundUser = await userModel
