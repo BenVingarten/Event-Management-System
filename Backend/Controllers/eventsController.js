@@ -3,6 +3,7 @@ import { validationResult, matchedData } from "express-validator";
 import { createEvent } from "../services/eventsLogic.js";
 
 export const handleGetEvents = async (req, res) => {
+  console.log("check handle get events");
   try {
     const userId = req.userId;
     const events = await getEvents(userId);
@@ -20,7 +21,9 @@ export const handleCreateEvent = async (req, res) => {
     const eventData = matchedData(req);
     const { userId } = req;
     const newEvent = await createEvent(userId, eventData);
-    return res.status(201).json({successfull: `new Event: ${newEvent.name} created!`});
+    return res
+      .status(201)
+      .json({ successfull: `new Event: ${newEvent.name} created!` });
   } catch (err) {
     return res.status(err.statusCode).json({ err: err.message });
   }

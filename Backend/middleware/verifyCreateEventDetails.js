@@ -1,6 +1,6 @@
 import { eventType } from "../constants/event.js";
 import { checkSchema } from "express-validator";
-import isEmail from "validator";
+import validator from "validator";
 
 function createEventValidation() {
   return {
@@ -9,7 +9,7 @@ function createEventValidation() {
     },
     date: {
       notEmpty: { errorMessage: "event's date cant be empty" },
-      isDate: { errorMessage: "invalid Date" },
+      //isDate: { errorMessage: "invalid Date" },
     },
     type: {
       notEmpty: { errorMessage: "event must have a type" },
@@ -30,12 +30,12 @@ function createEventValidation() {
     collaborators: {
       custom: {
         options: (value) => {
-          if (!Array.isArray(value)) return false;
-          return value.every(email => isEmail(email));
+          //if (!Array.isArray(value)) return false;
+          return value.every((email) => validator.isEmail(email));
         },
         errorMessage: "Invalid email format for collaborator",
-      }
-    }
+      },
+    },
   };
 }
 

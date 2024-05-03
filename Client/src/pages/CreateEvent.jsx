@@ -3,9 +3,14 @@ import useAxiosPrivate from "../hooks/useAxiosPrivate";
 import { IoIosRemoveCircleOutline } from "react-icons/io";
 import { Button, TextInput } from "flowbite-react";
 import { Toaster, toast } from "react-hot-toast";
+import { jwtDecode } from "jwt-decode";
+import useAuth from "../hooks/useAuth";
+import { useNavigate } from "react-router-dom";
 
 const CreateEventPage = () => {
   const axiosPrivate = useAxiosPrivate();
+  const { auth } = useAuth();
+  const navigate = useNavigate();
 
   const [eventType, setEventType] = useState("");
   const [eventDate, setEventDate] = useState("");
@@ -81,19 +86,33 @@ const CreateEventPage = () => {
     e.preventDefault();
 
     const eventData = {
-      eventName,
-      eventType,
-      eventDate,
+      name: eventName,
+      date: eventDate,
+      type: eventType,
       budget,
       location,
-      additionalInfo,
+      additionalInfo: "",
+      collaborators,
     };
-
+    //console.log("Event Data:", eventData);
     try {
-      const response = await axiosPrivate.post("/createEvent", eventData);
+      const userId = jwtDecode(auth.accessToken).userInfo.id;
+      //console.log("User ID:", userId);
+      const response = await axiosPrivate.post(
+        `/users/${userId}/events`,
+        JSON.stringify({ eventData }),
+        {
+          headers: { "Content-Type": "application/json" },
+          withCredentials: true,
+        }
+      );
+      toast.success("Logged in successfully");
       console.log("Event created successfully:", response.data);
+      navigate("/myEvents", { replace: true });
     } catch (error) {
-      console.error("Error creating event:", error);
+      //console.error("Error creating event:", error.message);
+      if (!error?.response) toast.error("Error: No response from server.");
+      else toast.error("Error: " + error.message);
     }
   };
 
@@ -248,7 +267,6 @@ const CreateEventPage = () => {
               id="email"
               type="email"
               placeholder="name@mail.com"
-              required
               shadow
               className="w-1/2"
               onChange={handleEmailInputChange}

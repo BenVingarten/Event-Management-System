@@ -8,38 +8,40 @@ const eventSchema = new Schema({
     required: true,
   },
   date: {
-    type: Date,
-    required: true
+    type: String,
+    required: true,
   },
   type: {
     type: String,
     required: true,
-    index: true
+    index: true,
   },
   budget: {
     type: Number,
-    required: true
+    required: true,
   },
-  location : {
+  location: {
     type: String,
-    required: true
+    required: true,
   },
-  additionalInfo: String,
+  additionalInfo: {
+    type: String,
+    default: "",
+  },
   collaborators: [
     {
       type: Schema.Types.ObjectId,
-      ref: 'User'
-    }
+      ref: "User",
+    },
   ],
   taskList: [
     {
       task: String,
       status: {
         type: String,
-        default: taskStatus[0]
-      }
-
-    }
+        default: taskStatus[0],
+      },
+    },
   ],
   guestList: [
     {
@@ -47,9 +49,9 @@ const eventSchema = new Schema({
       phoneNumber: String,
       status: {
         type: String,
-        default: guestStatus[guestStatus.length - 1]
-      } 
-    }
+        default: guestStatus[guestStatus.length - 1],
+      },
+    },
   ],
   createdAt: {
     type: Date,
@@ -61,10 +63,13 @@ const eventSchema = new Schema({
   },
 });
 
-eventSchema.pre(["save", "updateOne", "updateMany", "findOneAndUpdate"], function (next) {
-  this.updatedAt = Date.now();
-  next();
-});
+eventSchema.pre(
+  ["save", "updateOne", "updateMany", "findOneAndUpdate"],
+  function (next) {
+    this.updatedAt = Date.now();
+    next();
+  }
+);
 
 const eventModel = mongoose.model("Event", eventSchema);
 export default eventModel;

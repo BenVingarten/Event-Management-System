@@ -52,33 +52,41 @@ export const getEvents = async (id) => {
 };
 
 export const createEvent = async (id, event) => {
-    try {
-       
-        const user = await userModel.findById(id);
-        if (!user) throw new DataNotFoundError();
-        const { name, date, type, budget, location, additionalInfo, collaborators } = event;
+  try {
+    const user = await userModel.findById(id);
+    if (!user) throw new DataNotFoundError();
+    const {
+      name,
+      date,
+      type,
+      budget,
+      location,
+      additionalInfo,
+      collaborators,
+    } = event;
 
-        //set collaborators
-        const idArray = [id];
-        for(const email of collaborators) {
-            const collaboratorId = await getIdbyEmail(email);
-            idArray.push(collaboratorId);
-        }
-        const newEvent =  await eventModel.create({
-            name,
-            date,
-            type,
-            budget,
-            location,
-            additionalInfo,
-            collaborators: idArray
-        });
-        // set event to the user
-        user.events.push(newEvent);
-        await user.save();
-        // set event to collaborators only after they accept
-        return newEvent;
-      } catch (err) {
-            throw err;
-      }
+    //set collaborators
+    const idArray = [id];
+    //TODO: change email validate to ignore uppercase and lowercase
+    for (const email of collaborators) {
+      const collaboratorId = await getIdbyEmail(email);
+      idArray.push(collaboratorId);
+    }
+    const newEvent = await eventModel.create({
+      name,
+      date,
+      type,
+      budget,
+      location,
+      additionalInfo,
+      collaborators: idArray,
+    });
+    // set event to the user
+    user.events.push(newEvent);
+    await user.save();
+    //TODO: set event to collaborators only after they accept
+    return newEvent;
+  } catch (err) {
+    throw err;
+  }
 };

@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { IoMdCalendar } from "react-icons/io";
 import { Card } from "flowbite-react";
 import useAxiosPrivate from "../hooks/useAxiosPrivate";
-
+ 
 const MyEvents = () => {
   const [events, setEvents] = useState([]);
   const axiosPrivate = useAxiosPrivate();
