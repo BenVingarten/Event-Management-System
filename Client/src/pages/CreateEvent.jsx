@@ -84,6 +84,7 @@ const CreateEventPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const controller = new AbortController();
 
     const eventData = {
       name: eventName,
@@ -100,13 +101,14 @@ const CreateEventPage = () => {
       //console.log("User ID:", userId);
       const response = await axiosPrivate.post(
         `/users/${userId}/events`,
-        JSON.stringify({ eventData }),
+        eventData,
         {
           headers: { "Content-Type": "application/json" },
           withCredentials: true,
+          signal: controller.signal,
         }
       );
-      toast.success("Logged in successfully");
+      toast.success("Event created successfully");
       console.log("Event created successfully:", response.data);
       navigate("/myEvents", { replace: true });
     } catch (error) {

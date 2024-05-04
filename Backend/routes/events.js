@@ -12,7 +12,12 @@ const router = Router();
 router
   .route("/users/:id/events")
   .get(verifyValidResourceId, verifyUserIdMatchAuthId, handleGetEvents)
-  .post(verifyValidResourceId, verifyUserIdMatchAuthId, validateCreateEvent, handleCreateEvent);
+  .post(
+    verifyValidResourceId,
+    verifyUserIdMatchAuthId,
+    validateCreateEvent,
+    handleCreateEvent
+  );
 
 router.route("/users/:id/events/:eventId").get().patch().delete();
 
