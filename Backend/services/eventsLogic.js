@@ -6,17 +6,17 @@ import { getIdbyEmail } from "./UserLogic.js";
 
 export const getEventsGeneralData = async (user) => {
   try {
-    await user
-      .populate({
-        path: "events",
-        select: "name date type budget location collaborators -__v",
-        populate: {
-          path: "collaborators",
-          select: "email",
-        },
-      })
-      .execPopulate();
+    await user.populate({
+      path: "events",
+      select: "name date type budget location collaborators",
+      populate: {
+        path: "collaborators",
+        select: "email -_id",
+      },
+    });
+
     const events = user.events;
+    console.log(events);
     return events;
   } catch (err) {
     throw new GeneralServerError();
@@ -24,16 +24,13 @@ export const getEventsGeneralData = async (user) => {
 };
 export const getEventsFullData = async (user) => {
   try {
-    await user
-      .populate({
-        path: "events",
-        select: "-__v",
-        populate: {
-          path: "collaborators",
-          select: "email",
-        },
-      })
-      .execPopulate();
+    await user.populate({
+      path: "events",
+      populate: {
+        path: "collaborators",
+        select: "email -_id",
+      },
+    });
     const events = user.events;
     return events;
   } catch (err) {
