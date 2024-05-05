@@ -14,9 +14,7 @@ export const getEventsGeneralData = async (user) => {
         select: "email -_id",
       },
     });
-
     const events = user.events;
-    console.log(events);
     return events;
   } catch (err) {
     throw new GeneralServerError();

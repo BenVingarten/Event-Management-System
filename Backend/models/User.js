@@ -30,19 +30,19 @@ const userSchema = new Schema({
     },
   ],
   createdAt: {
-    type: Date,
+    type: Number,
     default: Date.now(),
     immutable: true,
   },
   updatedAt: {
-    type: Date,
+    type: Number,
   },
 });
 
 userSchema.pre(
   ["save", "updateOne", "updateMany", "findOneAndUpdate"],
   function (next) {
-    this.updatedAt = Date.now()
+    this.updatedAt = Date.now();
     next();
   }
 );

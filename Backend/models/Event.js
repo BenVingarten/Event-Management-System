@@ -8,7 +8,7 @@ const eventSchema = new Schema({
     required: true,
   },
   date: {
-    type: String,
+    type: Number,
     required: true,
   },
   type: {
@@ -54,12 +54,12 @@ const eventSchema = new Schema({
     },
   ],
   createdAt: {
-    type: Date,
+    type: Number,
     default: Date.now(),
     immutable: true,
   },
   updatedAt: {
-    type: Date,
+    type: Number,
   },
 });
 

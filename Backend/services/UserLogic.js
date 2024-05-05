@@ -23,8 +23,9 @@ export const getAllUsers = async (filter, value) => {
 export const getIdbyEmail = async (email) => {
   try {
     const userId = await userModel.findOne({ email }, "_id");
-    console.log((userId));
-    if (!userId) throw new DataNotFoundError("couldnt find user with that email");
+    console.log(userId);
+    if (!userId)
+      throw new DataNotFoundError("couldnt find user with that email");
     return userId;
   } catch (err) {
     if (err instanceof DataNotFoundError) throw err;
@@ -119,7 +120,7 @@ export const createUser = async (userInfo) => {
 
 export const getUserById = async (id) => {
   try {
-    const user = await userModel.findById(id).exec();
+    const user = await userModel.findById(id);
     if (!user) throw new DataNotFoundError("User with that ID is not found");
     return user;
   } catch (err) {
