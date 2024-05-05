@@ -61,7 +61,7 @@ export const createEvent = async (id, event) => {
       additionalInfo,
       collaborators,
     } = event;
-
+    console.log("additionalInfo", additionalInfo);
     //set collaborators
     const idArray = [id];
     //TODO: change email validate to ignore uppercase and lowercase

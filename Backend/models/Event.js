@@ -25,8 +25,8 @@ const eventSchema = new Schema({
     required: true,
   },
   additionalInfo: {
-    type: String,
-    default: "",
+    type: [String],
+    default: [],
   },
   collaborators: [
     {

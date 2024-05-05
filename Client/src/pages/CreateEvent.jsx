@@ -92,7 +92,7 @@ const CreateEventPage = () => {
       type: eventType,
       budget,
       location,
-      additionalInfo: "",
+      additionalInfo,
       collaborators,
     };
     //console.log("Event Data:", eventData);

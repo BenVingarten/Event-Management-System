@@ -18,6 +18,7 @@ export const handleCreateEvent = async (req, res) => {
     if (!errors.isEmpty())
       return res.status(400).json({ error: errors.array() });
     const eventData = matchedData(req);
+    eventData.additionalInfo = req.body.additionalInfo;
     const { userId } = req;
     const newEvent = await createEvent(userId, eventData);
     return res
