@@ -1,7 +1,7 @@
 import { ObjectId } from "mongodb";
 
 export const verifyValidResourceId = (req, res, next) => {
-  
+  console.log("check1");
   if (!req?.params?.id)
     return res.status(400).json({ error: "user id is missing in the request" });
 
@@ -9,5 +9,6 @@ export const verifyValidResourceId = (req, res, next) => {
 
   if (!ObjectId.isValid(id))
     return res.status(400).json({ error: "user id is not valid" });
+
   next();
 };
