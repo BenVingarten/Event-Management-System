@@ -9,6 +9,7 @@ import { Toaster, toast } from "react-hot-toast";
 import { FaQuestionCircle, FaMoneyBillWave } from "react-icons/fa";
 import { FaLocationDot } from "react-icons/fa6";
 import { MdDeleteForever } from "react-icons/md";
+import moment from "moment-timezone";
 
 const MyEvents = () => {
   const [events, setEvents] = useState([]);
@@ -68,12 +69,9 @@ const MyEvents = () => {
             // Parse the date string into a Date object
             const eventDate = new Date(event.date);
             // Format the date as dd-mm-yyyy
-            const formattedDate = `${eventDate
-              .getDate()
-              .toString()
-              .padStart(2, "0")}-${(eventDate.getMonth() + 1)
-              .toString()
-              .padStart(2, "0")}-${eventDate.getFullYear()}`;
+            const formattedDate = moment(eventDate * 1000)
+              .tz("Israel")
+              .format("DD-MM-YYYY");
 
             return (
               <Card key={event._id} className="flex flex-col">

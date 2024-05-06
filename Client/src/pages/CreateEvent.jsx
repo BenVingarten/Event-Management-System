@@ -86,16 +86,19 @@ const CreateEventPage = () => {
     e.preventDefault();
     const controller = new AbortController();
 
+    const date = new Date(eventDate);
+    const epochTime = Math.floor(date.getTime() / 1000); // Convert milliseconds to seconds
+
     const eventData = {
       name: eventName,
-      date: eventDate,
+      date: epochTime,
       type: eventType,
       budget,
       location,
       additionalInfo,
       collaborators,
     };
-    //console.log("Event Data:", eventData);
+    console.log("Event Data:", eventData);
     try {
       const userId = jwtDecode(auth.accessToken).userInfo.id;
       //console.log("User ID:", userId);
@@ -112,9 +115,9 @@ const CreateEventPage = () => {
       console.log("Event created successfully:", response.data);
       navigate("/myEvents", { replace: true });
     } catch (error) {
-      //console.error("Error creating event:", error.message);
+      console.error("Error creating event:", error.response?.data.err);
       if (!error?.response) toast.error("Error: No response from server.");
-      else toast.error("Error: " + error.message);
+      else toast.error("Error: " + error.response?.data.err);
     }
   };
 
