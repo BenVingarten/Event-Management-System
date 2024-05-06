@@ -1,6 +1,11 @@
-import { getEvents } from "../services/eventsLogic.js";
+import {
+  deleteEvent,
+  getEventById,
+  getEvents,
+} from "../services/eventsLogic.js";
 import { validationResult, matchedData } from "express-validator";
 import { createEvent } from "../services/eventsLogic.js";
+import { ObjectId } from "mongodb";
 
 export const handleGetEvents = async (req, res) => {
   try {
@@ -24,6 +29,30 @@ export const handleCreateEvent = async (req, res) => {
     return res
       .status(201)
       .json({ successfull: `new Event: ${newEvent.name} created!` });
+  } catch (err) {
+    return res.status(err.statusCode).json({ err: err.message });
+  }
+};
+
+export const handleGetEventById = async (req, res) => {
+  try {
+    const { eventId } = req.params;
+    const { userId } = req;
+    const event = await getEventById(userId, eventId);
+    return res.status(200).json({ event });
+  } catch (err) {
+    return res.status(err.statusCode).json({ err: err.message });
+  }
+};
+
+export const handleDeleteEvent = async (req, res) => {
+  try {
+    const { eventId } = req.params;
+    const { userId } = req;
+    const event = await deleteEvent(userId, eventId);
+    return res
+      .status(200)
+      .json({ deleted: `you successfully deleted the event: ${event.name}` });
   } catch (err) {
     return res.status(err.statusCode).json({ err: err.message });
   }

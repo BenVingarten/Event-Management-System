@@ -1,4 +1,4 @@
-import { checkSchema, body } from "express-validator";
+import { checkSchema } from "express-validator";
 import { rolesEnum, validFilter } from "../constants/user.js";
 function queryValidationSchema() {
   return {

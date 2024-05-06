@@ -1,8 +1,10 @@
 import { DataNotFoundError } from "../errors/DataNotFoundError.js";
 import { GeneralServerError } from "../errors/GeneralServerError.js";
+import { UnauthorizedError } from "../errors/UnauthorizedError.js";
 import eventModel from "../models/Event.js";
 import userModel from "../models/User.js";
-import { getIdbyEmail } from "./UserLogic.js";
+import { deleteUserEvent, getIdbyEmail } from "./UserLogic.js";
+
 
 export const getEventsGeneralData = async (user) => {
   try {
@@ -11,7 +13,7 @@ export const getEventsGeneralData = async (user) => {
       select: "name date type budget location collaborators",
       populate: {
         path: "collaborators",
-        select: "email -_id",
+        select: "email _id",
       },
     });
     const events = user.events;
@@ -26,7 +28,7 @@ export const getEventsFullData = async (user) => {
       path: "events",
       populate: {
         path: "collaborators",
-        select: "email -_id",
+        select: "email _id",
       },
     });
     const events = user.events;
@@ -45,7 +47,6 @@ export const getEvents = async (id) => {
     throw err;
   }
 };
-
 export const createEvent = async (id, event) => {
   try {
     const user = await userModel.findById(id);
@@ -83,5 +84,33 @@ export const createEvent = async (id, event) => {
     return newEvent;
   } catch (err) {
     throw err;
+  }
+};
+export const getEventById = async (userId, eventId) => {
+  try {
+    const event = await eventModel.findOne({ _id: eventId, collaborators: userId }).populate({
+      path: "collaborators",
+      select: "email _id",
+    }).exec();
+    if(!event)
+        throw new DataNotFoundError();
+    return event;
+  } catch(err) {
+      if(err instanceof DataNotFoundError)
+          throw err;
+      throw new GeneralServerError();
+  }
+};
+export const deleteEvent = async (userId, eventId) => {
+  try {
+    const event = await eventModel.deleteOne({ _id: eventId, collaborators: userId }).exec();
+    if(!event)
+        throw new DataNotFoundError();
+    await deleteUserEvent(userId, eventId);
+    return event;
+  } catch(err) {
+      if(err instanceof DataNotFoundError)
+          throw err;
+      throw new GeneralServerError();
   }
 };

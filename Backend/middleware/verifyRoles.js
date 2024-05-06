@@ -10,7 +10,7 @@ export const verifyRoles = (...allowedRoles) => {
     if (!result)
       return res
         .status(401)
-        .json({ msg: "Your role has No Access to this resoruce" });
+        .json({ msg: "You have No Access to this resoruce" });
     next();
   };
 };

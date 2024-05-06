@@ -14,7 +14,11 @@ export const getAllUsers = async (filter, value) => {
       query[filter] = value;
       return await userModel.find(query);
     }
-    return await userModel.find({});
+    const users = await userModel.find({}).populate({
+      path: "events",
+      select: "name date -_id",
+    });
+    return users;
   } catch (err) {
     throw new GeneralServerError();
   }
@@ -120,7 +124,10 @@ export const createUser = async (userInfo) => {
 
 export const getUserById = async (id) => {
   try {
-    const user = await userModel.findById(id);
+    const user = await userModel.findById(id).populate({
+      path: "events",
+      select: "name date -_id"
+    });
     if (!user) throw new DataNotFoundError("User with that ID is not found");
     return user;
   } catch (err) {
@@ -251,3 +258,9 @@ export const logoutUser = async (refreshToken) => {
     throw new GeneralServerError();
   }
 };
+
+export const deleteUserEvent = async (userId, eventId) => {
+  const user = await getUserById(userId);
+  user.events.pull(eventId);
+  await user.save();
+}

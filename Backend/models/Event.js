@@ -63,6 +63,7 @@ const eventSchema = new Schema({
   },
 });
 
+eventSchema.index({collabrators : 1});
 eventSchema.pre(
   ["save", "updateOne", "updateMany", "findOneAndUpdate"],
   function (next) {
