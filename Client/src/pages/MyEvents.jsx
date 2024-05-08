@@ -34,8 +34,8 @@ const MyEvents = () => {
         console.log(response.data.events);
         setEvents(response.data.events);
       } catch (err) {
-        console.log(err);
-        toast.error("Failed to fetch users");
+        console.log("Error: " + err.response?.data.err);
+        toast.error("No Events Found!");
         navigate("/unauthorized", { state: { from: location }, replace: true });
       }
     };
@@ -77,7 +77,11 @@ const MyEvents = () => {
               <Card key={event._id} className="flex flex-col">
                 <h3
                   className="text-2xl text-white rounded-md text-center font-mono font-bold bg-gradient-to-r from-indigo-500 from-10% via-sky-500 via-30% to-emerald-500 to-90% cursor-pointer underline hover:text-blue-500"
-                  onClick={() => navigate(`/eventDetails/${event._id}`)}
+                  onClick={() =>
+                    navigate(`/eventDetails/${event._id}`, {
+                      state: { eventId: event._id },
+                    })
+                  }
                 >
                   {event.name}
                 </h3>
