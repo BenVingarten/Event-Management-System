@@ -4,7 +4,7 @@ import {
   getEvents,
 } from "../services/eventsLogic.js";
 import { validationResult, matchedData } from "express-validator";
-import { createEvent } from "../services/eventsLogic.js";
+import { createEvent, patchEvent } from "../services/eventsLogic.js";
 import { ObjectId } from "mongodb";
 
 export const handleGetEvents = async (req, res) => {
@@ -44,6 +44,23 @@ export const handleGetEventById = async (req, res) => {
     return res.status(err.statusCode).json({ err: err.message });
   }
 };
+
+export const handlePatchEvent = async(req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty())
+      return res.status(400).json({ error: errors.array() });
+    const eventDetails = matchedData(req);
+    const { eventId } = req.params;
+    const { userId } = req;
+    const event = await patchEvent(userId, eventId, eventDetails);
+    return res
+      .status(200)
+      .json({ event });
+  } catch (err) {
+    return res.status(err.statusCode).json({ err: err.message });
+  }
+}
 
 export const handleDeleteEvent = async (req, res) => {
   try {

@@ -9,7 +9,6 @@ function createEventValidation() {
     },
     date: {
       notEmpty: { errorMessage: "event's date cant be empty" },
-      //isDate: { errorMessage: "invalid Date" },
     },
     type: {
       notEmpty: { errorMessage: "event must have a type" },
@@ -39,4 +38,37 @@ function createEventValidation() {
   };
 }
 
+function patchEventValidation() {
+  return {
+    name: {
+      optional: { options: { nullable: true } },
+      notEmpty: { errorMessage: "event must have a name" },
+    },
+    date: {
+      optional: { options: { nullable: true } },
+      notEmpty: { errorMessage: "event's date cant be empty" },
+    },
+    type: {
+      optional: { options: { nullable: true } },
+      notEmpty: { errorMessage: "event must have a type" },
+      custom: {
+        options: (value) => {
+          return value && eventType.some((type) => type === value);
+        },
+        errorMessage: "Invalid event's type",
+      },
+    },
+    budget: {
+      optional: { options: { nullable: true } },
+      isDecimal: { errorMessage: "budget must be Decimal" },
+      notEmpty: { errorMessage: "budget cant be empty" },
+    },
+    location: {
+      optional: { options: { nullable: true } },
+      notEmpty: { errorMessage: "event must have a location" },
+    },
+  }
+}
+
 export const validateCreateEvent = checkSchema(createEventValidation());
+export const validatePathchEvent = checkSchema(patchEventValidation());

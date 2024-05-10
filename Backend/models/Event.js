@@ -36,11 +36,20 @@ const eventSchema = new Schema({
   ],
   taskList: [
     {
+      _id: false,
+      taskId: {
+        type: Schema.Types.ObjectId,
+        required: true
+      },
       task: String,
       status: {
         type: String,
-        default: taskStatus[0],
+        default: taskStatus[2],
       },
+      priority: {
+        type: Number,
+        required: true
+      }
     },
   ],
   guestList: [
@@ -49,8 +58,9 @@ const eventSchema = new Schema({
       phoneNumber: String,
       status: {
         type: String,
-        default: guestStatus[guestStatus.length - 1],
+        default: guestStatus[3],
       },
+      
     },
   ],
   createdAt: {

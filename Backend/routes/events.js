@@ -4,9 +4,10 @@ import {
   handleGetEvents,
   handleCreateEvent,
   handleGetEventById,
-  handleDeleteEvent
+  handleDeleteEvent,
+  handlePatchEvent
 } from "../Controllers/eventsController.js";
-import { validateCreateEvent } from "../middleware/verifyCreateEventDetails.js";
+import { validateCreateEvent, validatePathchEvent } from "../middleware/verifyEventDetails.js";
 import { verifyEventId } from "../middleware/VerifyEventId.js";
 
 
@@ -23,7 +24,7 @@ router
 
 router.route("/users/:id/events/:eventId")
 .get(verifyUserIdMatchAuthId, verifyEventId, handleGetEventById)
-.patch()
+.patch(verifyUserIdMatchAuthId, verifyEventId, validatePathchEvent, handlePatchEvent)
 .delete(verifyUserIdMatchAuthId, verifyEventId, handleDeleteEvent);
 
 export default router;

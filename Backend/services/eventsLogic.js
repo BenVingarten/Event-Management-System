@@ -101,6 +101,20 @@ export const getEventById = async (userId, eventId) => {
       throw new GeneralServerError();
   }
 };
+export const patchEvent= async (userId, eventId, eventDetails) => {
+  try {
+    const event = await eventModel.findOne({ _id: eventId, collaborators: userId }).exec();
+    if(!event)
+      throw new DataNotFoundError();
+    for(let field of eventDetails) {
+      if(field !== undefined)
+        event[field] = eventDetails[field];
+    }
+
+  } catch(err) {
+
+  }
+}
 export const deleteEvent = async (userId, eventId) => {
   try {
     const event = await eventModel.deleteOne({ _id: eventId, collaborators: userId }).exec();
