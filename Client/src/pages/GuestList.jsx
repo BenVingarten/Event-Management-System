@@ -8,10 +8,16 @@ import {
   Select,
 } from "flowbite-react";
 import { IoMdAddCircle, IoIosRemoveCircleOutline } from "react-icons/io";
+import { FaSort } from "react-icons/fa";
 
 const GuestListPage = () => {
   //guests list
   const [guests, setGuests] = useState([]);
+  // Selected guests
+  const [selectedGuests, setSelectedGuests] = useState([]);
+  // Sorting criteria
+  const [sortCriteria, setSortCriteria] = useState("name"); // "name", "status", etc.
+  const [sortOrder, setSortOrder] = useState("asc"); // "asc" or "desc"
 
   // New guest input fields
   const [newGuestName, setNewGuestName] = useState("");
@@ -21,8 +27,11 @@ const GuestListPage = () => {
   const [newGuestStatus, setNewGuestStatus] = useState("");
   const [newGuestComments, setNewGuestComments] = useState("");
 
-  // Selected guests
-  const [selectedGuests, setSelectedGuests] = useState([]);
+  // Initialize guests
+  useEffect(() => {
+    setGuests(DEFAULT_GUESTS);
+    //TODO: Fetch guests from the server
+  }, []);
 
   const addGuest = () => {
     const newGuest = {
@@ -34,6 +43,7 @@ const GuestListPage = () => {
       comments: newGuestComments,
     };
     setGuests([...guests, newGuest]);
+    // TODO: Add new guest to the server
 
     // Reset input fields
     setNewGuestName("");
@@ -64,6 +74,7 @@ const GuestListPage = () => {
   const handleRemoveGuests = () => {
     setGuests(guests.filter((guest, index) => !selectedGuests.includes(index)));
     setSelectedGuests([]);
+    //TODO: Remove selected guests from the server
   };
 
   const handleSelectGuest = (index) => {
@@ -80,17 +91,54 @@ const GuestListPage = () => {
     const updatedGuests = [...guests];
     updatedGuests[index].status = status;
     setGuests(updatedGuests);
+
+    //TODO: Update guest status on the server
+  };
+
+  const handlePeopleCountChange = (index, peopleCount) => {
+    const updatedGuests = [...guests];
+    updatedGuests[index].peopleCount = peopleCount;
+    setGuests(updatedGuests);
+
+    //TODO: Update guest people counte on the server
+  };
+
+  // Sorting guests based on criteria and order
+  const sortedGuests = guests.sort((a, b) => {
+    if (sortOrder === "asc") {
+      return a[sortCriteria].localeCompare(b[sortCriteria]);
+    } else {
+      return b[sortCriteria].localeCompare(a[sortCriteria]);
+    }
+  });
+
+  const handleSort = (criteria) => {
+    if (sortCriteria === criteria) {
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+    } else {
+      setSortCriteria(criteria);
+      setSortOrder("asc");
+    }
   };
 
   const presentList = () => {
-    return guests.map((guest, index) => (
+    return sortedGuests.map((guest, index) => (
       <Table.Row key={index}>
         <Table.Cell>
           {" "}
           <Checkbox onChange={() => handleSelectGuest(index)} />{" "}
         </Table.Cell>
         <Table.Cell className="px-4 py-2">{guest.name}</Table.Cell>
-        <Table.Cell className="px-4 py-2">{guest.peopleCount}</Table.Cell>
+        <Table.Cell className="px-4 py-2 ">
+          <input
+            type="number"
+            id="guests"
+            value={guest.peopleCount}
+            onChange={(e) => handlePeopleCountChange(index, e.target.value)}
+            className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-500"
+            required
+          />
+        </Table.Cell>
         <Table.Cell className="px-4 py-2">{guest.group}</Table.Cell>
         <Table.Cell className="px-4 py-2">{guest.phoneNumber}</Table.Cell>
         <Table.Cell className="px-4 py-2">
@@ -251,12 +299,44 @@ const GuestListPage = () => {
             {" "}
             <Checkbox />{" "}
           </Table.HeadCell>
-          <Table.HeadCell className="px-4 py-2">Name</Table.HeadCell>
+          <Table.HeadCell
+            className="px-4 py-2 hover:cursor-pointer"
+            onClick={() => handleSort("name")}
+          >
+            <div className="flex items-center">
+              Name
+              <FaSort className="ml-1" />
+            </div>
+          </Table.HeadCell>
           <Table.HeadCell className="px-4 py-2">Guests</Table.HeadCell>
-          <Table.HeadCell className="px-4 py-2">Group</Table.HeadCell>
+          <Table.HeadCell
+            className="px-4 py-2 hover:cursor-pointer "
+            onClick={() => handleSort("group")}
+          >
+            <div className="flex items-center">
+              Group
+              <FaSort className="ml-1" />
+            </div>
+          </Table.HeadCell>
           <Table.HeadCell className="px-4 py-2">Phone Number</Table.HeadCell>
-          <Table.HeadCell className="px-4 py-2">Status</Table.HeadCell>
-          <Table.HeadCell className="px-4 py-2">Comments</Table.HeadCell>
+          <Table.HeadCell
+            className="px-4 py-2 hover:cursor-pointer"
+            onClick={() => handleSort("status")}
+          >
+            <div className="flex items-center">
+              Status
+              <FaSort className="ml-1" />
+            </div>
+          </Table.HeadCell>
+          <Table.HeadCell
+            className="px-4 py-2 hover:cursor-pointer"
+            onClick={() => handleSort("comments")}
+          >
+            <div className="flex items-center">
+              Comments
+              <FaSort className="ml-1" />
+            </div>
+          </Table.HeadCell>
         </Table.Head>
         <Table.Body>{presentList()}</Table.Body>
       </Table>
@@ -265,3 +345,142 @@ const GuestListPage = () => {
 };
 
 export default GuestListPage;
+
+const DEFAULT_GUESTS = [
+  {
+    name: "John Doe",
+    peopleCount: 1,
+    group: "Family",
+    phoneNumber: "050-5882271",
+    status: "Message Sent",
+    comments: "",
+  },
+  {
+    name: "Jane Smith",
+    peopleCount: 2,
+    group: "Friends",
+    phoneNumber: "050-1236567",
+    status: "",
+    comments: "Vegan option needed",
+  },
+  {
+    name: "Mike Jones",
+    peopleCount: 1,
+    group: "Work Colleagues",
+    phoneNumber: "050-1229567",
+    status: "Not Coming",
+    comments: "Out of town",
+  },
+  {
+    name: "Sarah Lee",
+    peopleCount: 1,
+    group: "",
+    phoneNumber: "052-1234567",
+    status: "Coming",
+    comments: "Brings dessert!",
+  },
+  {
+    name: "David Miller",
+    peopleCount: 2,
+    group: "Family",
+    phoneNumber: "058-9876543",
+    status: "",
+    comments: "Might bring a guest",
+  },
+  {
+    name: "Emily Garcia",
+    peopleCount: 1,
+    group: "Friends",
+    phoneNumber: "050-1236753",
+    status: "Maybe",
+    comments: "",
+  },
+  {
+    name: "Daniel Williams",
+    peopleCount: 1,
+    group: "Work Colleagues",
+    phoneNumber: "054-7890123",
+    status: "Message Sent",
+    comments: "Allergies: Peanuts",
+  },
+  {
+    name: "Amanda Johnson",
+    peopleCount: 1,
+    group: "",
+    phoneNumber: "055-0123456",
+    status: "Coming",
+    comments: "",
+  },
+  {
+    name: "Christopher Brown",
+    peopleCount: 2,
+    group: "Friends",
+    phoneNumber: "059-3456789",
+    status: "",
+    comments: "Prefers vegetarian option",
+  },
+  {
+    name: "Elizabeth Moore",
+    peopleCount: 1,
+    group: "Family",
+    phoneNumber: "056-2345678",
+    status: "Coming",
+    comments: "",
+  },
+  {
+    name: "Kevin Thomas",
+    peopleCount: 1,
+    group: "Work Colleagues",
+    phoneNumber: "053-4567890",
+    status: "Maybe",
+    comments: "",
+  },
+  {
+    name: "Lauren Davis",
+    peopleCount: 1,
+    group: "",
+    phoneNumber: "060-5678901",
+    status: "Coming",
+    comments: "",
+  },
+  {
+    name: "Matthew Hernandez",
+    peopleCount: 2,
+    group: "Friends",
+    phoneNumber: "050-1951567",
+    status: "",
+    comments: "",
+  },
+  {
+    name: "Ashley Young",
+    peopleCount: 1,
+    group: "Family",
+    phoneNumber: "057-6789012",
+    status: "Coming",
+    comments: "",
+  },
+  {
+    name: "Joseph Robinson",
+    peopleCount: 1,
+    group: "Work Colleagues",
+    phoneNumber: "050-1231597",
+    status: "Not Coming",
+    comments: "Busy that day",
+  },
+  {
+    name: "Nicole Allen",
+    peopleCount: 1,
+    group: "",
+    phoneNumber: "061-7890123",
+    status: "Coming",
+    comments: "",
+  },
+  {
+    name: "Brandon Carter",
+    peopleCount: 2,
+    group: "Friends",
+    phoneNumber: "062-8901234",
+    status: "",
+    comments: "",
+  },
+];
