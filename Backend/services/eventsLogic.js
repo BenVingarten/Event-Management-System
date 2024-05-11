@@ -1,7 +1,9 @@
 import { DataNotFoundError } from "../errors/DataNotFoundError.js";
 import { GeneralServerError } from "../errors/GeneralServerError.js";
 import { UnauthorizedError } from "../errors/UnauthorizedError.js";
+import { InvalidFieldModifyError } from "../errors/InvalidFieldModify.js";
 import eventModel from "../models/Event.js";
+import { excludedFieldsInPatch } from "../constants/event.js";
 import userModel from "../models/User.js";
 import { deleteUserEvent, getIdbyEmail } from "./UserLogic.js";
 
@@ -106,13 +108,14 @@ export const patchEvent= async (userId, eventId, eventDetails) => {
     const event = await eventModel.findOne({ _id: eventId, collaborators: userId }).exec();
     if(!event)
       throw new DataNotFoundError();
-    for(let field of eventDetails) {
-      if(field !== undefined)
-        event[field] = eventDetails[field];
-    }
-
+    for(let property in eventDetails) 
+        event[property] = eventDetails[property];
+    await event.save();
+    return event;    
   } catch(err) {
-
+      if(err instanceof DataNotFoundError || err instanceof InvalidFieldModifyError)
+        throw err;
+      throw new GeneralServerError();
   }
 }
 export const deleteEvent = async (userId, eventId) => {

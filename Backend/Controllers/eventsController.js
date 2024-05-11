@@ -5,7 +5,7 @@ import {
 } from "../services/eventsLogic.js";
 import { validationResult, matchedData } from "express-validator";
 import { createEvent, patchEvent } from "../services/eventsLogic.js";
-import { ObjectId } from "mongodb";
+import { InvalidFieldModifyError } from "../errors/InvalidFieldModify.js";
 
 export const handleGetEvents = async (req, res) => {
   try {
@@ -45,22 +45,23 @@ export const handleGetEventById = async (req, res) => {
   }
 };
 
-export const handlePatchEvent = async(req, res) => {
+export const handlePatchEvent = async (req, res) => {
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty())
       return res.status(400).json({ error: errors.array() });
     const eventDetails = matchedData(req);
+    if(Object.keys(eventDetails).length === 0 )
+        throw new InvalidFieldModifyError();
+      
     const { eventId } = req.params;
     const { userId } = req;
     const event = await patchEvent(userId, eventId, eventDetails);
-    return res
-      .status(200)
-      .json({ event });
+    return res.status(200).json({ event });
   } catch (err) {
     return res.status(err.statusCode).json({ err: err.message });
   }
-}
+};
 
 export const handleDeleteEvent = async (req, res) => {
   try {
