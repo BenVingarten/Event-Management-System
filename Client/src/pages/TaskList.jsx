@@ -225,6 +225,7 @@ const BurnBarrel = ({ setCards }) => {
     setActive(false);
   };
 
+  //TODO: Implement the functionality to delete a task
   const handleDragEnd = (e) => {
     const cardId = e.dataTransfer.getData("cardId");
 
