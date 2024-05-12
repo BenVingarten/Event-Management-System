@@ -50,7 +50,13 @@ export const getUserByUsername = async (username) => {
 
 export const getUserByEmail = async (email) => {
   try {
-    const foundUser = await userModel.findOne({ email }).exec();
+    const foundUser = await userModel
+    .findOne({
+      email: {
+        $regex: new RegExp("^" + email + "$", "i"),
+      },
+    })
+    .exec();
     return foundUser;
   } catch (error) {
     throw new GeneralServerError();
@@ -126,7 +132,7 @@ export const getUserById = async (id) => {
   try {
     const user = await userModel.findById(id).populate({
       path: "events",
-      select: "name date -_id"
+      select: "name date -_id",
     });
     if (!user) throw new DataNotFoundError("User with that ID is not found");
     return user;
@@ -139,30 +145,32 @@ export const getUserById = async (id) => {
 export const patchUser = async (id, updatedValues) => {
   try {
     if (updatedValues?.username) {
-      const foundUser = await userModel
-        .findOne({
-          username: {
-            $regex: new RegExp("^" + updatedValues.username + "$", "i"),
-          },
-        })
-        .exec();
+      const foundUser = await getUserByUsername(updatedValues.username);
       if (foundUser)
         throw new DuplicateUserError(
           "There is already a user with that username"
         );
     }
-
     if (updatedValues?.email) {
-      const foundUser = await userModel.findOne({ email }).exec();
+      const foundUser = await getUserByEmail(updatedValues.email);
       if (foundUser)
         throw new DuplicateUserError("There is already a user with that email");
     }
-    const updatedUser = await userModel.findByIdAndUpdate(id, updatedValues);
+
+    if (updatedValues?.password) {
+      const hasedPwd = await bcrypt.hash(updatedValues.password, 10);
+      updatedValues.password = hasedPwd;
+    }
+
+    const updatedUser = await userModel.findByIdAndUpdate(id, updatedValues, {
+      new: true,
+    });
+
     if (!updatedUser) throw new DataNotFoundError();
     return updatedUser;
   } catch (err) {
-    if ((err.code = 11000)) throw new DuplicateUserError();
-    if (err instanceof DataNotFoundError) throw err;
+    if (err instanceof DataNotFoundError || err instanceof DuplicateUserError)
+      throw err;
     throw new GeneralServerError();
   }
 };
@@ -263,4 +271,4 @@ export const deleteUserEvent = async (userId, eventId) => {
   const user = await getUserById(userId);
   user.events.pull(eventId);
   await user.save();
-}
+};

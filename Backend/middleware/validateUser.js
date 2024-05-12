@@ -69,6 +69,11 @@ function patchUserValidation() {
           "username needs to be at range of 3 to 15 characters long",
       },
     },
+    email: {
+      optional: { options: { nullable: true } },
+      notEmpty: { errorMessage: "email cant be empty" },
+      isEmail: { errorMessage: "invalid email format" },
+    },
     password: {
       optional: { options: { nullable: true } },
       notEmpty: { errorMessage: "password can't be empty" },

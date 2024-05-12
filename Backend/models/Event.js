@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 const { Schema } = mongoose;
-import { taskStatus, guestStatus } from "../constants/event.js";
+import taskModel from "./Task";
 
 const eventSchema = new Schema({
   name: {
@@ -34,24 +34,7 @@ const eventSchema = new Schema({
       ref: "User",
     },
   ],
-  taskList: [
-    {
-      _id: false,
-      taskId: {
-        type: Schema.Types.ObjectId,
-        required: true
-      },
-      task: String,
-      status: {
-        type: String,
-        default: taskStatus[2],
-      },
-      priority: {
-        type: Number,
-        required: true
-      }
-    },
-  ],
+  taskList: [taskModel],
   guestList: [
     {
       name: String,
@@ -60,7 +43,6 @@ const eventSchema = new Schema({
         type: String,
         default: guestStatus[3],
       },
-      
     },
   ],
   createdAt: {
@@ -73,7 +55,7 @@ const eventSchema = new Schema({
   },
 });
 
-eventSchema.index({collabrators : 1});
+eventSchema.index({ collabrators: 1 });
 eventSchema.pre(
   ["save", "updateOne", "updateMany", "findOneAndUpdate"],
   function (next) {

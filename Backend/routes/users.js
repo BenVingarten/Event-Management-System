@@ -21,7 +21,7 @@ router
 router
   .route("/users/:id")
   .get(verifyUserIdMatchAuthId, handleGetUserById)
-  .patch(validatePatchUser, verifyUserIdMatchAuthId, hadnlePatchUser)
+  .patch(verifyUserIdMatchAuthId, validatePatchUser, hadnlePatchUser)
   .delete(verifyUserIdMatchAuthId, handleDeleteUser);
 
 export default router;

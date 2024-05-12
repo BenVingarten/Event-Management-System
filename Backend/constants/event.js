@@ -11,4 +11,12 @@ export const eventType = [
   "Workshops",
 ];
 export const guestStatus = ["Accept", "Reject", "Maybe", "Pending"];
-export const excludedFieldsInPatch = ['collaborators', 'taskList', 'additionalInfo','guestList', 'createdAt', 'updatedAt'];
+export const excludedFieldsInPatch = [
+  "collaborators",
+  "taskList",
+  "additionalInfo",
+  "guestList",
+  "createdAt",
+  "updatedAt",
+];
+export const tasksFilters = ["status", "priority", "created"]; // needs to complete

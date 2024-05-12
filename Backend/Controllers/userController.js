@@ -1,3 +1,4 @@
+import { InvalidFieldModifyError } from "../errors/InvalidFieldModify.js";
 import {
   getAllUsers,
   getUserById,
@@ -35,8 +36,10 @@ export const hadnlePatchUser = async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) return res.status(400).json({ err: errors.array() });
     const verifiedData = matchedData(req);
-    const { userId } = req;
+    if(Object.keys(verifiedData).length === 0)
+      throw new InvalidFieldModifyError();
 
+    const { userId } = req;
     const updatedUser = await patchUser(userId, verifiedData);
 
     return res.status(200).json({ updatedUser });
