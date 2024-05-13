@@ -50,12 +50,8 @@ const eventSchema = new Schema({
   }],
   guestList: [
     {
-      name: String,
-      phoneNumber: String,
-      status: {
-        type: String,
-        default: guestStatus[3],
-      },
+      type: Schema.Types.ObjectId,
+      ref: "Guest",
     },
   ],
   createdAt: {

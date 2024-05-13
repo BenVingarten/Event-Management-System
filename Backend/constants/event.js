@@ -10,7 +10,7 @@ export const eventType = [
   "Meetings",
   "Workshops",
 ];
-export const guestStatus = ["Accept", "Reject", "Maybe", "Pending"];
+export const guestStatus = ["Message Sent", "Coming", "Not Coming", "Maybe"];
 export const excludedFieldsInPatch = [
   "collaborators",
   "taskList",

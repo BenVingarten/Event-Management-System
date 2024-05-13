@@ -1,5 +1,5 @@
 import { matchedData, validationResult } from "express-validator";
-import { getTasks, updateTasks } from "../services/tasksLogic";
+import { getTasks, updateTasks } from "../services/tasksLogic.js";
 export const handleGetTasks = async (req, res) => {
   try {
     const { userId } = req;
