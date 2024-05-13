@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 const { Schema } = mongoose;
-import taskModel from "./Task";
-
+import { guestStatus } from "../constants/event.js";
+import { taskStatus } from "../constants/event.js";
 const eventSchema = new Schema({
   name: {
     type: String,
@@ -34,7 +34,20 @@ const eventSchema = new Schema({
       ref: "User",
     },
   ],
-  taskList: [taskModel],
+  taskList: [{
+    content: {
+      type: String,
+      required: true,
+    },
+    status: {
+      type: String,
+      default: taskStatus[2],
+    },
+    priority: {
+      type: Number,
+      required: true
+    },
+  }],
   guestList: [
     {
       name: String,

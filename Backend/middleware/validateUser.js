@@ -10,12 +10,13 @@ function queryValidationSchema() {
         },
       },
       custom: {
-        options: (value) => {
-          return value && validFilter.some((filter) => filter === value);
+        options: (values) => {
+          if (!Array.isArray(values)) return false;
+          return values.every(value => validFilter.includes(value));
         },
         errorMessage: "Filter must be included in the filter list",
       },
-    },
+    }
   };
 }
 

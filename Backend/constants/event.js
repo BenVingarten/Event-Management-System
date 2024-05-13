@@ -1,4 +1,4 @@
-export const taskStatus = ["Backlog", "In Progress", "To Do", "Completed"];
+export const taskStatus = ["Backlog", "TODO", "In progress", "Complete"];
 export const eventType = [
   "Birthday",
   "Wedding",

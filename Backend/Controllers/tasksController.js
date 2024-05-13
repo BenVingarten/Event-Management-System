@@ -1,27 +1,30 @@
 import { matchedData, validationResult } from "express-validator";
-
-export const handleCreateTask = async (req, res) => {
+import { getTasks, updateTasks } from "../services/tasksLogic";
+export const handleGetTasks = async (req, res) => {
   try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) return res.status(400).json({ err: errors.array() });
-    const verifiedData = matchedData(req);
     const { userId } = req;
     const { eventId } = req.params;
-    const task = await createTask(userId, eventId, verifiedData);
-    return res
-      .status(201)
-      .json({ success: `successfully added new task to ${task.status}` });
+    const tasks = await getTasks(userId, eventId);
+    return res.status(200).json({ tasks });
   } catch (err) {
     return res.status(err.statusCode).json({ err: err.message });
   }
 };
 
-export const handleGetTasks = async (req, res) => {
-        const errors = validationResult(req);
-        if (!errors.isEmpty())
-          return res.status(400).json({ error: errors.array() });
-}
+export const handleUpdateTaskList = async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty())
+      return res.status(400).json({ error: errors.array() });
+    const taskList = matchedData(req);
+    if (Object.keys(eventDetails).length === 0)
+      throw new InvalidFieldModifyError();
 
-            
-       
-    
+    const { userId } = req;
+    const { eventId } = req.params;
+    const updatedTasks = await updateTasks(userId, eventId, taskList);
+    return res.stauts(200).json({ updatedTasks });
+  } catch (err) {
+    return res.status(err.statusCode).json({ err: err.message });
+  }
+};

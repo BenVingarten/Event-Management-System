@@ -7,14 +7,9 @@ import { GeneralServerError } from "../errors/GeneralServerError.js";
 import jwt from "jsonwebtoken";
 import "../config/loadEnv.js";
 
-export const getAllUsers = async (filter, value) => {
+export const getAllUsers = async (filter, options) => {
   try {
-    if (filter && value) {
-      let query = {};
-      query[filter] = value;
-      return await userModel.find(query);
-    }
-    const users = await userModel.find({}).populate({
+    const users = await userModel.find(filter,options).populate({
       path: "events",
       select: "name date -_id",
     });

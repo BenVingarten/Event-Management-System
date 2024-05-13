@@ -12,11 +12,15 @@ export const handleGetUsers = async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty())
       return res.status(400).json({ error: errors.array() });
-    const {
-      query: { filter, value },
-    } = req;
+    const { sortBy, ...queryParams } = matchedData(req);
+    const filter = {};
+    Object.keys(queryParams).forEach((key) => {
+      filter[key] = queryParams[key];
+    });
+    let options = {};
+    if (sortBy) options = { sort: { [sortBy]: 1 } };
 
-    const allUsers = await getAllUsers(filter, value);
+    const allUsers = await getAllUsers(filter, options);
     return res.status(200).json({ allUsers });
   } catch (err) {
     return res.status(err.statusCode).json({ err: err.message });
@@ -36,7 +40,7 @@ export const hadnlePatchUser = async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) return res.status(400).json({ err: errors.array() });
     const verifiedData = matchedData(req);
-    if(Object.keys(verifiedData).length === 0)
+    if (Object.keys(verifiedData).length === 0)
       throw new InvalidFieldModifyError();
 
     const { userId } = req;

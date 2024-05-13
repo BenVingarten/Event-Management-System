@@ -55,7 +55,7 @@ const LoginPage = () => {
     } catch (error) {
       setLoading(false);
       if (!error?.response) toast.error("Error: No response from server.");
-      else toast.error("Error: " + error.response.data.message);
+      else toast.error("Error: " + error.response.data);
     }
   }
 
