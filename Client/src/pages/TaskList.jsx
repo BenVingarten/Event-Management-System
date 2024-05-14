@@ -3,6 +3,7 @@ import { FiPlus, FiTrash } from "react-icons/fi";
 import { motion } from "framer-motion";
 import { FaFire } from "react-icons/fa";
 import PropTypes from "prop-types";
+import { Button } from "flowbite-react";
 
 export default function TaskList() {
   return (
@@ -49,7 +50,10 @@ const Board = () => {
         cards={cards}
         setCards={setCards}
       />
-      <BurnBarrel setCards={setCards} />
+      <div>
+        <BurnBarrel setCards={setCards} />
+        <SaveTasks setCards={setCards} />
+      </div>
     </div>
   );
 };
@@ -92,11 +96,6 @@ const Column = ({ title, headingColor, cards, column, setCards }) => {
       }
 
       setCards(copy);
-
-      //TODO: Send request to the server to update task's column
-      /* updateTaskColumn(cardId, column)
-        .then((response) => console.log("Task column updated successfully"))
-        .catch((error) => console.error("Error updating task column:", error));*/
     }
   };
 
@@ -250,6 +249,30 @@ const BurnBarrel = ({ setCards }) => {
   );
 };
 
+const SaveTasks = ({ setCards }) => {
+  //TODO: Implement the functionality to send tasks to the server
+
+  const handleSave = () => {
+    // Send request to the server to update tasks
+    /* updateTasks(newCards)
+    .then((response) => console.log("Tasks updated successfully"))
+    .catch((error) => console.error("Error updating tasks:", error)); */
+  };
+
+  return (
+    <div>
+      <Button
+        className="mt-5 grid h-20 w-56 place-content-center "
+        size="xl"
+        gradientDuoTone="greenToBlue"
+        onClick={handleSave}
+      >
+        Save
+      </Button>
+    </div>
+  );
+};
+
 const AddCard = ({ column, setCards }) => {
   const [text, setText] = useState("");
   const [adding, setAdding] = useState(false);
@@ -269,11 +292,6 @@ const AddCard = ({ column, setCards }) => {
 
     setText("");
     setAdding(false);
-
-    //TODO: Send request to the server to update tasks
-    /* updateTasks(newCards)
-    .then((response) => console.log("Tasks updated successfully"))
-    .catch((error) => console.error("Error updating tasks:", error)); */
   };
 
   return (
@@ -380,5 +398,9 @@ BurnBarrel.propTypes = {
 
 AddCard.propTypes = {
   column: PropTypes.string.isRequired,
+  setCards: PropTypes.func.isRequired,
+};
+
+SaveTasks.propTypes = {
   setCards: PropTypes.func.isRequired,
 };
