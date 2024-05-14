@@ -13,6 +13,7 @@ const guestSchema = new Schema({
   },
   status: {
     type: String,
+    enum: guestStatus,
     default: guestStatus[2],
   },
   createdAt: {
@@ -25,7 +26,7 @@ const guestSchema = new Schema({
   },
 });
 
-guestSchema.index({ collabrators: 1 });
+guestSchema.index({ status: 1, name: 1 });
 guestSchema.pre(
   ["save", "updateOne", "updateMany", "findOneAndUpdate"],
   function (next) {

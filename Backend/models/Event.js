@@ -41,6 +41,7 @@ const eventSchema = new Schema({
     },
     status: {
       type: String,
+      enum: taskStatus,
       default: taskStatus[2],
     },
     priority: {
