@@ -8,7 +8,7 @@ import {
   handlePatchEvent
 } from "../Controllers/eventsController.js";
 import { validateCreateEvent, validatePathchEvent } from "../middleware/verifyEventDetails.js";
-import { verifyEventId } from "../middleware/VerifyEventId.js";
+import { verifyParamId } from "../middleware/verifyParamId.js";
 
 
 const router = Router();
@@ -23,8 +23,8 @@ router
   );
 
 router.route("/users/:id/events/:eventId")
-.get(verifyUserIdMatchAuthId, verifyEventId, handleGetEventById)
-.patch(verifyUserIdMatchAuthId, verifyEventId, validatePathchEvent, handlePatchEvent)
-.delete(verifyUserIdMatchAuthId, verifyEventId, handleDeleteEvent);
+.get(verifyUserIdMatchAuthId, verifyParamId("eventId"), handleGetEventById)
+.patch(verifyUserIdMatchAuthId, verifyParamId("eventId"), validatePathchEvent, handlePatchEvent)
+.delete(verifyUserIdMatchAuthId, verifyParamId("eventId"), handleDeleteEvent);
 
 export default router;

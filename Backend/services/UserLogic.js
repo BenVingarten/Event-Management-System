@@ -1,6 +1,6 @@
 import userModel from "../models/User.js";
 import bcrypt from "bcrypt";
-import { DuplicateUserError } from "../errors/DuplicateUserError.js";
+import { DuplicateDataError } from "../errors/DuplicateDataError.js";
 import { DataNotFoundError } from "../errors/DataNotFoundError.js";
 import { UnauthorizedError } from "../errors/UnauthorizedError.js";
 import { GeneralServerError } from "../errors/GeneralServerError.js";
@@ -9,7 +9,7 @@ import "../config/loadEnv.js";
 
 export const getAllUsers = async (filter, options) => {
   try {
-    const users = await userModel.find(filter,options).populate({
+    const users = await userModel.find(filter, options).populate({
       path: "events",
       select: "name date -_id",
     });
@@ -46,12 +46,12 @@ export const getUserByUsername = async (username) => {
 export const getUserByEmail = async (email) => {
   try {
     const foundUser = await userModel
-    .findOne({
-      email: {
-        $regex: new RegExp("^" + email + "$", "i"),
-      },
-    })
-    .exec();
+      .findOne({
+        email: {
+          $regex: new RegExp("^" + email + "$", "i"),
+        },
+      })
+      .exec();
     return foundUser;
   } catch (error) {
     throw new GeneralServerError();
@@ -100,9 +100,9 @@ export const createUser = async (userInfo) => {
     let { password } = userInfo;
 
     if (await getUserByUsername(username))
-      throw new DuplicateUserError("user with that username already exists");
+      throw new DuplicateDataError("user with that username already exists");
     if (await getUserByEmail(email))
-      throw new DuplicateUserError("user with that email already exists");
+      throw new DuplicateDataError("user with that email already exists");
 
     if (password.length === 0) {
       password =
@@ -118,7 +118,7 @@ export const createUser = async (userInfo) => {
     });
     return newUser;
   } catch (err) {
-    if (err instanceof DuplicateUserError) throw err;
+    if (err instanceof DuplicateDataError) throw err;
     else throw new GeneralServerError();
   }
 };
@@ -142,14 +142,14 @@ export const patchUser = async (id, updatedValues) => {
     if (updatedValues?.username) {
       const foundUser = await getUserByUsername(updatedValues.username);
       if (foundUser)
-        throw new DuplicateUserError(
+        throw new DuplicateDataError(
           "There is already a user with that username"
         );
     }
     if (updatedValues?.email) {
       const foundUser = await getUserByEmail(updatedValues.email);
       if (foundUser)
-        throw new DuplicateUserError("There is already a user with that email");
+        throw new DuplicateDataError("There is already a user with that email");
     }
 
     if (updatedValues?.password) {
@@ -164,7 +164,7 @@ export const patchUser = async (id, updatedValues) => {
     if (!updatedUser) throw new DataNotFoundError();
     return updatedUser;
   } catch (err) {
-    if (err instanceof DataNotFoundError || err instanceof DuplicateUserError)
+    if (err instanceof DataNotFoundError || err instanceof DuplicateDataError)
       throw err;
     throw new GeneralServerError();
   }
