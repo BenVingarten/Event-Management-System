@@ -54,8 +54,9 @@ const LoginPage = () => {
       navigate(from, { replace: true });
     } catch (error) {
       setLoading(false);
+      console.log("Error: " + error.response?.data.err);
       if (!error?.response) toast.error("Error: No response from server.");
-      else toast.error("Error: " + error.response.data);
+      else toast.error("Error: " + error.response.data.err);
     }
   }
 

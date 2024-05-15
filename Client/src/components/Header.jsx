@@ -58,6 +58,9 @@ const Header = () => {
           <Link to="/createEvent" className="font-medium">
             <Dropdown.Item>Create Event</Dropdown.Item>
           </Link>
+          <Link to="/account" className="font-medium">
+            <Dropdown.Item>Profile</Dropdown.Item>
+          </Link>
           <Dropdown.Divider />
           <Dropdown.Item className="font-medium " onClick={signout}>
             Sign out

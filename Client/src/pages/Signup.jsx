@@ -1,4 +1,4 @@
-import { Label, Select } from "flowbite-react";
+import { Button, Label, Modal, Select, TextInput } from "flowbite-react";
 import { useState } from "react";
 import { Toaster, toast } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
@@ -13,9 +13,14 @@ const SignupPage = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [role, setRole] = useState("Event Planner");
+  const [businessInfo, setBusinessInfo] = useState({
+    businessType: "",
+    businessLocation: "",
+    businessDescription: "",
+  });
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const navigate = useNavigate();
-
 
   const handleEmailChange = (e) => {
     setEmail(e.target.value);
@@ -23,6 +28,7 @@ const SignupPage = () => {
 
   const handleRoleChange = (e) => {
     setRole(e.target.value);
+    e.target.value == "Vendor" ? setIsModalOpen(true) : setIsModalOpen(false);
   };
 
   const handleUserNameChange = (e) => {
@@ -44,13 +50,24 @@ const SignupPage = () => {
       if (password !== confirmPassword)
         throw new Error("Passwords do not match");
 
+      const userInfo = {
+        username: userName,
+        email: email,
+        password: password,
+        role: role,
+      };
+
+      if (role === "Vendor") {
+        //setIsModalOpen(true);
+        userInfo.businessType = businessInfo.businessType;
+        userInfo.businessLocation = businessInfo.businessLocation;
+        userInfo.businessDescription = businessInfo.businessDescription;
+      }
+
       const response = await axios.post(
         SIGNUP_URL,
         JSON.stringify({
-          username: userName,
-          email: email,
-          password: password,
-          role: role,
+          ...userInfo,
         }),
         {
           headers: { "Content-Type": "application/json" },
@@ -66,6 +83,74 @@ const SignupPage = () => {
       else toast.error("Error: " + error.message);
     }
   }
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setBusinessInfo({ ...businessInfo, [name]: value });
+  };
+
+  const Popup = () => {
+    return (
+      <Modal show={isModalOpen} onClose={() => setIsModalOpen(false)}>
+        <div className="p-5">
+          <h3 className="text-lg font-bold mb-3">
+            Tell us about your business!
+          </h3>
+          <div className="">
+            <div className="mr-5">
+              <div>
+                <div className="mb-2 block">
+                  <Label htmlFor="type" value="Business type" />
+                </div>
+                <TextInput
+                  id="businessType"
+                  type="text"
+                  value={businessInfo.businessType}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
+              <div>
+                <div className="mb-2 block">
+                  <Label htmlFor="type" value="Business location" />
+                </div>
+                <TextInput
+                  id="businessLocation"
+                  type="text"
+                  value={businessInfo.businessLocation}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
+              <div>
+                <div className="mb-2 block">
+                  <Label htmlFor="type" value="Business description" />
+                </div>
+                <TextInput
+                  id="businessDescription"
+                  type="text"
+                  value={businessInfo.businessDescription}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="items-center">
+              <Button
+                className="mt-5"
+                size="xl"
+                onClick={() => setIsModalOpen(false)}
+                gradientDuoTone="greenToBlue"
+              >
+                That's it!
+              </Button>
+            </div>
+          </div>
+        </div>
+      </Modal>
+    );
+  };
 
   return (
     <div className="flex justify-center items-center h-screen">
@@ -158,6 +243,8 @@ const SignupPage = () => {
 
         <OAuthSignUp role={role} />
       </form>
+
+      <Popup />
     </div>
   );
 };

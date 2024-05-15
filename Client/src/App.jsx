@@ -13,6 +13,7 @@ import MyEvents from "./pages/MyEvents";
 import Header from "./components/Header";
 import Layout from "./components/Layout";
 import Admin from "./pages/Admin";
+import Account from "./pages/Account";
 
 function App() {
   return (
@@ -37,6 +38,7 @@ function App() {
               }
             >
               <Route path="createEvent" element={<CreateEvent />} />
+              <Route path="account" element={<Account />} />
               <Route path="eventDetails/:id" element={<EventDetails />} />
               <Route path="guestList" element={<GuestList />} />
               <Route path="taskList" element={<TaskList />} />
