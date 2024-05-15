@@ -34,21 +34,23 @@ const eventSchema = new Schema({
       ref: "User",
     },
   ],
-  taskList: [{
-    content: {
-      type: String,
-      required: true,
+  taskList: [
+    {
+      content: {
+        type: String,
+        required: true,
+      },
+      status: {
+        type: String,
+        enum: taskStatus,
+        default: taskStatus[2],
+      },
+      priority: {
+        type: Number,
+        required: true,
+      },
     },
-    status: {
-      type: String,
-      enum: taskStatus,
-      default: taskStatus[2],
-    },
-    priority: {
-      type: Number,
-      required: true
-    },
-  }],
+  ],
   guestList: [
     {
       type: Schema.Types.ObjectId,
@@ -73,6 +75,14 @@ eventSchema.pre(
     next();
   }
 );
+// Middleware to populate events, collaborators, and guestList fields
+userSchema.pre(["findOne", "find"], function (next) {
+  this.populate([
+    { path: "collaborators", select: "email _id" },
+    { path: "guestList", select: "name _id" },
+  ]);
+  next();
+});
 
 const eventModel = mongoose.model("Event", eventSchema);
 export default eventModel;

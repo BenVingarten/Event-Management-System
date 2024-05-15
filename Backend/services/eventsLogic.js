@@ -46,7 +46,7 @@ export const getEventsFullData = async (user) => {
 export const getEvents = async (id) => {
   try {
     const user = await getUserById(id);
-    const events = await getEventsGeneralData(user);
+    const events = user.events;
     return events;
   } catch (err) {
     throw err;
@@ -94,14 +94,6 @@ export const getEventById = async (userId, eventId) => {
   try {
     const event = await eventModel
       .findOne({ _id: eventId, collaborators: userId })
-      .populate({
-        path: "collaborators",
-        select: "email _id",
-      })
-      .populate({
-        path: "guestList",
-        select: "name _id",
-      })
       .exec();
     if (!event) throw new DataNotFoundError();
     return event;

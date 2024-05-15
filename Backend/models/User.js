@@ -46,6 +46,19 @@ userSchema.pre(
     next();
   }
 );
+
+userSchema.pre(["findOne", "find"], function (next) {
+  this.populate({
+    path: "events",
+    select: "name date type budget location collaborators",
+    populate: {
+      path: "collaborators",
+      select: "email _id",
+    },
+  });
+
+  next();
+});
 userSchema.index({ username: 1 });
 userSchema.index({ email: 1 });
 
