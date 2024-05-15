@@ -16,6 +16,12 @@ const guestSchema = new Schema({
     enum: guestStatus,
     default: guestStatus[2],
   },
+  guestEvents: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: "Event",
+    },
+  ],
   createdAt: {
     type: Number,
     default: Date.now(),

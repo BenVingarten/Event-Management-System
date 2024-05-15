@@ -9,7 +9,7 @@ import { InvalidFieldModifyError } from "../errors/InvalidFieldModify.js";
 
 export const handleGetEvents = async (req, res) => {
   try {
-    const userId = req.userId;
+    const { userId }= req;
     const events = await getEvents(userId);
     return res.status(200).json({ events });
   } catch (err) {

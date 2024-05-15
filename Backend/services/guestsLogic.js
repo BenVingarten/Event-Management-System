@@ -31,3 +31,16 @@ export const addGuest = async (userId, eventId, guestData) => {
     throw new GeneralServerError();
   }
 };
+
+export const getGuest = async (userId, eventId, guestId) => {
+  try {
+    const event = await getEventById(userId, eventId);
+    const guest = await guestModel.findOne({_id: guestId, guestEvents: eventId});
+    if(!guest)
+      throw new DataNotFoundError();
+    return guest;
+  } catch(err) {
+      if(err instanceof DataNotFoundError) throw err;
+      throw new GeneralServerError();
+  }
+};

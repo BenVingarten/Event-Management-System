@@ -2,8 +2,7 @@ import { DataNotFoundError } from "../errors/DataNotFoundError.js";
 import { GeneralServerError } from "../errors/GeneralServerError.js";
 import eventModel from "../models/Event.js";
 import userModel from "../models/User.js";
-import { deleteUserEvent, getIdbyEmail } from "./UserLogic.js";
-
+import { deleteUserEvent, getIdbyEmail, getUserById } from "./UserLogic.js";
 
 export const getEventsGeneralData = async (user) => {
   try {
@@ -13,6 +12,10 @@ export const getEventsGeneralData = async (user) => {
       populate: {
         path: "collaborators",
         select: "email _id",
+      },
+      populate: {
+        path: "guestList",
+        select: "name _id",
       },
     });
     const events = user.events;
@@ -29,6 +32,10 @@ export const getEventsFullData = async (user) => {
         path: "collaborators",
         select: "email _id",
       },
+      populate: {
+        path: "guestList",
+        select: "name _id",
+      },
     });
     const events = user.events;
     return events;
@@ -38,8 +45,7 @@ export const getEventsFullData = async (user) => {
 };
 export const getEvents = async (id) => {
   try {
-    const user = await userModel.findById(id);
-    if (!user) throw new DataNotFoundError();
+    const user = await getUserById(id);
     const events = await getEventsGeneralData(user);
     return events;
   } catch (err) {
@@ -86,40 +92,42 @@ export const createEvent = async (id, event) => {
 };
 export const getEventById = async (userId, eventId) => {
   try {
-    const event = await eventModel.findOne({ _id: eventId, collaborators: userId }).populate({
-      path: "collaborators",
-      select: "email _id",
-    }).exec();
-    if(!event)
-        throw new DataNotFoundError();
+    const event = await eventModel
+      .findOne({ _id: eventId, collaborators: userId })
+      .populate({
+        path: "collaborators",
+        select: "email _id",
+      })
+      .populate({
+        path: "guestList",
+        select: "name _id",
+      })
+      .exec();
+    if (!event) throw new DataNotFoundError();
     return event;
-  } catch(err) {
-      if(err instanceof DataNotFoundError)
-          throw err;
-      throw new GeneralServerError();
+  } catch (err) {
+    if (err instanceof DataNotFoundError) throw err;
+    throw new GeneralServerError();
   }
 };
-export const patchEvent= async (userId, eventId, eventDetails) => {
+export const patchEvent = async (userId, eventId, eventDetails) => {
   try {
     const event = await getEventById(userId, eventId);
-    for(let property in eventDetails) 
-        event[property] = eventDetails[property];
+    for (let property in eventDetails) event[property] = eventDetails[property];
     await event.save();
-    return event;    
-  } catch(err) {
-      if(err instanceof DataNotFoundError)
-        throw err;
-      throw new GeneralServerError();
+    return event;
+  } catch (err) {
+    if (err instanceof DataNotFoundError) throw err;
+    throw new GeneralServerError();
   }
-}
+};
 export const deleteEvent = async (userId, eventId) => {
   try {
-    const event = await getEventById(userId, eventId)
+    const event = await getEventById(userId, eventId);
     await deleteUserEvent(userId, eventId);
     return event;
-  } catch(err) {
-      if(err instanceof DataNotFoundError)
-          throw err;
-      throw new GeneralServerError();
+  } catch (err) {
+    if (err instanceof DataNotFoundError) throw err;
+    throw new GeneralServerError();
   }
 };

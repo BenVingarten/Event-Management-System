@@ -29,7 +29,14 @@ export const handleAddGuest = async (req, res) => {
 };
 
 export const handleGetGuest = async (req, res) => {
-
+  try {
+    const { userId } = req;
+    const { eventId, guestId } = req.params;
+    const guest = await getGuestById(userId, eventId, guestId);
+    return res.status(200).json({ guest });
+  } catch(err) {
+      return res.status(err.statusCode).json({ err: err.message });
+  }
 };
 export const handlePatchGuest = async (req, res) => {
 
