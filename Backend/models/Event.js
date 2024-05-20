@@ -76,7 +76,7 @@ eventSchema.pre(
   }
 );
 // Middleware to populate events, collaborators, and guestList fields
-userSchema.pre(["findOne", "find"], function (next) {
+eventSchema.pre(["findOne", "find"], function (next) {
   this.populate([
     { path: "collaborators", select: "email _id" },
     { path: "guestList", select: "name _id" },

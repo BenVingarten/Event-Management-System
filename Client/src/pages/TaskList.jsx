@@ -1,9 +1,14 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { FiPlus, FiTrash } from "react-icons/fi";
 import { motion } from "framer-motion";
 import { FaFire } from "react-icons/fa";
 import PropTypes from "prop-types";
 import { Button } from "flowbite-react";
+import { jwtDecode } from "jwt-decode";
+import useAxiosPrivate from "../hooks/useAxiosPrivate";
+import useAuth from "../hooks/useAuth";
+import { Toaster, toast } from "react-hot-toast";
+import { useLocation, useNavigate } from "react-router-dom";
 
 export default function TaskList() {
   return (
@@ -14,14 +19,50 @@ export default function TaskList() {
 }
 
 const Board = () => {
+  const axiosPrivate = useAxiosPrivate();
+  const effectRun = useRef(false);
+  const { auth } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const eventID = location.state.eventId;
+
   const [cards, setCards] = useState(DEFAULT_CARDS);
 
   useEffect(() => {
     //TODO: Fetch tasks from the server and update state
+
+    const controller = new AbortController();
+
+    const fetchTasks = async () => {
+      try {
+        const userId = jwtDecode(auth.accessToken).userInfo.id;
+        const response = await axiosPrivate.get(
+          `/users/${userId}/events/${eventID}/tasks`,
+          {
+            signal: controller.signal,
+          }
+        );
+
+        console.log(response.data.events);
+        setCards(response.data.events);
+      } catch (err) {
+        console.log("Error: " + err.response?.data.err);
+        toast.error("No Events Found!");
+        navigate("/unauthorized", { state: { from: location }, replace: true });
+      }
+    };
+
+    if (effectRun.current) fetchTasks();
+
+    return () => {
+      controller.abort();
+      effectRun.current = true;
+    };
   }, []);
 
   return (
     <div className="flex h-full w-full gap-3 overflow-scroll p-12">
+      <Toaster />
       <Column
         title="Backlog"
         column="backlog"

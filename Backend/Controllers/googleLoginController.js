@@ -1,6 +1,4 @@
-import {
-  authenticateUserWithGoogle,
-} from "../services/UserLogic.js";
+import { authenticateUserWithGoogle } from "../services/UserLogic.js";
 
 export const handleUserGoogleLogin = async (req, res) => {
   try {

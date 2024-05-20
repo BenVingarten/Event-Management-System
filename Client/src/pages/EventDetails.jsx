@@ -18,7 +18,8 @@ export default function EventDetails() {
   const { auth } = useAuth();
   const axiosPrivate = useAxiosPrivate();
   const navigate = useNavigate();
-  const location = useLocation();
+  const state = useLocation();
+  const eventID = state.state.eventId;
 
   const effectRun = useRef(false);
   useEffect(() => {
@@ -28,7 +29,7 @@ export default function EventDetails() {
     const getInfo = async () => {
       try {
         const userId = jwtDecode(auth.accessToken).userInfo.id;
-        const eventId = location.state.eventId;
+        const eventId = state.state.eventId;
         console.log("Event ID: " + eventId);
         const response = await axiosPrivate.get(
           `/users/${userId}/events/${eventId}`,
@@ -41,7 +42,7 @@ export default function EventDetails() {
       } catch (err) {
         console.log(err);
         toast.error("Failed to fetch event info. Please try again later.");
-        navigate("/myEvents", { state: { from: location }, replace: true });
+        navigate("/myEvents", { state: { from: state }, replace: true });
       }
     };
     if (effectRun.current) getInfo();
@@ -126,7 +127,15 @@ export default function EventDetails() {
             data={data}
             options={options}
           />
-          <Button>Go to Tasks</Button>
+          <Button
+            onClick={() =>
+              navigate(`/taskList`, {
+                state: { eventId: eventID },
+              })
+            }
+          >
+            Go to Tasks
+          </Button>
         </Card>
 
         {/* Third area */}
@@ -141,7 +150,7 @@ export default function EventDetails() {
             data={data}
             options={options}
           />
-          <Button>Go to Tasks</Button>
+          <Button>Go to Guests</Button>
         </Card>
       </div>
     </div>
