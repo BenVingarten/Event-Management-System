@@ -7,11 +7,11 @@ import { GeneralServerError } from "../errors/GeneralServerError.js";
 import jwt from "jsonwebtoken";
 import "../config/loadEnv.js";
 
-export const getAllUsers = async (filter, options) => {
+export const getAllUsers = async () => {
   try {
-    const users = await userModel.find(filter, options).populate({
+    const users = await userModel.find({}).populate({
       path: "events",
-      select: "name date -_id",
+      select: "name -_id",
     });
     return users;
   } catch (err) {
@@ -22,7 +22,6 @@ export const getAllUsers = async (filter, options) => {
 export const getIdbyEmail = async (email) => {
   try {
     const userId = await userModel.findOne({ email }, "_id");
-    console.log(userId);
     if (!userId)
       throw new DataNotFoundError("couldnt find user with that email");
     return userId;
@@ -123,13 +122,11 @@ export const createUser = async (userInfo) => {
   }
 };
 
-export const getUserById = async (id) => {
+export const getUserById = async (id, populateOptions = {}) => {
   try {
-    const user = await userModel.findById(id).populate({
-      path: "events",
-      select: "name date -_id",
-    });
+    let user = await userModel.findById(id);
     if (!user) throw new DataNotFoundError("User with that ID is not found");
+    user = user.populate(populateOptions);
     return user;
   } catch (err) {
     if (err instanceof DataNotFoundError) throw err;
@@ -186,8 +183,7 @@ export const authenticateUser = async (user) => {
   try {
     const { username, password } = user;
     const findUser = await getUserByUsername(username);
-    if (!findUser)
-      throw new DataNotFoundError("There is no user with that username");
+    if (!findUser) throw new DataNotFoundError("incorrect credentials");
 
     const isPasswordMatch = await bcrypt.compare(password, findUser.password);
     if (!isPasswordMatch) throw new UnauthorizedError("incorrect credentials");
@@ -197,8 +193,9 @@ export const authenticateUser = async (user) => {
 
     findUser.refreshToken = refreshToken;
     await findUser.save();
-    const tokens = { accessToken, refreshToken };
-    return tokens;
+    const authUser = { email: findUser.email, accessToken, refreshToken };
+
+    return authUser;
   } catch (err) {
     if (err instanceof DataNotFoundError || err instanceof UnauthorizedError)
       throw err;

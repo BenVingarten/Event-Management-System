@@ -4,50 +4,14 @@ import eventModel from "../models/Event.js";
 import userModel from "../models/User.js";
 import { deleteUserEvent, getIdbyEmail, getUserById } from "./UserLogic.js";
 
-export const getEventsGeneralData = async (user) => {
-  try {
-    await user.populate({
-      path: "events",
-      select: "name date type budget location collaborators",
-      populate: {
-        path: "collaborators",
-        select: "email _id",
-      },
-      populate: {
-        path: "guestList",
-        select: "name _id",
-      },
-    });
-    const events = user.events;
-    return events;
-  } catch (err) {
-    throw new GeneralServerError();
-  }
-};
-export const getEventsFullData = async (user) => {
-  try {
-    await user.populate({
-      path: "events",
-      populate: {
-        path: "collaborators",
-        select: "email _id",
-      },
-      populate: {
-        path: "guestList",
-        select: "name _id",
-      },
-    });
-    const events = user.events;
-    return events;
-  } catch (err) {
-    throw new GeneralServerError();
-  }
-};
 export const getEvents = async (id) => {
   try {
-    const user = await getUserById(id);
-    const events = user.events;
-    return events;
+    const populateOptions = {
+      path: "events",
+      select: "name date type budget location collaborators -_id",
+    };
+    const user = await getUserById(id, populateOptions);
+    return user.events;
   } catch (err) {
     throw err;
   }

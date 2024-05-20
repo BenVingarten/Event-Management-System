@@ -9,18 +9,7 @@ import { validationResult, matchedData } from "express-validator";
 
 export const handleGetUsers = async (req, res) => {
   try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty())
-      return res.status(400).json({ error: errors.array() });
-    const { sortBy, ...queryParams } = matchedData(req);
-    const filter = {};
-    Object.keys(queryParams).forEach((key) => {
-      filter[key] = queryParams[key];
-    });
-    let options = {};
-    if (sortBy) options = { sort: { [sortBy]: 1 } };
-
-    const allUsers = await getAllUsers(filter, options);
+    const allUsers = await getAllUsers();
     return res.status(200).json({ allUsers });
   } catch (err) {
     return res.status(err.statusCode).json({ err: err.message });

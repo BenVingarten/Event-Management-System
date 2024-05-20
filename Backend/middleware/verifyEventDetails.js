@@ -29,7 +29,7 @@ function createEventValidation() {
     collaborators: {
       custom: {
         options: (value) => {
-          //if (!Array.isArray(value)) return false;
+          if (!Array.isArray(value)) return false;
           return value.every((email) => validator.isEmail(email));
         },
         errorMessage: "Invalid email format for collaborator",

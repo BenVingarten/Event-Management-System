@@ -16,13 +16,17 @@ export const handleUpdateTaskList = async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty())
       return res.status(400).json({ error: errors.array() });
-    const taskList = matchedData(req);
-    if (Object.keys(eventDetails).length === 0)
+    const taskListObj = matchedData(req);
+    if (Object.keys(taskListObj).length === 0)
       throw new InvalidFieldModifyError();
 
     const { userId } = req;
     const { eventId } = req.params;
-    const updatedTasks = await updateTasks(userId, eventId, taskList);
+    const updatedTasks = await updateTasks(
+      userId,
+      eventId,
+      taskListObj.taskList
+    );
     return res.stauts(200).json({ updatedTasks });
   } catch (err) {
     return res.status(err.statusCode).json({ err: err.message });

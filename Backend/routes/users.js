@@ -7,7 +7,6 @@ import {
 } from "../Controllers/userController.js";
 import {
   validatePatchUser,
-  validateUsersQuery,
 } from "../middleware/validateUser.js";
 import { verifyRoles } from "../middleware/verifyRoles.js";
 import { verifyUserIdMatchAuthId } from "../middleware/verifyUserIdMatchAuthId.js";
@@ -16,7 +15,7 @@ const router = Router();
 
 router
   .route("/users")
-  .get(verifyRoles("Admin"), validateUsersQuery, handleGetUsers);
+  .get(verifyRoles("Admin"), handleGetUsers);
 
 router
   .route("/users/:id")

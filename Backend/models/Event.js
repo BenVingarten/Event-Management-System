@@ -1,6 +1,5 @@
 import mongoose from "mongoose";
 const { Schema } = mongoose;
-import { guestStatus } from "../constants/event.js";
 import { taskStatus } from "../constants/event.js";
 const eventSchema = new Schema({
   name: {
@@ -14,7 +13,6 @@ const eventSchema = new Schema({
   type: {
     type: String,
     required: true,
-    index: true,
   },
   budget: {
     type: Number,
@@ -36,6 +34,7 @@ const eventSchema = new Schema({
   ],
   taskList: [
     {
+      _id: false,
       content: {
         type: String,
         required: true,
@@ -75,14 +74,5 @@ eventSchema.pre(
     next();
   }
 );
-// Middleware to populate events, collaborators, and guestList fields
-eventSchema.pre(["findOne", "find"], function (next) {
-  this.populate([
-    { path: "collaborators", select: "email _id" },
-    { path: "guestList", select: "name _id" },
-  ]);
-  next();
-});
-
 const eventModel = mongoose.model("Event", eventSchema);
 export default eventModel;

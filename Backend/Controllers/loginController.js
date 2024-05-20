@@ -11,18 +11,15 @@ export const handleUserLogin = async (req, res) => {
     } = req;
 
     const user = { username, password };
-    const tokens = await authenticateUser(user);
-    const userData = await getUserByUsername(username);
-    const email = userData.email;
-
-    res.cookie("jwt", tokens.refreshToken, {
+    const authUser = await authenticateUser(user);
+    res.cookie("jwt", authUser.refreshToken, {
       httpOnly: true,
       maxAge: 24 * 60 * 60 * 1000,
     });
     return res.status(200).json({
-      accessToken: tokens.accessToken,
+      accessToken: authUser.accessToken,
       userName: username,
-      email: email,
+      email: authUser.email,
     });
   } catch (err) {
     return res.status(err.statusCode).json({ err: err.message });
