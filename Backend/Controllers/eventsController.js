@@ -5,7 +5,7 @@ import {
 } from "../services/eventsLogic.js";
 import { validationResult, matchedData } from "express-validator";
 import { createEvent, patchEvent } from "../services/eventsLogic.js";
-import { InvalidFieldModifyError } from "../errors/InvalidFieldModify.js";
+import { InvalidFieldModifyError } from "../errors/InvalidFieldModifyError.js";
 
 export const handleGetEvents = async (req, res) => {
   try {
@@ -36,8 +36,8 @@ export const handleCreateEvent = async (req, res) => {
 
 export const handleGetEventById = async (req, res) => {
   try {
-    const { eventId } = req.params;
     const { userId } = req;
+    const { eventId } = req.params;
     const event = await getEventById(userId, eventId);
     return res.status(200).json({ event });
   } catch (err) {

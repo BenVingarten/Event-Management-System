@@ -2,33 +2,33 @@ import { taskStatus } from "../constants/event.js";
 import { checkSchema } from "express-validator";
 function putTaskValidation() {
   return {
-    taskList: {
-      isArray: {
-        errorMessage: 'TaskList must be an array',
+    cards: {
+      custom: {
+        options: (value) => {
+          return Array.isArray(value);
+        },
+        errorMessage: "cards must be an array",
       },
     },
-    'taskList.*.content': {
+    "cards.*.title": {
       notEmpty: {
-        errorMessage: 'Task must have content',
+        errorMessage: "Task must have content",
       },
     },
-    'taskList.*.status': {
+    "cards.*.column": {
       notEmpty: {
-        errorMessage: 'Task must have a status',
+        errorMessage: "Task must have a status",
       },
       custom: {
         options: (value) => value && taskStatus.includes(value),
-        errorMessage: 'Invalid task status',
+        errorMessage: "Invalid task status",
       },
     },
-    'taskList.*.priority': {
+    "cards.*.id": {
       notEmpty: {
-        errorMessage: 'Task must have a priority',
+        errorMessage: "Task must have a priority",
       },
-      isNumeric: {
-        errorMessage: 'Priority must be a number',
-      },
-    }
+    },
   };
 }
 

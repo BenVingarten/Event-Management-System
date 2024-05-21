@@ -1,4 +1,4 @@
-import { InvalidFieldModifyError } from "../errors/InvalidFieldModify.js";
+import { InvalidFieldModifyError } from "../errors/InvalidFieldModifyError.js";
 import {
   getAllUsers,
   getUserById,

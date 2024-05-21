@@ -32,19 +32,18 @@ const eventSchema = new Schema({
       ref: "User",
     },
   ],
-  taskList: [
+  cards: [
     {
       _id: false,
-      content: {
+      title: {
         type: String,
         required: true,
       },
-      status: {
+      column: {
         type: String,
-        enum: taskStatus,
-        default: taskStatus[2],
+        default: taskStatus[1],
       },
-      priority: {
+      id: {
         type: Number,
         required: true,
       },
@@ -66,7 +65,7 @@ const eventSchema = new Schema({
   },
 });
 
-eventSchema.index({ collabrators: 1 });
+eventSchema.index({ collabrators: 1, guestList: 1, _id: 1 });
 eventSchema.pre(
   ["save", "updateOne", "updateMany", "findOneAndUpdate"],
   function (next) {

@@ -25,9 +25,9 @@ const Board = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const eventID = location.state.eventId;
+  const userId = jwtDecode(auth.accessToken).userInfo.id;
 
-  const [cards, setCards] = useState(DEFAULT_CARDS);
-
+  const [cards, setCards] = useState([]);
   useEffect(() => {
     //TODO: Fetch tasks from the server and update state
 
@@ -43,8 +43,8 @@ const Board = () => {
           }
         );
 
-        console.log(response.data.events);
-        setCards(response.data.events);
+        console.log(response.data.tasks);
+        setCards(response.data.tasks);
       } catch (err) {
         console.log("Error: " + err.response?.data.err);
         toast.error("No Events Found!");
@@ -93,7 +93,7 @@ const Board = () => {
       />
       <div>
         <BurnBarrel setCards={setCards} />
-        <SaveTasks setCards={setCards} />
+        <SaveTasks userId={userId} eventId={eventID} cards={cards} />
       </div>
     </div>
   );
@@ -290,14 +290,32 @@ const BurnBarrel = ({ setCards }) => {
   );
 };
 
-const SaveTasks = ({ setCards }) => {
+const SaveTasks = ({ userId, eventId, cards }) => {
   //TODO: Implement the functionality to send tasks to the server
-
-  const handleSave = () => {
-    // Send request to the server to update tasks
-    /* updateTasks(newCards)
-    .then((response) => console.log("Tasks updated successfully"))
-    .catch((error) => console.error("Error updating tasks:", error)); */
+  const axiosPrivate = useAxiosPrivate();
+  console.log(userId);
+  const handleSave = async (e) => {
+    e.preventDefault();
+    const controller = new AbortController();
+    try {
+      //console.log("User ID:", userId);
+      console.log(cards);
+      const response = await axiosPrivate.put(
+        `/users/${userId}/events/${eventId}/tasks`,
+        { cards },
+        {
+          headers: { "Content-Type": "application/json" },
+          withCredentials: true,
+          signal: controller.signal,
+        }
+      );
+      toast.success("tasks saved successfully");
+      //console.log("tasks saved successfully:", response.data);
+    } catch (error) {
+      console.error("Error saving tasks:", error.response?.data);
+      if (!error?.response) toast.error("Error: No response from server.");
+      else toast.error("Error: " + error.response?.data.error[0].msg);
+    }
   };
 
   return (
@@ -324,8 +342,8 @@ const AddCard = ({ column, setCards }) => {
     if (!text.trim().length) return;
 
     const newCard = {
-      column,
       title: text.trim(),
+      column,
       id: Math.random().toString(),
     };
 
@@ -443,5 +461,7 @@ AddCard.propTypes = {
 };
 
 SaveTasks.propTypes = {
-  setCards: PropTypes.func.isRequired,
+  userId: PropTypes.string.isRequired,
+  eventId: PropTypes.string.isRequired,
+  cards: PropTypes.array.isRequired,
 };

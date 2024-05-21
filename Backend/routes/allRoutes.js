@@ -25,7 +25,7 @@ router.use(logoutRoute);
 router.use(verifyJWT);
 router.use(usersRoute);
 router.use(eventsRoute);
-router.use(guestsRoute);
 router.use(tasksRoute);
+router.use(guestsRoute);
 
 export default router;

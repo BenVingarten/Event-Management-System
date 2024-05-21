@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { verifyUserIdMatchAuthId } from "../middleware/verifyUserIdMatchAuthId.js";
-import { validateAddGuest, validatePathchGuest } from "../middleware/verifyGuestDetails.js";
+import { validateAddGuest, validateUpdateGuest } from "../middleware/verifyGuestDetails.js";
 import { verifyParamId } from "../middleware/verifyParamId.js";
 import { handleAddGuest, handleGetGuests, handleGetGuest, handlePatchGuest, handlePutGuest, handleDeleteGuest } from "../Controllers/guestsController.js";
 const router = Router();
@@ -14,7 +14,7 @@ router
   router
     .route("/users/:id/events/:eventId/guests/:guestId")
     .get(verifyUserIdMatchAuthId, verifyParamId('eventId'), verifyParamId('guestId'), handleGetGuest)
-    .patch(verifyUserIdMatchAuthId, verifyParamId('eventId'), verifyParamId('guestId'), validatePathchGuest, handlePatchGuest)
+    .patch(verifyUserIdMatchAuthId, verifyParamId('eventId'), verifyParamId('guestId'), validateUpdateGuest, handlePatchGuest)
     .put(verifyUserIdMatchAuthId, verifyParamId('eventId'), verifyParamId('guestId'), handlePutGuest)
     .delete(verifyUserIdMatchAuthId, verifyParamId('eventId'), verifyParamId('guestId'), handleDeleteGuest);
     

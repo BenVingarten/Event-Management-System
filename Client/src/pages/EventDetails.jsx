@@ -20,6 +20,7 @@ export default function EventDetails() {
   const navigate = useNavigate();
   const state = useLocation();
   const eventID = state.state.eventId;
+  
 
   const effectRun = useRef(false);
   useEffect(() => {

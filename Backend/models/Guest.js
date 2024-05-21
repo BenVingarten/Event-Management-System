@@ -16,12 +16,6 @@ const guestSchema = new Schema({
     enum: guestStatus,
     default: guestStatus[2],
   },
-  guestEvents: [
-    {
-      type: Schema.Types.ObjectId,
-      ref: "Event",
-    },
-  ],
   createdAt: {
     type: Number,
     default: Date.now(),
@@ -32,7 +26,7 @@ const guestSchema = new Schema({
   },
 });
 
-guestSchema.index({ status: 1, name: 1 });
+guestSchema.index({ _id: 1, status: 1, name: 1 });
 guestSchema.pre(
   ["save", "updateOne", "updateMany", "findOneAndUpdate"],
   function (next) {
