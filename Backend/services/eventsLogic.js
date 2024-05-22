@@ -81,9 +81,12 @@ export const patchEvent = async (userId, eventId, eventDetails) => {
 };
 export const deleteEvent = async (userId, eventId) => {
   try {
-    const event = await getEventById(userId, eventId);
+    const deletedEvent = await eventModel.findOneAndDelete({
+      _id: eventId,
+      collaborators: userId,
+    });
     await deleteUserEvent(userId, eventId);
-    return event;
+    return deletedEvent;
   } catch (err) {
     if (err instanceof DataNotFoundError) throw err;
     throw new GeneralServerError();

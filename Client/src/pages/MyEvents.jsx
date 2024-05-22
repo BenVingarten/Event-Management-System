@@ -46,16 +46,29 @@ const MyEvents = () => {
       controller.abort();
       effectRun.current = true;
     };
-  }, []);
+  }, [isModalOpen]);
 
   const handleDeleteConfirmation = (eventId) => {
     setSelectedEventId(eventId);
     setIsModalOpen(true);
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     //TODO: Perform delete action here
     console.log("Deleting event");
+    const controller = new AbortController();
+    try {
+      const userId = jwtDecode(auth.accessToken).userInfo.id;
+      const response = await axiosPrivate.delete(`/users/${userId}/events/${selectedEventId}`, {
+        signal: controller.signal,
+      });
+      console.log(response.data.events);
+      setEvents(response.data.events);
+    } catch (err) {
+      console.log("Error: " + err.response?.data.err);
+      toast.error("No Events Found!");
+      navigate("/unauthorized", { state: { from: location }, replace: true });
+    }
     setIsModalOpen(false); // Close the modal after deletion
   };
 

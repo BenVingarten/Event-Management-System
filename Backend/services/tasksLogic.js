@@ -13,11 +13,7 @@ export const getTasks = async (userId, eventId) => {
 
 export const updateTasks = async (userId, eventId, updatedTaskList) => {
   try {
-    console.log(updatedTaskList);
     const event = await getEventById(userId, eventId);
-    updatedTaskList = updatedTaskList.map(
-      (card) => (card.id = parseInt(card.id))
-    );
     event.cards = updatedTaskList;
     await event.save();
     return event.cards;
