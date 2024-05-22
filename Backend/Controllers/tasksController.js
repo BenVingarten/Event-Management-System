@@ -27,6 +27,7 @@ export const handleUpdateTaskList = async (req, res) => {
       eventId,
       taskListObj.cards
     );
+    console.log(updatedTasks);
     return res.status(200).json({ success: "updated taskList successfully!" });
   } catch (err) {
     return res.status(err.statusCode).json({ err: err.message });

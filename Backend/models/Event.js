@@ -44,7 +44,7 @@ const eventSchema = new Schema({
         default: taskStatus[1],
       },
       id: {
-        type: Number,
+        type: String,
         required: true,
       },
     },

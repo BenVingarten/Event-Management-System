@@ -26,7 +26,7 @@ function putTaskValidation() {
     },
     "cards.*.id": {
       notEmpty: {
-        errorMessage: "Task must have a priority",
+        errorMessage: "Task must have a id",
       },
     },
   };

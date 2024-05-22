@@ -4,11 +4,7 @@ import { getEventById } from "./eventsLogic.js";
 export const getTasks = async (userId, eventId) => {
   try {
     const event = await getEventById(userId, eventId);
-
-    const sortedTaskList = event.cards.sort(
-      (a, b) => Number(a.id) - Number(b.id)
-    );
-    return sortedTaskList;
+    return event.cards;
   } catch (err) {
     if (err instanceof DataNotFoundError) throw err;
     throw new GeneralServerError();
