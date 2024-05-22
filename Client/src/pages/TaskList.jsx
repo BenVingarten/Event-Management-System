@@ -10,6 +10,8 @@ import useAuth from "../hooks/useAuth";
 import { Toaster, toast } from "react-hot-toast";
 import { useLocation, useNavigate } from "react-router-dom";
 
+export const taskStatus = ["Backlog", "TODO", "In progress", "Complete"];
+
 export default function TaskList() {
   return (
     <div className="h-screen w-full text-neutral-800">
@@ -26,8 +28,8 @@ const Board = () => {
   const location = useLocation();
   const eventID = location.state.eventId;
   const userId = jwtDecode(auth.accessToken).userInfo.id;
-
   const [cards, setCards] = useState([]);
+  console.log(cards);
   useEffect(() => {
     //TODO: Fetch tasks from the server and update state
 
@@ -65,28 +67,28 @@ const Board = () => {
       <Toaster />
       <Column
         title="Backlog"
-        column="backlog"
+        column={taskStatus[0]}
         headingColor="text-red-500"
         cards={cards}
         setCards={setCards}
       />
       <Column
         title="TODO"
-        column="todo"
+        column={taskStatus[1]}
         headingColor="text-yellow-200"
         cards={cards}
         setCards={setCards}
       />
       <Column
         title="In progress"
-        column="doing"
+        column={taskStatus[2]}
         headingColor="text-blue-400"
         cards={cards}
         setCards={setCards}
       />
       <Column
         title="Complete"
-        column="done"
+        column={taskStatus[3]}
         headingColor="text-emerald-500"
         cards={cards}
         setCards={setCards}
