@@ -1,5 +1,5 @@
 import { Chart } from "react-google-charts";
-import { Button, Card } from "flowbite-react";
+import { Button, Card, Label, Modal, TextInput } from "flowbite-react";
 import useAxiosPrivate from "../hooks/useAxiosPrivate";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -20,7 +20,14 @@ export default function EventDetails() {
   const navigate = useNavigate();
   const state = useLocation();
   const eventID = state.state.eventId;
-  
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [updatedDetails, setUpdatedDetails] = useState({
+    name: null,
+    budget: null,
+    location: null,
+    date: null,
+  });
 
   const effectRun = useRef(false);
   useEffect(() => {
@@ -31,14 +38,14 @@ export default function EventDetails() {
       try {
         const userId = jwtDecode(auth.accessToken).userInfo.id;
         const eventId = state.state.eventId;
-        console.log("Event ID: " + eventId);
+        //console.log("Event ID: " + eventId);
         const response = await axiosPrivate.get(
           `/users/${userId}/events/${eventId}`,
           {
             signal: controller.signal,
           }
         );
-        console.log(response.data.event);
+        //console.log(response.data.event);
         isMounted && setEventInfo(response.data.event);
       } catch (err) {
         console.log(err);
@@ -53,7 +60,7 @@ export default function EventDetails() {
       controller.abort();
       effectRun.current = true;
     };
-  }, []);
+  }, [isModalOpen]);
 
   const data = [
     ["Task", "Hours per Day"],
@@ -103,6 +110,65 @@ export default function EventDetails() {
     );
   };
 
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setUpdatedDetails((prevDetails) => ({
+      ...prevDetails,
+      [name]: value,
+    }));
+  };
+  //console.log(updatedDetails);
+
+  const handleSaveChanges = async () => {
+    console.log("Save changes");
+    // TODO: Implement the save changes logic
+    // check which fields are updated
+    const updatedFields = {};
+    for (let [field, value] of Object.entries(updatedDetails)) {
+      if (value != null && field == "date") {
+        // change date to epoch time
+        const date = new Date(value);
+        value = Math.floor(date.getTime() / 1000);
+        console.log(value);
+      }
+      if (value != null && eventInfo[field] !== value) {
+        updatedFields[field] = value;
+      }
+    }
+    //console.log("updated Fields are ");
+    console.log(updatedFields);
+    // Reset updated details
+    setUpdatedDetails({
+      name: null,
+      budget: null,
+      location: null,
+      date: null,
+    });
+
+    const controller = new AbortController();
+    try {
+      const userId = jwtDecode(auth.accessToken).userInfo.id;
+      const eventId = state.state.eventId;
+      //console.log("Event ID: " + eventId);
+      const response = await axiosPrivate.patch(
+        `/users/${userId}/events/${eventId}`,
+        updatedFields,
+        {
+          headers: { "Content-Type": "application/json" },
+          withCredentials: true,
+          signal: controller.signal,
+        }
+      );
+      //console.log(response.data.event);
+    } catch (err) {
+      console.log(err);
+      toast.error("Failed to fetch event info. Please try again later.");
+    }
+
+    setIsModalOpen(false);
+  };
+  //console.log(eventInfo);
+
   return (
     <div className=" h-screen flex flex-col">
       <Toaster />
@@ -114,6 +180,18 @@ export default function EventDetails() {
           Details
         </h5>
         {displayEventDetails()}
+        <div className="flex justify-end">
+          <Button
+            size={"lg"}
+            className="w-30"
+            gradientDuoTone={"greenToBlue"}
+            onClick={() => {
+              setIsModalOpen(true);
+            }}
+          >
+            Edit Details
+          </Button>
+        </div>
       </Card>
       <div className="grid grid-cols-2 gap-8 p-8">
         {/* Second area */}
@@ -154,6 +232,80 @@ export default function EventDetails() {
           <Button>Go to Guests</Button>
         </Card>
       </div>
+
+      {/* Edit Event Details Details */}
+      <Modal show={isModalOpen} onClose={() => setIsModalOpen(false)}>
+        <div className="p-5">
+          <form>
+            <h3 className="text-lg font-bold mb-3">Edit your event details</h3>
+
+            <div>
+              <div className="m-2 block">
+                <Label htmlFor="name" value="Event Name" />
+              </div>
+              <TextInput
+                id="name"
+                type="name"
+                placeholder={eventInfo.name}
+                name={"name"}
+                onChange={handleInputChange}
+              />
+            </div>
+
+            <div>
+              <div className="m-2 block">
+                <Label htmlFor="budget" value="Event Budget" />
+              </div>
+              <TextInput
+                id="budget"
+                type="number"
+                placeholder={eventInfo.budget}
+                name={"budget"}
+                onChange={handleInputChange}
+              />
+            </div>
+
+            <div>
+              <div className="m-2 block">
+                <Label htmlFor="location" value="Event Location" />
+              </div>
+              <TextInput
+                id="location"
+                type="text"
+                placeholder={eventInfo.location}
+                name={"location"}
+                onChange={handleInputChange}
+              />
+            </div>
+
+            <div>
+              <div className="m-2 block">
+                <Label htmlFor="date" value="Event Date" />
+              </div>
+              <TextInput
+                id="date"
+                type="date"
+                name={"date"}
+                onChange={handleInputChange}
+              />
+            </div>
+
+            <div className="flex justify-end">
+              <Button
+                color={"green"}
+                size="sm"
+                className="mr-3"
+                onClick={handleSaveChanges}
+              >
+                Save
+              </Button>
+              <Button size="sm" onClick={() => setIsModalOpen(false)}>
+                Cancel
+              </Button>
+            </div>
+          </form>
+        </div>
+      </Modal>
     </div>
   );
 }

@@ -92,7 +92,7 @@ const MyEvents = () => {
                 <h3
                   className="text-2xl text-white rounded-md text-center font-mono font-bold bg-gradient-to-r from-indigo-500 from-10% via-sky-500 via-30% to-emerald-500 to-90% cursor-pointer underline hover:text-blue-500"
                   onClick={() =>
-                    navigate(`/eventDetails/${event._id}`, {
+                    navigate(`/eventDetails`, {
                       state: { eventId: event._id },
                     })
                   }
