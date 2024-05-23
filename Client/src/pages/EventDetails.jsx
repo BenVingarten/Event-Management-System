@@ -1,5 +1,13 @@
 import { Chart } from "react-google-charts";
-import { Button, Card, Label, Modal, TextInput } from "flowbite-react";
+import {
+  Button,
+  Card,
+  Dropdown,
+  Label,
+  ListGroup,
+  Modal,
+  TextInput,
+} from "flowbite-react";
 import useAxiosPrivate from "../hooks/useAxiosPrivate";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -86,26 +94,35 @@ export default function EventDetails() {
       .format("DD-MM-YYYY");
 
     return (
-      <div className="grid grid-cols-2">
-        <span className="flex mb-5 ">
-          <IoMdCalendar className="mr-2 text-3xl text-blue-500" />
-          <p className="font-sans font-semibold">{formattedDate}</p>
-        </span>
+      <div>
+        <div className="grid grid-cols-2 mb-5">
+          <span className="flex mb-5 ">
+            <IoMdCalendar className="mr-2 text-3xl text-blue-500" />
+            <p className="font-sans font-semibold">{formattedDate}</p>
+          </span>
 
-        <span className="flex ">
-          <FaQuestionCircle className="mr-2 text-3xl text-blue-500" />
-          <p className="font-sans font-semibold">{eventInfo.type}</p>
-        </span>
+          <span className="flex ">
+            <FaQuestionCircle className="mr-2 text-3xl text-blue-500" />
+            <p className="font-sans font-semibold">{eventInfo.type}</p>
+          </span>
 
-        <span className="flex ">
-          <FaMoneyBillWave className="mr-2 text-3xl text-blue-500" />
-          <p className="font-sans font-semibold">{eventInfo.budget}</p>
-        </span>
+          <span className="flex ">
+            <FaMoneyBillWave className="mr-2 text-3xl text-blue-500" />
+            <p className="font-sans font-semibold">{eventInfo.budget}</p>
+          </span>
 
-        <span className="flex ">
-          <FaLocationDot className="mr-2 text-3xl text-blue-500" />
-          <p className="font-sans font-semibold">{eventInfo.location}</p>
-        </span>
+          <span className="flex ">
+            <FaLocationDot className="mr-2 text-3xl text-blue-500" />
+            <p className="font-sans font-semibold">{eventInfo.location}</p>
+          </span>
+
+          {/* Additional Info */}
+          {eventInfo.additionalInfo && eventInfo.additionalInfo.length > 0
+            ? additionalInfoPresent()
+            : null}
+
+          {collaboratorsPresent()}
+        </div>
       </div>
     );
   };
@@ -167,7 +184,43 @@ export default function EventDetails() {
 
     setIsModalOpen(false);
   };
-  console.log(eventInfo);
+  //console.log(eventInfo);
+
+  const additionalInfoPresent = () => {
+    return (
+      <div>
+        <ListGroup className="mr-5 mt-5">
+          {eventInfo.additionalInfo.map((info) => (
+            //TODO: manage info
+            <ListGroup.Item key={info}>{info}</ListGroup.Item>
+          ))}
+        </ListGroup>
+      </div>
+    );
+  };
+
+  const collaboratorsPresent = () => {
+    return (
+      <div className="mt-5">
+        {/* Collabs */}
+        <Dropdown
+          label="Collaborators"
+          dismissOnClick={false}
+          outline
+          gradientDuoTone={"pinkToOrange"}
+        >
+          {eventInfo.collaborators ? ( //TODO: Change the c to collab name and manage it
+            //TODO: Modal is open? than add delete button
+            eventInfo.collaborators.map((c) => (
+              <Dropdown.Item key={c}>{c}</Dropdown.Item>
+            ))
+          ) : (
+            <Dropdown.Item>No Collaborators!</Dropdown.Item>
+          )}
+        </Dropdown>
+      </div>
+    );
+  };
 
   return (
     <div className=" h-screen flex flex-col">
@@ -290,7 +343,7 @@ export default function EventDetails() {
               />
             </div>
 
-            <div className="flex justify-end">
+            <div className="flex justify-end mt-5">
               <Button
                 color={"green"}
                 size="sm"
