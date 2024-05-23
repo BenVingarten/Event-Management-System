@@ -4,8 +4,8 @@ export const handleGetGuests = async (req, res) => {
   try {
     const { userId } = req;
     const { eventId } = req.params;
-    const guests = await getGuests(userId, eventId);
-    return res.status(200).json({ guests });
+    const guestList = await getGuests(userId, eventId);
+    return res.status(200).json({ guestList });
   } catch (err) {
     return res.status(err.statusCode).json({ err: err.message });
   }

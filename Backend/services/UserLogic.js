@@ -124,10 +124,12 @@ export const createUser = async (userInfo) => {
 
 export const getUserById = async (id, populateOptions) => {
   try {
-    let user = await userModel.findById(id);
+    const isPopulate = populateOptions && Object.keys(populateOptions).length > 0;
+    const query = userModel.findById(id);
     if (!user) throw new DataNotFoundError("User with that ID is not found");
-    if (populateOptions && Object.keys(populateOptions).length > 0)
-        user = user.populate(populateOptions);
+    if(isPopulate)
+       query.populate(populateOptions);
+    const user = await query.exec();
     return user;
   } catch (err) {
     if (err instanceof DataNotFoundError) throw err;

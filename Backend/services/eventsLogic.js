@@ -56,12 +56,11 @@ export const createEvent = async (id, event) => {
 };
 export const getEventById = async (userId, eventId, populateOptions) => {
   try {
-    const event = await eventModel
-      .findOne({ _id: eventId, collaborators: userId })
-      .exec();
-    if (!event) throw new DataNotFoundError();
-    if (populateOptions && Object.keys(populateOptions).length > 0)
-      event.populate(populateOptions);
+    const isPopulate = populateOptions && Object.keys(populateOptions).length > 0;
+    const query = eventModel.findOne({ _id: eventId, collaborators: userId })
+    if(isPopulate)
+        query.populate(populateOptions);
+    const event = await query.exec();
     return event;
   } catch (err) {
     if (err instanceof DataNotFoundError) throw err;

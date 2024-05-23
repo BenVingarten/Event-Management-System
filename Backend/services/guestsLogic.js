@@ -8,7 +8,7 @@ export const getGuests = async (userId, eventId) => {
   try {
     const populateOptions = {
       path: "guestList",
-      select: "name phoneNumber status",
+      select: "name phoneNumber status ",
     };
     const event = await getEventById(userId, eventId, populateOptions);
     return event.guestList;
