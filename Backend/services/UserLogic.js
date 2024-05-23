@@ -126,10 +126,10 @@ export const getUserById = async (id, populateOptions) => {
   try {
     const isPopulate = populateOptions && Object.keys(populateOptions).length > 0;
     const query = userModel.findById(id);
-    if (!user) throw new DataNotFoundError("User with that ID is not found");
     if(isPopulate)
        query.populate(populateOptions);
     const user = await query.exec();
+    if (!user) throw new DataNotFoundError("User with that ID is not found");
     return user;
   } catch (err) {
     if (err instanceof DataNotFoundError) throw err;
