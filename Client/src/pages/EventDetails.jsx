@@ -167,7 +167,7 @@ export default function EventDetails() {
 
     setIsModalOpen(false);
   };
-  //console.log(eventInfo);
+  console.log(eventInfo);
 
   return (
     <div className=" h-screen flex flex-col">
