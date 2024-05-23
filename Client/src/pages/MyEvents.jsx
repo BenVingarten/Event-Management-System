@@ -35,7 +35,7 @@ const MyEvents = () => {
         console.log(response.data.events);
         setEvents(response.data.events);
       } catch (err) {
-        console.log("Error: " + err.response?.data.err);
+        console.log(err.response?.data);
         toast.error("No Events Found!");
         navigate("/unauthorized", { state: { from: location }, replace: true });
       }
@@ -47,7 +47,7 @@ const MyEvents = () => {
       controller.abort();
       effectRun.current = true;
     };
-  }, [isModalOpen]);
+  }, []);
 
   const handleDeleteConfirmation = (eventId) => {
     setSelectedEventId(eventId);
