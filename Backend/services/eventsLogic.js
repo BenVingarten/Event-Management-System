@@ -54,12 +54,16 @@ export const createEvent = async (id, event) => {
     throw err;
   }
 };
-export const getEventById = async (userId, eventId, populateOptions) => {
+export const getEventById = async (
+  userId,
+  eventId,
+  populateOptions = { path: "collaborators", select: "username email" }
+) => {
   try {
-    const isPopulate = populateOptions && Object.keys(populateOptions).length > 0;
-    const query = eventModel.findOne({ _id: eventId, collaborators: userId })
-    if(isPopulate)
-        query.populate(populateOptions);
+    const isPopulate =
+      populateOptions && Object.keys(populateOptions).length > 0;
+    const query = eventModel.findOne({ _id: eventId, collaborators: userId });
+    if (isPopulate) query.populate(populateOptions);
     const event = await query.exec();
     return event;
   } catch (err) {

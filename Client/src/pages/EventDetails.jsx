@@ -184,7 +184,7 @@ export default function EventDetails() {
 
     setIsModalOpen(false);
   };
-  //console.log(eventInfo);
+  console.log(eventInfo);
 
   const additionalInfoPresent = () => {
     return (
@@ -212,7 +212,9 @@ export default function EventDetails() {
           {eventInfo.collaborators ? ( //TODO: Change the c to collab name and manage it
             //TODO: Modal is open? than add delete button
             eventInfo.collaborators.map((c) => (
-              <Dropdown.Item key={c}>{c}</Dropdown.Item>
+              <Dropdown.Item key={c._id}>
+                {c.username} | {c.email}
+              </Dropdown.Item>
             ))
           ) : (
             <Dropdown.Item>No Collaborators!</Dropdown.Item>
