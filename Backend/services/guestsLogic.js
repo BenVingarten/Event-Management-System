@@ -8,7 +8,7 @@ export const getGuests = async (userId, eventId) => {
   try {
     const populateOptions = {
       path: "guestList",
-      select: "name phoneNumber status ",
+      select: "name phoneNumber status peopleCount ",
     };
     const event = await getEventById(userId, eventId, populateOptions);
     return event.guestList;
@@ -21,7 +21,8 @@ export const getGuests = async (userId, eventId) => {
 export const addGuest = async (userId, eventId, guestData) => {
   try {
     const event = await getEventById(userId, eventId);
-    const { name, phoneNumber, status } = guestData;
+    const { name, phoneNumber, status, peopleCount, group, comments } =
+      guestData;
     const duplicatePhoneNumber = await guestModel
       .findOne({ phoneNumber })
       .exec();
@@ -31,8 +32,11 @@ export const addGuest = async (userId, eventId, guestData) => {
       );
     const newGuest = await guestModel.create({
       name,
+      peopleCount,
+      group,
       phoneNumber,
       status,
+      comments,
     });
     event.guestList.push(newGuest);
     await event.save();
@@ -48,6 +52,20 @@ export const getGuestById = async (userId, eventId, guestId) => {
     await getEventByGuestId(userId, eventId, guestId);
     const guest = await guestModel.findById(guestId);
     if (!guest) throw new DataNotFoundError();
+  } catch (err) {
+    if (err instanceof DataNotFoundError) throw err;
+    throw new GeneralServerError();
+  }
+};
+
+export const patchGuest = async (userId, eventId, guestId, updatedGuest) => {
+  try {
+    const guest = await getGuestById(userId, eventId, guestId);
+    const [key] = Object.keys(updatedGuest);
+    const value = updatedGuest[key];
+    guest[key] = value;
+    await guest.save();
+    return guest;
   } catch (err) {
     if (err instanceof DataNotFoundError) throw err;
     throw new GeneralServerError();

@@ -14,6 +14,9 @@ function addGuestValidation() {
     name: {
       notEmpty: { errorMessage: "guest must have a name" },
     },
+    group: {
+      notEmpty: { errorMessage: "guest must have a group" },
+    },
     phoneNumber: {
       notEmpty: { errorMessage: "guest must have a phoneNumber for contact" },
       custom: {
@@ -32,23 +35,29 @@ function addGuestValidation() {
         errorMessage: "Invalid guest's status",
       },
     },
+    peopleCount: {
+      optional: { options: { nullable: true } },
+      notEmpty: { errorMessage: "guest needs to inform the number of people he is going to bring with him" },
+      custom: {
+        options: (value) => {
+          return value >= 0;
+        },
+        errorMessage: "number of guests cant be negative",
+      },
+    },
   };
 }
 
 function updateGuestValidation() {
   return {
-    name: {
+    peopleCount: {
       optional: { options: { nullable: true } },
-      notEmpty: { errorMessage: "guest must have a name" },
-    },
-    phoneNumber: {
-      optional: { options: { nullable: true } },
-      notEmpty: { errorMessage: "guest must have a phoneNumber for contact" },
+      notEmpty: { errorMessage: "guest must have a status" },
       custom: {
         options: (value) => {
-          return isValidPhoneNumber(value);
+          return value >= 0;
         },
-        errorMessage: "Invalid phone number",
+        errorMessage: "number of guests cant be negative",
       },
     },
     status: {

@@ -40,6 +40,20 @@ export const handleGetGuest = async (req, res) => {
     return res.status(err.statusCode).json({ err: err.message });
   }
 };
-export const handlePatchGuest = async (req, res) => {};
+export const handlePatchGuest = async (req, res) => {
+  try {
+    const { userId } = req;
+    const { eventId, guestId } = req.params;
+    const errors = validationResult(req);
+    if (!errors.isEmpty())
+      return res.status(400).json({ errors: errors.array() });
+    const verifiedUpdatedGuest = matchedData(req);
+    const updatedGuest = await patchGuest(userId, eventId, guestId, verifiedUpdatedGuest);
+    return res.status(200).json({ updatedGuest });
+  } catch (err) {
+    return res.status(err.statusCode).json({ err: err.message });
+  }
+
+};
 export const handlePutGuest = async (req, res) => {};
 export const handleDeleteGuest = async (req, res) => {};

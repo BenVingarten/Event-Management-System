@@ -7,6 +7,14 @@ const guestSchema = new Schema({
     type: String,
     required: true,
   },
+  peopleCount: {
+    type: Number,
+    required: true
+  },
+  group: {
+    type: String,
+    required: true
+  },
   phoneNumber: {
     type: String,
     required: true,
@@ -15,6 +23,9 @@ const guestSchema = new Schema({
     type: String,
     enum: guestStatus,
     default: guestStatus[2],
+  },
+  comments: {
+    type: [String]
   },
   createdAt: {
     type: Number,
