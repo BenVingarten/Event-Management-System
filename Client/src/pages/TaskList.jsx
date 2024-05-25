@@ -31,8 +31,6 @@ const Board = () => {
   const [cards, setCards] = useState([]);
   console.log(cards);
   useEffect(() => {
-    //TODO: Fetch tasks from the server and update state
-
     const controller = new AbortController();
 
     const fetchTasks = async () => {

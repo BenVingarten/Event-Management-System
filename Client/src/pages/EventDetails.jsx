@@ -272,7 +272,7 @@ export default function EventDetails() {
           </Button>
         </Card>
 
-        {/* Third area */}
+        {/* Third area - GuestList */}
         <Card className=" p-4">
           <h5 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
             Tasks
@@ -284,7 +284,15 @@ export default function EventDetails() {
             data={data}
             options={options}
           />
-          <Button>Go to Guests</Button>
+          <Button
+            onClick={() =>
+              navigate(`/guestList`, {
+                state: { eventId: eventID },
+              })
+            }
+          >
+            Go to Guests
+          </Button>
         </Card>
       </div>
 

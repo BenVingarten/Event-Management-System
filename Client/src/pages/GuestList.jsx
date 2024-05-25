@@ -9,8 +9,21 @@ import {
 } from "flowbite-react";
 import { IoMdAddCircle, IoIosRemoveCircleOutline } from "react-icons/io";
 import { FaSort } from "react-icons/fa";
+import { useLocation } from "react-router-dom";
+import { jwtDecode } from "jwt-decode";
+import useAuth from "../hooks/useAuth";
+import { Toaster, toast } from "react-hot-toast";
+import useAxiosPrivate from "../hooks/useAxiosPrivate";
 
 const GuestListPage = () => {
+  const axiosPrivate = useAxiosPrivate();
+  const location = useLocation();
+  const { auth } = useAuth();
+  const effectRun = useRef(false);
+
+  const eventID = location.state.eventId;
+  const userId = jwtDecode(auth.accessToken).userInfo.id;
+
   //guests list
   const [guests, setGuests] = useState([]);
   // Selected guests
@@ -29,11 +42,34 @@ const GuestListPage = () => {
 
   // Initialize guests
   useEffect(() => {
-    setGuests(DEFAULT_GUESTS);
-    //TODO: Fetch guests from the server
+    const controller = new AbortController();
+
+    const fetchGuests = async () => {
+      try {
+        const response = await axiosPrivate.get(
+          `/users/${userId}/events/${eventID}/guests`,
+          {
+            signal: controller.signal,
+          }
+        );
+
+        console.log(response.data.guestList);
+        setGuests(response.data.guestList);
+      } catch (err) {
+        console.log("Error: " + err.response?.data.err);
+        toast.error("No Guests Found!");
+      }
+    };
+
+    if (effectRun.current) fetchGuests();
+
+    return () => {
+      controller.abort();
+      effectRun.current = true;
+    };
   }, []);
 
-  const addGuest = () => {
+  const addGuest = async () => {
     const newGuest = {
       name: newGuestName,
       peopleCount: newGuestPeopleCount,
@@ -42,8 +78,25 @@ const GuestListPage = () => {
       status: newGuestStatus,
       comments: newGuestComments,
     };
-    setGuests([...guests, newGuest]);
-    // TODO: Add new guest to the server
+
+    const controller = new AbortController();
+    try {
+      const response = await axiosPrivate.post(
+        `/users/${userId}/events/${eventID}/guests`,
+        { newGuest },
+        {
+          headers: { "Content-Type": "application/json" },
+          withCredentials: true,
+          signal: controller.signal,
+        }
+      );
+      toast.success("Guest added successfully");
+      setGuests([...guests, newGuest]);
+    } catch (error) {
+      console.error("Error Adding Guest:", error.response?.data);
+      if (!error?.response) toast.error("Error: No response from server.");
+      else toast.error("Error: " + error.response?.data.error[0].msg);
+    }
 
     // Reset input fields
     setNewGuestName("");
@@ -100,7 +153,7 @@ const GuestListPage = () => {
     updatedGuests[index].peopleCount = peopleCount;
     setGuests(updatedGuests);
 
-    //TODO: Update guest people counte on the server
+    //TODO: Update guest people counte on the server {Patch}
   };
 
   // Sorting guests based on criteria and order
@@ -166,6 +219,7 @@ const GuestListPage = () => {
 
   return (
     <div className="container mx-auto px-2 py-8">
+      <Toaster />
       <h2 className="text-2xl font-bold mb-4">Guest List</h2>
       <form className="flex gap-2 pb-5">
         <div>
