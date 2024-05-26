@@ -21,10 +21,10 @@ export const getAllUsers = async () => {
 
 export const getIdbyEmail = async (email) => {
   try {
-    const userId = await userModel.findOne({ email }, "_id");
+    const user = await userModel.findOne({ email });
     if (!userId)
       throw new DataNotFoundError("couldnt find user with that email");
-    return userId;
+    return user._id;
   } catch (err) {
     if (err instanceof DataNotFoundError) throw err;
     else throw new GeneralServerError();
@@ -109,6 +109,7 @@ export const createUser = async (userInfo) => {
         Math.random().toString(36).slice(-8);
     }
     const hashedPwd = await bcrypt.hash(password, 10);
+    
     const newUser = await userModel.create({
       username,
       email,

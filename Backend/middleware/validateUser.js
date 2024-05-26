@@ -57,6 +57,33 @@ function createUserValidation() {
         errorMessage: "role must be Event Planner/Vendor",
       },
     },
+    businessType: {
+      custom: {
+        options: (value, { req }) => {
+          // Check if role is Vendor and businessType is provided
+          return req.body.role !== 'Vendor' || (req.body.role === 'Vendor' && value);
+        },
+        errorMessage: "Business type is required for vendors"
+      }
+    },
+    location: {
+      custom: {
+        options: (value, { req }) => {
+          // Check if role is Vendor and location is provided
+          return req.body.role !== 'Vendor' || (req.body.role === 'Vendor' && value);
+        },
+        errorMessage: "Location is required for vendors"
+      }
+    },
+    description: {
+      custom: {
+        options: (value, { req }) => {
+          // Check if role is Vendor and description is provided
+          return req.body.role !== 'Vendor' || (req.body.role === 'Vendor' && value);
+        },
+        errorMessage: "Description is required for vendors"
+      }
+    }
   };
 }
 function patchUserValidation() {

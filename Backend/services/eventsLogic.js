@@ -1,3 +1,4 @@
+import { ObjectId } from "mongodb";
 import { DataNotFoundError } from "../errors/DataNotFoundError.js";
 import { GeneralServerError } from "../errors/GeneralServerError.js";
 import eventModel from "../models/Event.js";
@@ -30,13 +31,18 @@ export const createEvent = async (id, event) => {
       collaborators,
     } = event;
     //set collaborators
-    const idArray = new Set();
-    idArray.add(id);
-    //TODO: change email validate to ignore uppercase and lowercase
+    const idSet = new Set();
+    idSet.add(user._id.toString());
+
     for (const email of collaborators) {
       const collaboratorId = await getIdbyEmail(email);
-      idArray.add(collaboratorId);
+      if (collaboratorId) {
+        idSet.add(collaboratorId.toString());
+      }
     }
+
+    // Convert the set to an array of ObjectIds
+    const idArray = Array.from(idSet).map((id) => new ObjectId(id));
     const newEvent = await eventModel.create({
       name,
       date,
