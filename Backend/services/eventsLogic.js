@@ -30,11 +30,12 @@ export const createEvent = async (id, event) => {
       collaborators,
     } = event;
     //set collaborators
-    const idArray = [id];
+    const idArray = new Set();
+    set.add(id);
     //TODO: change email validate to ignore uppercase and lowercase
     for (const email of collaborators) {
       const collaboratorId = await getIdbyEmail(email);
-      idArray.push(collaboratorId);
+      idArray.add(collaboratorId);
     }
     const newEvent = await eventModel.create({
       name,
