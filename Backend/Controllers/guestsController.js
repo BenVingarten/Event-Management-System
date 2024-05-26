@@ -1,5 +1,6 @@
 import { matchedData, validationResult } from "express-validator";
 import { getGuests, addGuest } from "../services/guestsLogic.js";
+import { getGuestById, patchGuest } from "../services/guestsLogic.js";
 export const handleGetGuests = async (req, res) => {
   try {
     const { userId } = req;
@@ -55,7 +56,7 @@ export const handlePatchGuest = async (req, res) => {
     );
     return res.status(200).json({ updatedGuest });
   } catch (err) {
-    return res.status(err.statusCode).json({ err: err.message });
+      return res.status(err.statusCode).json({ err: err.message });
   }
 };
 export const handlePutGuest = async (req, res) => {};

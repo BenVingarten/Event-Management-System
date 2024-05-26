@@ -25,7 +25,7 @@ const guestSchema = new Schema({
     default: guestStatus[2],
   },
   comments: {
-    type: [String]
+    type: String
   },
   createdAt: {
     type: Number,

@@ -49,9 +49,10 @@ export const addGuest = async (userId, eventId, guestData) => {
 
 export const getGuestById = async (userId, eventId, guestId) => {
   try {
-    await getEventByGuestId(userId, eventId, guestId);
+    const event = await getEventByGuestId(userId, eventId, guestId);
     const guest = await guestModel.findById(guestId);
     if (!guest) throw new DataNotFoundError();
+    return guest;
   } catch (err) {
     if (err instanceof DataNotFoundError) throw err;
     throw new GeneralServerError();
@@ -62,8 +63,7 @@ export const patchGuest = async (userId, eventId, guestId, updatedGuest) => {
   try {
     const guest = await getGuestById(userId, eventId, guestId);
     const [key] = Object.keys(updatedGuest);
-    const value = updatedGuest[key];
-    guest[key] = value;
+    guest[key] = updatedGuest[key];
     await guest.save();
     return guest;
   } catch (err) {

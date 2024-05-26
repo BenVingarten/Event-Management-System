@@ -36,12 +36,15 @@ function addGuestValidation() {
       },
     },
     peopleCount: {
-      notEmpty: { errorMessage: "guest needs to inform the number of people he is going to bring with him" },
+      notEmpty: {
+        errorMessage:
+          "guest needs to inform the number of people he is going to bring with him",
+      },
       custom: {
         options: (value) => {
-          return value >= 0;
+          return value > 0;
         },
-        errorMessage: "number of guests cant be negative",
+        errorMessage: "number of guests must at least be 1",
       },
     },
   };
@@ -54,9 +57,9 @@ function updateGuestValidation() {
       notEmpty: { errorMessage: "guest must have a status" },
       custom: {
         options: (value) => {
-          return value >= 0;
+          return value > 0;
         },
-        errorMessage: "number of guests cant be negative",
+        errorMessage: "number of guests must at least be 1",
       },
     },
     status: {
