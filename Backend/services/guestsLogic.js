@@ -71,3 +71,17 @@ export const patchGuest = async (userId, eventId, guestId, updatedGuest) => {
     throw new GeneralServerError();
   }
 };
+
+export const deleteGuest = async (userId, eventId, guestId) => {
+  try {
+    const event = await getEventByGuestId(userId, eventId, guestId); // verafication
+    const deletedGuest = await guestModel.findByIdAndDelete(guestId);
+    //delete the guest from the event gustList
+    event.guestList.pull(guestId);
+    await event.save();
+    return deletedGuest;
+  } catch (err) {
+    if (err instanceof DataNotFoundError) throw err;
+    throw new GeneralServerError();
+  }
+};
