@@ -17,14 +17,13 @@ export const handleAddGuest = async (req, res) => {
     if (!errors.isEmpty())
       return res.status(400).json({ errors: errors.array() });
     const verifiedData = matchedData(req);
+    console.log(verifiedData);
     const { userId } = req;
     const { eventId } = req.params;
     const newGuest = await addGuest(userId, eventId, verifiedData);
-    return res
-      .status(201)
-      .json({
-        success: `new guest ${newGuest.name} has been added to the guestList`,
-      });
+    return res.status(201).json({
+      success: `new guest ${newGuest.name} has been added to the guestList`,
+    });
   } catch (err) {
     return res.status(err.statusCode).json({ err: err.message });
   }
@@ -48,12 +47,16 @@ export const handlePatchGuest = async (req, res) => {
     if (!errors.isEmpty())
       return res.status(400).json({ errors: errors.array() });
     const verifiedUpdatedGuest = matchedData(req);
-    const updatedGuest = await patchGuest(userId, eventId, guestId, verifiedUpdatedGuest);
+    const updatedGuest = await patchGuest(
+      userId,
+      eventId,
+      guestId,
+      verifiedUpdatedGuest
+    );
     return res.status(200).json({ updatedGuest });
   } catch (err) {
     return res.status(err.statusCode).json({ err: err.message });
   }
-
 };
 export const handlePutGuest = async (req, res) => {};
 export const handleDeleteGuest = async (req, res) => {};

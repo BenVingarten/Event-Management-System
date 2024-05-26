@@ -83,7 +83,7 @@ const GuestListPage = () => {
     try {
       const response = await axiosPrivate.post(
         `/users/${userId}/events/${eventID}/guests`,
-        { newGuest },
+        newGuest,
         {
           headers: { "Content-Type": "application/json" },
           withCredentials: true,

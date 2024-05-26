@@ -36,7 +36,6 @@ function addGuestValidation() {
       },
     },
     peopleCount: {
-      optional: { options: { nullable: true } },
       notEmpty: { errorMessage: "guest needs to inform the number of people he is going to bring with him" },
       custom: {
         options: (value) => {
