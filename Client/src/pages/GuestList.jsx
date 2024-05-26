@@ -95,7 +95,7 @@ const GuestListPage = () => {
     } catch (error) {
       console.error("Error Adding Guest:", error.response?.data);
       if (!error?.response) toast.error("Error: No response from server.");
-      else toast.error("Error: " + error.response?.data.error[0].msg);
+      else toast.error("Error: " + error.response?.data.errors[0].msg);
     }
 
     // Reset input fields
@@ -140,20 +140,57 @@ const GuestListPage = () => {
     }
   };
 
-  const handleStatusChange = (index, status) => {
+  const handleStatusChange = async (index, status) => {
     const updatedGuests = [...guests];
     updatedGuests[index].status = status;
-    setGuests(updatedGuests);
 
-    //TODO: Update guest status on the server
+    // Update guest status on the server
+    const controller = new AbortController();
+    try {
+      const response = await axiosPrivate.patch(
+        `/users/${userId}/events/${eventID}/guests/${guests[index]._id}`,
+        { status: status },
+        {
+          headers: { "Content-Type": "application/json" },
+          withCredentials: true,
+          signal: controller.signal,
+        }
+      );
+      toast.success("Guest status changed successfully");
+      setGuests(updatedGuests);
+    } catch (error) {
+      console.error("Error Changing Guest Status:", error.response?.data);
+      if (!error?.response) toast.error("Error: No response from server.");
+      else toast.error("Error: " + error.response?.data.errors[0].msg);
+    }
   };
 
-  const handlePeopleCountChange = (index, peopleCount) => {
+  const handlePeopleCountChange = async (index, peopleCount) => {
     const updatedGuests = [...guests];
     updatedGuests[index].peopleCount = peopleCount;
-    setGuests(updatedGuests);
 
-    //TODO: Update guest people counte on the server {Patch}
+    // Update guest people count on the server
+    const controller = new AbortController();
+    try {
+      const response = await axiosPrivate.patch(
+        `/users/${userId}/events/${eventID}/guests/${guests[index]._id}`,
+        { peopleCount: peopleCount },
+        {
+          headers: { "Content-Type": "application/json" },
+          withCredentials: true,
+          signal: controller.signal,
+        }
+      );
+      toast.success("Guest Guests changed successfully");
+      setGuests(updatedGuests);
+    } catch (error) {
+      console.error(
+        "Error Changing Guest amount of guests:",
+        error.response?.data
+      );
+      if (!error?.response) toast.error("Error: No response from server.");
+      else toast.error("Error: " + error.response?.data.errors[0].msg);
+    }
   };
 
   // Sorting guests based on criteria and order
