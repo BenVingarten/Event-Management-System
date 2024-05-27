@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 const { Schema } = mongoose;
-import { taskStatus } from "../constants/event.js";
+import { taskStatus } from "../constants/event.js";;
 const eventSchema = new Schema({
   name: {
     type: String,
@@ -52,8 +52,8 @@ const eventSchema = new Schema({
   guestList: [
     {
       type: Schema.Types.ObjectId,
-      ref: "Guest",
-    },
+      ref: "Guest"
+    }
   ],
   createdAt: {
     type: Number,

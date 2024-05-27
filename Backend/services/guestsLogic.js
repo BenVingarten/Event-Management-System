@@ -1,16 +1,11 @@
 import { DataNotFoundError } from "../errors/DataNotFoundError.js";
 import { DuplicateDataError } from "../errors/DuplicateDataError.js";
 import { GeneralServerError } from "../errors/GeneralServerError.js";
-import { getEventByGuestId, getEventById } from "./eventsLogic.js";
-import guestModel from "../models/Guest.js";
-import eventModel from "../models/Event.js";
+import { findGuestById, getEventById, } from "./eventsLogic.js";
+
 export const getGuests = async (userId, eventId) => {
   try {
-    const populateOptions = {
-      path: "guestList",
-      select: "name phoneNumber status peopleCount ",
-    };
-    const event = await getEventById(userId, eventId, populateOptions);
+    const event = await getEventById(userId, eventId);
     return event.guestList;
   } catch (err) {
     if (err instanceof DataNotFoundError) throw err;
@@ -23,6 +18,7 @@ export const addGuest = async (userId, eventId, guestData) => {
     const event = await getEventById(userId, eventId);
     const { name, phoneNumber, status, peopleCount, group, comments } =
       guestData;
+
     const duplicatePhoneNumber = await guestModel
       .findOne({ phoneNumber })
       .exec();
@@ -30,6 +26,7 @@ export const addGuest = async (userId, eventId, guestData) => {
       throw new DuplicateDataError(
         "there is already a guest with that phoneNumber"
       );
+
     const newGuest = await guestModel.create({
       name,
       peopleCount,
@@ -42,16 +39,15 @@ export const addGuest = async (userId, eventId, guestData) => {
     await event.save();
     return newGuest;
   } catch (err) {
-    if (err instanceof DataNotFoundError) throw err;
+    if (err instanceof DataNotFoundError || err instanceof DuplicateDataError)
+      throw err;
     throw new GeneralServerError();
   }
 };
 
 export const getGuestById = async (userId, eventId, guestId) => {
   try {
-    const event = await getEventByGuestId(userId, eventId, guestId);
-    const guest = await guestModel.findById(guestId);
-    if (!guest) throw new DataNotFoundError();
+    const guest = await findGuestById(userId, eventId, guestId);
     return guest;
   } catch (err) {
     if (err instanceof DataNotFoundError) throw err;
@@ -61,10 +57,7 @@ export const getGuestById = async (userId, eventId, guestId) => {
 
 export const patchGuest = async (userId, eventId, guestId, updatedGuest) => {
   try {
-    const guest = await getGuestById(userId, eventId, guestId);
-    const [key] = Object.keys(updatedGuest);
-    guest[key] = updatedGuest[key];
-    await guest.save();
+    const guest = await updateEventGuest(userId, eventId, guestId, updatedGuest);
     return guest;
   } catch (err) {
     if (err instanceof DataNotFoundError) throw err;

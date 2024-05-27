@@ -5,6 +5,7 @@ import {
   patchGuest,
   deleteGuests,
 } from "../services/guestsLogic.js";
+import { InvalidFieldModifyError } from "../errors/InvalidFieldModifyError.js";
 export const handleGetGuests = async (req, res) => {
   try {
     const { userId } = req;
@@ -52,6 +53,8 @@ export const handlePatchGuest = async (req, res) => {
     if (!errors.isEmpty())
       return res.status(400).json({ errors: errors.array() });
     const verifiedUpdatedGuest = matchedData(req);
+    if(Object.keys(verifiedUpdatedGuest).length === 0)
+      throw new InvalidFieldModifyError();
     const updatedGuest = await patchGuest(
       userId,
       eventId,
@@ -69,8 +72,7 @@ export const handleDeleteGuests = async (req, res) => {
     const { userId } = req;
     const { eventId } = req.params;
     const { idArray } = req.body;
-    const deletedGuests = await deleteGuests(userId, eventId, idArray);
-
+    await deleteGuests(userId, eventId, idArray);
     return res.status(200).json({ success: `deleted guests successfully` });
   } catch (err) {
     return res.status(err.statusCode).json({ err: err.message });

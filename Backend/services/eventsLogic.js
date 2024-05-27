@@ -102,13 +102,18 @@ export const deleteEvent = async (userId, eventId) => {
     throw new GeneralServerError();
   }
 };
-export const getEventByGuestId = async (userId, eventId, guestId) => {
+export const findGuestById = async (userId, eventId, guestId) => {
   try {
     const event = await eventModel
-      .findOne({ _id: eventId, collaborators: userId, guestList: guestId })
+      .findOne({
+        _id: eventId,
+        collaborators: userId,
+        guestList: guestId,
+      })
+      .select("guestList")
       .exec();
-    if (!event) throw new DataNotFoundError();
-    return event;
+    if (!event || event.guestList.length === 0) throw new DataNotFoundError();
+    return event.guestList[0];
   } catch (err) {
     if (err instanceof DataNotFoundError) throw err;
     throw new GeneralServerError();
