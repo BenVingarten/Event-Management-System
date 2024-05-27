@@ -124,10 +124,30 @@ const GuestListPage = () => {
     commentsRef.current.value = "";
   };
 
-  const handleRemoveGuests = () => {
-    setGuests(guests.filter((guest, index) => !selectedGuests.includes(index)));
-    setSelectedGuests([]);
+  const handleRemoveGuests = async () => {
     //TODO: Remove selected guests from the server
+    const selectedGuestsIDs = selectedGuests.map((index) => guests[index]._id);
+    const controller = new AbortController();
+    try {
+      const response = await axiosPrivate.delete(
+        `/users/${userId}/events/${eventID}/guests`,
+        { selectedGuestsIDs },
+        {
+          headers: { "Content-Type": "application/json" },
+          withCredentials: true,
+          signal: controller.signal,
+        }
+      );
+      toast.success("Guests deleted successfully");
+      setGuests(
+        guests.filter((guest, index) => !selectedGuests.includes(index))
+      );
+      setSelectedGuests([]);
+    } catch (error) {
+      console.error("Error Adding Guest:", error.response?.data);
+      if (!error?.response) toast.error("Error: No response from server.");
+      else toast.error("Error: " + error.response?.data.errors[0].msg);
+    }
   };
 
   const handleSelectGuest = (index) => {
@@ -436,142 +456,3 @@ const GuestListPage = () => {
 };
 
 export default GuestListPage;
-
-const DEFAULT_GUESTS = [
-  {
-    name: "John Doe",
-    peopleCount: 1,
-    group: "Family",
-    phoneNumber: "050-5882271",
-    status: "Message Sent",
-    comments: "",
-  },
-  {
-    name: "Jane Smith",
-    peopleCount: 2,
-    group: "Friends",
-    phoneNumber: "050-1236567",
-    status: "",
-    comments: "Vegan option needed",
-  },
-  {
-    name: "Mike Jones",
-    peopleCount: 1,
-    group: "Work Colleagues",
-    phoneNumber: "050-1229567",
-    status: "Not Coming",
-    comments: "Out of town",
-  },
-  {
-    name: "Sarah Lee",
-    peopleCount: 1,
-    group: "",
-    phoneNumber: "052-1234567",
-    status: "Coming",
-    comments: "Brings dessert!",
-  },
-  {
-    name: "David Miller",
-    peopleCount: 2,
-    group: "Family",
-    phoneNumber: "058-9876543",
-    status: "",
-    comments: "Might bring a guest",
-  },
-  {
-    name: "Emily Garcia",
-    peopleCount: 1,
-    group: "Friends",
-    phoneNumber: "050-1236753",
-    status: "Maybe",
-    comments: "",
-  },
-  {
-    name: "Daniel Williams",
-    peopleCount: 1,
-    group: "Work Colleagues",
-    phoneNumber: "054-7890123",
-    status: "Message Sent",
-    comments: "Allergies: Peanuts",
-  },
-  {
-    name: "Amanda Johnson",
-    peopleCount: 1,
-    group: "",
-    phoneNumber: "055-0123456",
-    status: "Coming",
-    comments: "",
-  },
-  {
-    name: "Christopher Brown",
-    peopleCount: 2,
-    group: "Friends",
-    phoneNumber: "059-3456789",
-    status: "",
-    comments: "Prefers vegetarian option",
-  },
-  {
-    name: "Elizabeth Moore",
-    peopleCount: 1,
-    group: "Family",
-    phoneNumber: "056-2345678",
-    status: "Coming",
-    comments: "",
-  },
-  {
-    name: "Kevin Thomas",
-    peopleCount: 1,
-    group: "Work Colleagues",
-    phoneNumber: "053-4567890",
-    status: "Maybe",
-    comments: "",
-  },
-  {
-    name: "Lauren Davis",
-    peopleCount: 1,
-    group: "",
-    phoneNumber: "060-5678901",
-    status: "Coming",
-    comments: "",
-  },
-  {
-    name: "Matthew Hernandez",
-    peopleCount: 2,
-    group: "Friends",
-    phoneNumber: "050-1951567",
-    status: "",
-    comments: "",
-  },
-  {
-    name: "Ashley Young",
-    peopleCount: 1,
-    group: "Family",
-    phoneNumber: "057-6789012",
-    status: "Coming",
-    comments: "",
-  },
-  {
-    name: "Joseph Robinson",
-    peopleCount: 1,
-    group: "Work Colleagues",
-    phoneNumber: "050-1231597",
-    status: "Not Coming",
-    comments: "Busy that day",
-  },
-  {
-    name: "Nicole Allen",
-    peopleCount: 1,
-    group: "",
-    phoneNumber: "061-7890123",
-    status: "Coming",
-    comments: "",
-  },
-  {
-    name: "Brandon Carter",
-    peopleCount: 2,
-    group: "Friends",
-    phoneNumber: "062-8901234",
-    status: "",
-    comments: "",
-  },
-];

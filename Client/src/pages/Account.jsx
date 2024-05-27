@@ -10,9 +10,8 @@ export default function Account() {
   const axiosPrivate = useAxiosPrivate();
   const auth = useAuth();
   const effectRun = useRef(false);
-  const navigate = useNavigate();
+
   const userRole = auth?.auth?.role;
-  const location = useLocation();
 
   const [user, setUser] = useState({
     username: "example_user",
@@ -58,19 +57,19 @@ export default function Account() {
     const controller = new AbortController();
 
     // Fetch user's events from the backend
+
     const fetchUserDetails = async () => {
       try {
         const userId = jwtDecode(auth.accessToken).userInfo.id;
-        const response = await axiosPrivate.get(`/users/${userId}/userDet`, {
+        const response = await axiosPrivate.get(`/users/${userId}/`, {
           signal: controller.signal,
         });
 
         console.log(response.data);
-        setUser(response.data.user);
+        //TODO: Set user state with fetched user information
       } catch (err) {
-        //console.log("Error: " + err.response?.data.err);
-        toast.error("No Events Found!");
-        //navigate("/unauthorized", { state: { from: location }, replace: true });
+        console.log("Error: " + err.response?.data);
+        toast.error("Failed fetching user details. Try again.");
       }
     };
 

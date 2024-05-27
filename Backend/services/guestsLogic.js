@@ -72,7 +72,7 @@ export const patchGuest = async (userId, eventId, guestId, updatedGuest) => {
   }
 };
 
-export const deleteGuest = async (userId, eventId, guestId) => {
+export const deleteGuests = async (userId, eventId, idArray) => {
   try {
     const event = await getEventByGuestId(userId, eventId, guestId); // verafication
     const deletedGuest = await guestModel.findByIdAndDelete(guestId);

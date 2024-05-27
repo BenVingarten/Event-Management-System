@@ -16,6 +16,7 @@ export const handleGetUsers = async (req, res) => {
   }
 };
 export const handleGetUserById = async (req, res) => {
+  console.log("handleGetUserById");
   try {
     const { userId } = req;
     const user = await getUserById(userId);
