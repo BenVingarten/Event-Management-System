@@ -53,7 +53,7 @@ const GuestListPage = () => {
           }
         );
 
-        console.log(response.data.guestList);
+        //console.log(response.data.guestList);
         setGuests(response.data.guestList);
       } catch (err) {
         console.log("Error: " + err.response?.data.err);

@@ -1,5 +1,5 @@
 import { Button, Label, Modal, Select, TextInput } from "flowbite-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Toaster, toast } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import OAuthSignUp from "../components/OAuthSignUp";
@@ -85,72 +85,15 @@ const SignupPage = () => {
   }
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setBusinessInfo({ ...businessInfo, [name]: value });
+    const { id, value } = e.target;
+    //console.log(businessInfo);
+    setBusinessInfo((prevState) => ({
+      ...prevState,
+      [id]: value,
+    }));
   };
 
-  const Popup = () => {
-    return (
-      <Modal show={isModalOpen} onClose={() => setIsModalOpen(false)}>
-        <div className="p-5">
-          <h3 className="text-lg font-bold mb-3">
-            Tell us about your business!
-          </h3>
-          <div className="">
-            <div className="mr-5">
-              <div>
-                <div className="mb-2 block">
-                  <Label htmlFor="type" value="Business type" />
-                </div>
-                <TextInput
-                  id="businessType"
-                  type="text"
-                  value={businessInfo.businessType}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-              <div>
-                <div className="mb-2 block">
-                  <Label htmlFor="type" value="Business location" />
-                </div>
-                <TextInput
-                  id="businessLocation"
-                  type="text"
-                  value={businessInfo.businessLocation}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-              <div>
-                <div className="mb-2 block">
-                  <Label htmlFor="type" value="Business description" />
-                </div>
-                <TextInput
-                  id="businessDescription"
-                  type="text"
-                  value={businessInfo.businessDescription}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="items-center">
-              <Button
-                className="mt-5"
-                size="xl"
-                onClick={() => setIsModalOpen(false)}
-                gradientDuoTone="greenToBlue"
-              >
-                That's it!
-              </Button>
-            </div>
-          </div>
-        </div>
-      </Modal>
-    );
-  };
+  
 
   return (
     <div className="flex justify-center items-center h-screen">
@@ -244,7 +187,69 @@ const SignupPage = () => {
         <OAuthSignUp role={role} />
       </form>
 
-      <Popup />
+      
+
+      {/*Popup Modal*/}
+      <Modal show={isModalOpen} onClose={() => setIsModalOpen(false)}>
+        <div className="p-5">
+          <h3 className="text-lg font-bold mb-3">
+            Tell us about your business!
+          </h3>
+          <div className="">
+            <div className="mr-5">
+              <div>
+                <div className="mb-2 block">
+                  <Label htmlFor="businessType" value="Business type" />
+                </div>
+                <TextInput
+                  id="businessType"
+                  type="text"
+                  value={businessInfo.businessType}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
+              <div>
+                <div className="mb-2 block">
+                  <Label htmlFor="businessLocation" value="Business location" />
+                </div>
+                <TextInput
+                  id="businessLocation"
+                  type="text"
+                  value={businessInfo.businessLocation}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
+              <div>
+                <div className="mb-2 block">
+                  <Label
+                    htmlFor="businessDescription"
+                    value="Business description"
+                  />
+                </div>
+                <TextInput
+                  id="businessDescription"
+                  type="text"
+                  value={businessInfo.businessDescription}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
+            </div>
+            <div className="items-center">
+              <Button
+                className="mt-5"
+                size="xl"
+                onClick={() => setIsModalOpen(false)}
+                gradientDuoTone="greenToBlue"
+              >
+                That's it!
+              </Button>
+            </div>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 };
