@@ -105,7 +105,7 @@ export const findGuestById = async (userId, eventId, guestId) => {
       .findOne({
         _id: eventId,
         collaborators: userId,
-        guestList: guestId,
+        'guestList._id': guestId,
       })
       .select("guestList")
       .exec();

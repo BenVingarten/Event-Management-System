@@ -19,7 +19,6 @@ export const handleUpdateTaskList = async (req, res) => {
     const taskListObj = matchedData(req);
     if (Object.keys(taskListObj).length === 0)
       throw new InvalidFieldModifyError();
-    console.log(taskListObj);
     const { userId } = req;
     const { eventId } = req.params;
     const updatedTasks = await updateTasks(

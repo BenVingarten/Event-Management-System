@@ -1,5 +1,6 @@
 import { DataNotFoundError } from "../errors/DataNotFoundError.js";
 import { GeneralServerError } from "../errors/GeneralServerError.js";
+import eventModel from "../models/Event.js";
 import { getEventById } from "./eventsLogic.js";
 export const getTasks = async (userId, eventId) => {
   try {
@@ -22,3 +23,10 @@ export const updateTasks = async (userId, eventId, updatedTaskList) => {
     throw new GeneralServerError();
   }
 };
+
+export const getTasksAnalytics = async (userId, eventId) => {
+    const event = await eventModel.aggregate
+
+    
+  
+}

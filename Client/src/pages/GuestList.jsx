@@ -131,8 +131,8 @@ const GuestListPage = () => {
     try {
       const response = await axiosPrivate.delete(
         `/users/${userId}/events/${eventID}/guests`,
-        { selectedGuestsIDs },
         {
+          data: { selectedGuestsIDs },
           headers: { "Content-Type": "application/json" },
           withCredentials: true,
           signal: controller.signal,

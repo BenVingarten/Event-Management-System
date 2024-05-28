@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 const { Schema } = mongoose;
-import { guestStatus, taskStatus } from "../constants/event.js";
+import { taskStatus, guestStatus } from "../constants/event.js";
 const eventSchema = new Schema({
   name: {
     type: String,

@@ -71,8 +71,9 @@ export const handleDeleteGuests = async (req, res) => {
   try {
     const { userId } = req;
     const { eventId } = req.params;
-    const { idArray } = req.body;
-    await deleteGuests(userId, eventId, idArray);
+    const { selectedGuestsIDs } = req.body;
+    console.log(selectedGuestsIDs);
+    await deleteGuests(userId, eventId, selectedGuestsIDs);
     return res.status(200).json({ success: `deleted guests successfully` });
   } catch (err) {
     return res.status(err.statusCode).json({ err: err.message });
