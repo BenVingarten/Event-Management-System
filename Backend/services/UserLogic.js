@@ -9,10 +9,7 @@ import "../config/loadEnv.js";
 
 export const getAllUsers = async () => {
   try {
-    const users = await userModel.find({}).populate({
-      path: "events",
-      select: "name -_id",
-    });
+    const users = await userModel.find({});
     return users;
   } catch (err) {
     throw new GeneralServerError();
@@ -22,8 +19,7 @@ export const getAllUsers = async () => {
 export const getIdbyEmail = async (email) => {
   try {
     const user = await userModel.findOne({ email });
-    if (!userId)
-      throw new DataNotFoundError("couldnt find user with that email");
+    if (!user) throw new DataNotFoundError("couldnt find user with that email");
     return user._id;
   } catch (err) {
     if (err instanceof DataNotFoundError) throw err;
@@ -109,7 +105,7 @@ export const createUser = async (userInfo) => {
         Math.random().toString(36).slice(-8);
     }
     const hashedPwd = await bcrypt.hash(password, 10);
-    
+
     const newUser = await userModel.create({
       username,
       email,
@@ -125,10 +121,10 @@ export const createUser = async (userInfo) => {
 
 export const getUserById = async (id, populateOptions) => {
   try {
-    const isPopulate = populateOptions && Object.keys(populateOptions).length > 0;
+    const isPopulate =
+      populateOptions && Object.keys(populateOptions).length > 0;
     const query = userModel.findById(id);
-    if(isPopulate)
-       query.populate(populateOptions);
+    if (isPopulate) query.populate(populateOptions);
     const user = await query.exec();
     if (!user) throw new DataNotFoundError("User with that ID is not found");
     return user;
@@ -264,7 +260,7 @@ export const logoutUser = async (refreshToken) => {
 };
 
 export const deleteUserEvent = async (userId, eventId) => {
-  const user = await getUserById(userId);
-  user.events.pull(eventId);
-  await user.save();
+  await userModel.findByIdAndUpdate(userId, {
+    $pull: { events: eventId },
+  });
 };

@@ -14,9 +14,6 @@ function addGuestValidation() {
     name: {
       notEmpty: { errorMessage: "guest must have a name" },
     },
-    group: {
-      notEmpty: { errorMessage: "guest must have a group" },
-    },
     phoneNumber: {
       notEmpty: { errorMessage: "guest must have a phoneNumber for contact" },
       custom: {
@@ -25,6 +22,9 @@ function addGuestValidation() {
         },
         errorMessage: "Invalid phone number",
       },
+    },
+    group: {
+      notEmpty: { errorMessage: "guest must have a group" },
     },
     status: {
       notEmpty: { errorMessage: "guest must have a status" },

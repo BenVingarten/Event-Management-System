@@ -1,11 +1,14 @@
+
 import { DataNotFoundError } from "../errors/DataNotFoundError.js";
 import { DuplicateDataError } from "../errors/DuplicateDataError.js";
 import { GeneralServerError } from "../errors/GeneralServerError.js";
-import { findGuestById, getEventById, } from "./eventsLogic.js";
+import { findGuestById, getEventById} from "./eventsLogic.js";
+import eventModel from "../models/Event.js";
 
 export const getGuests = async (userId, eventId) => {
   try {
-    const event = await getEventById(userId, eventId);
+    const event = await eventModel.findOne({ _id: eventId, collaborators: userId }).select('guestList').exec();
+    if(!event) throw new DataNotFoundError();
     return event.guestList;
   } catch (err) {
     if (err instanceof DataNotFoundError) throw err;
@@ -15,29 +18,11 @@ export const getGuests = async (userId, eventId) => {
 
 export const addGuest = async (userId, eventId, guestData) => {
   try {
-    const event = await getEventById(userId, eventId);
-    const { name, phoneNumber, status, peopleCount, group, comments } =
-      guestData;
-
-    const duplicatePhoneNumber = await guestModel
-      .findOne({ phoneNumber })
-      .exec();
-    if (duplicatePhoneNumber)
-      throw new DuplicateDataError(
-        "there is already a guest with that phoneNumber"
-      );
-
-    const newGuest = await guestModel.create({
-      name,
-      peopleCount,
-      group,
-      phoneNumber,
-      status,
-      comments,
-    });
-    event.guestList.push(newGuest);
-    await event.save();
-    return newGuest;
+      const event = await getEventById(userId, eventId);
+      const existingPhone = event.guestList.find((guest) => guest.phoneNumber === guestData.phoneNumber);
+      if(existingPhone) throw new DuplicateDataError("there is already a guest with that phoneNumber");
+      event.guestList.push(guestData);
+      await event.save();
   } catch (err) {
     if (err instanceof DataNotFoundError || err instanceof DuplicateDataError)
       throw err;
@@ -65,7 +50,7 @@ export const patchGuest = async (userId, eventId, guestId, updatedGuest) => {
   }
 };
 
-export const deleteGuests = async (userId, eventId, idArray) => {
+export const deleteGuests = async (userId, eventId, guestidArrayToDelete) => {
   try {
     const event = await getEventByGuestId(userId, eventId, guestId); // verafication
     const deletedGuest = await guestModel.findByIdAndDelete(guestId);

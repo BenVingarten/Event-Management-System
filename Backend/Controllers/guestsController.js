@@ -23,12 +23,12 @@ export const handleAddGuest = async (req, res) => {
     if (!errors.isEmpty())
       return res.status(400).json({ errors: errors.array() });
     const verifiedData = matchedData(req);
-    console.log(verifiedData);
+    if (req.body.comments) verifiedData.comments = req.body.comments;
     const { userId } = req;
     const { eventId } = req.params;
-    const newGuest = await addGuest(userId, eventId, verifiedData);
+    await addGuest(userId, eventId, verifiedData);
     return res.status(201).json({
-      success: `new guest ${newGuest.name} has been added to the guestList`,
+      success: `new guest has been added to the guestList`,
     });
   } catch (err) {
     return res.status(err.statusCode).json({ err: err.message });
@@ -53,7 +53,7 @@ export const handlePatchGuest = async (req, res) => {
     if (!errors.isEmpty())
       return res.status(400).json({ errors: errors.array() });
     const verifiedUpdatedGuest = matchedData(req);
-    if(Object.keys(verifiedUpdatedGuest).length === 0)
+    if (Object.keys(verifiedUpdatedGuest).length === 0)
       throw new InvalidFieldModifyError();
     const updatedGuest = await patchGuest(
       userId,

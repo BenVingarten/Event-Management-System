@@ -38,7 +38,8 @@ export const handleGetEventById = async (req, res) => {
   try {
     const { userId } = req;
     const { eventId } = req.params;
-    const event = await getEventById(userId, eventId);
+    const populateOptions = { path: "collaborators", select: "username email"}
+    const event = await getEventById(userId, eventId, populateOptions);
     return res.status(200).json({ event });
   } catch (err) {
     return res.status(err.statusCode).json({ err: err.message });

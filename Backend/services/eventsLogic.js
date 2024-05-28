@@ -7,20 +7,15 @@ import { deleteUserEvent, getIdbyEmail, getUserById } from "./UserLogic.js";
 
 export const getEvents = async (id) => {
   try {
-    const populateOptions = {
-      path: "events",
-      select: "name date type budget location collaborators",
-    };
-    const user = await getUserById(id, populateOptions);
-    return user.events;
+    const events = await eventModel.find({ collaborators: id });
+    if (!events) throw new DataNotFoundError();
+    return events;
   } catch (err) {
     throw err;
   }
 };
 export const createEvent = async (id, event) => {
   try {
-    const user = await userModel.findById(id);
-    if (!user) throw new DataNotFoundError();
     const {
       name,
       date,
@@ -32,17 +27,18 @@ export const createEvent = async (id, event) => {
     } = event;
     //set collaborators
     const idSet = new Set();
-    idSet.add(user._id.toString());
-
+    idSet.add(id);
     for (const email of collaborators) {
       const collaboratorId = await getIdbyEmail(email);
       if (collaboratorId) {
         idSet.add(collaboratorId.toString());
       }
     }
+   
 
     // Convert the set to an array of ObjectIds
     const idArray = Array.from(idSet).map((id) => new ObjectId(id));
+
     const newEvent = await eventModel.create({
       name,
       date,
@@ -53,25 +49,23 @@ export const createEvent = async (id, event) => {
       collaborators: idArray,
     });
     // set event to the user
-    user.events.push(newEvent);
-    await user.save();
-    //TODO: set event to collaborators only after they accept
+
+    await userModel.findByIdAndUpdate(id, {
+      $push: { events: newEvent._id },
+    });
     return newEvent;
   } catch (err) {
     throw err;
   }
 };
-export const getEventById = async (
-  userId,
-  eventId,
-  populateOptions = { path: "collaborators", select: "username email" }
-) => {
+export const getEventById = async (userId, eventId, populateOptions = {}) => {
   try {
     const isPopulate =
       populateOptions && Object.keys(populateOptions).length > 0;
     const query = eventModel.findOne({ _id: eventId, collaborators: userId });
     if (isPopulate) query.populate(populateOptions);
     const event = await query.exec();
+    if (!event) throw new DataNotFoundError();
     return event;
   } catch (err) {
     if (err instanceof DataNotFoundError) throw err;
@@ -80,9 +74,12 @@ export const getEventById = async (
 };
 export const patchEvent = async (userId, eventId, eventDetails) => {
   try {
-    const event = await getEventById(userId, eventId);
-    for (let property in eventDetails) event[property] = eventDetails[property];
-    await event.save();
+    const event = await eventModel.findOneAndUpdate(
+      { _id: eventId, collaborators: userId },
+      eventDetails,
+      { new: true }
+    );
+    if (!event) throw new DataNotFoundError();
     return event;
   } catch (err) {
     if (err instanceof DataNotFoundError) throw err;
