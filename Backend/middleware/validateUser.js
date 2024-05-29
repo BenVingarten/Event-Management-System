@@ -66,7 +66,7 @@ function createUserValidation() {
         errorMessage: "Business type is required for vendors"
       }
     },
-    location: {
+    businessLocation: {
       custom: {
         options: (value, { req }) => {
           // Check if role is Vendor and location is provided
@@ -75,7 +75,7 @@ function createUserValidation() {
         errorMessage: "Location is required for vendors"
       }
     },
-    description: {
+    businessDescription: {
       custom: {
         options: (value, { req }) => {
           // Check if role is Vendor and description is provided

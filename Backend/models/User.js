@@ -38,6 +38,27 @@ const userSchema = new Schema({
     type: Number,
   },
 });
+// Conditionally define fields based on user's role
+userSchema.add({
+  businessType: {
+    type: String,
+    required: function () {
+      return this.role === "Vendor"; // Required only if role is Vendor
+    },
+  },
+  businessLocation: {
+    type: String,
+    required: function () {
+      return this.role === "Vendor"; // Required only if role is Vendor
+    },
+  },
+  businessDescription: {
+    type: String,
+    required: function () {
+      return this.role === "Vendor"; // Required only if role is Vendor
+    },
+  },
+});
 
 userSchema.pre(
   ["save", "updateOne", "updateMany", "findOneAndUpdate"],

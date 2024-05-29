@@ -105,15 +105,22 @@ export const createUser = async (userInfo) => {
         Math.random().toString(36).slice(-8);
     }
     const hashedPwd = await bcrypt.hash(password, 10);
-
-    const newUser = await userModel.create({
+    const newUserObj = {
       username,
       email,
       password: hashedPwd,
       role,
-    });
+    };
+    if (role === "Vendor") {
+      const { businessType, businessLocation, businessDescription } = userInfo;
+      newUserObj.businessType = businessType;
+      newUserObj.businessLocation = businessLocation;
+      newUserObj.businessDescription = businessDescription;
+    }
+    const newUser = await userModel.create(newUserObj);
     return newUser;
   } catch (err) {
+    console.error(err.message);
     if (err instanceof DuplicateDataError) throw err;
     else throw new GeneralServerError();
   }
