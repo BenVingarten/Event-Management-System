@@ -19,13 +19,12 @@ import { FaQuestionCircle, FaMoneyBillWave } from "react-icons/fa";
 import { FaLocationDot } from "react-icons/fa6";
 
 import moment from "moment-timezone";
-import { ta } from "date-fns/locale";
 
 export default function EventDetails() {
   const [eventInfo, setEventInfo] = useState([]);
   const [taskAnalytics, setTaskAnalytics] = useState([]);
   const [guestAnalytics, setGuestAnalytics] = useState([]);
-  console.log(taskAnalytics);
+  console.log(guestAnalytics);
 
   const { auth } = useAuth();
   const axiosPrivate = useAxiosPrivate();
@@ -57,7 +56,7 @@ export default function EventDetails() {
             signal: controller.signal,
           }
         );
-        //console.log(response.data);
+        console.log(response.data);
         isMounted && setEventInfo(response.data.eventDetails.event);
         setTaskAnalytics(
           convertArray(
@@ -99,7 +98,10 @@ export default function EventDetails() {
 
   const convertArray = (inputArray, headerName, type) => {
     const header = [headerName, type];
-    const data = inputArray.map((item) => [item.column, item.percentage]);
+    const data = inputArray.map((item) => [
+      item.column ? item.column : item.status,
+      item.percentage,
+    ]);
     return [header, ...data];
   };
 
