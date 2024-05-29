@@ -34,7 +34,6 @@ export const createEvent = async (id, event) => {
         idSet.add(collaboratorId.toString());
       }
     }
-   
 
     // Convert the set to an array of ObjectIds
     const idArray = Array.from(idSet).map((id) => new ObjectId(id));
@@ -105,7 +104,7 @@ export const findGuestById = async (userId, eventId, guestId) => {
       .findOne({
         _id: eventId,
         collaborators: userId,
-        'guestList._id': guestId,
+        "guestList._id": guestId,
       })
       .select("guestList")
       .exec();
@@ -118,14 +117,33 @@ export const findGuestById = async (userId, eventId, guestId) => {
 };
 
 export const roundedPercentagesToHundred = (results) => {
-  const totalRoundedPercentage = results.reduce((sum, result) => sum + result.percentage, 0);
+  // Calculate total percentage to be adjusted
+  let totalRoundedPercentage = results.reduce(
+    (sum, result) => sum + result.percentage,
+    0
+  );
 
+  // Adjust the last result to ensure the total percentage sums to 100%
+  if (results.length > 0) {
     const lastResultIndex = results.length - 1;
-    results[lastResultIndex].percentage += 100 - totalRoundedPercentage;
+    let difference = 100 - totalRoundedPercentage;
+    results[lastResultIndex].percentage += difference;
 
-    const adjustedTotalPercentage = results.reduce((sum, result) => sum + result.percentage, 0);
+    // Convert percentages to integers
+    results.forEach((result) => {
+      result.percentage = Math.round(result.percentage);
+    });
 
-    if (adjustedTotalPercentage !== 100) 
-      results[lastResultIndex].percentage += 100 - adjustedTotalPercentage;
-    return results;
-}
+    // Verify and adjust if necessary
+    totalRoundedPercentage = results.reduce(
+      (sum, result) => sum + result.percentage,
+      0
+    );
+    if (totalRoundedPercentage !== 100) {
+      const remainingDifference = 100 - totalRoundedPercentage;
+      results[lastResultIndex].percentage += remainingDifference;
+    }
+  }
+
+  return results;
+};

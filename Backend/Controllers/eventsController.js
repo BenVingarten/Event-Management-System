@@ -6,6 +6,8 @@ import {
 import { validationResult, matchedData } from "express-validator";
 import { createEvent, patchEvent } from "../services/eventsLogic.js";
 import { InvalidFieldModifyError } from "../errors/InvalidFieldModifyError.js";
+import { getTasksAnalytics } from "../services/tasksLogic.js";
+import { getGuestsAnalytics } from "../services/guestsLogic.js";
 
 export const handleGetEvents = async (req, res) => {
   try {
@@ -38,9 +40,16 @@ export const handleGetEventById = async (req, res) => {
   try {
     const { userId } = req;
     const { eventId } = req.params;
-    const populateOptions = { path: "collaborators", select: "username email"}
+    const populateOptions = { path: "collaborators", select: "username email" };
     const event = await getEventById(userId, eventId, populateOptions);
-    return res.status(200).json({ event });
+    const taskAnalytics = await getTasksAnalytics(userId, eventId);
+    const guestAnalytics = await getGuestsAnalytics(userId, eventId);
+    const eventDetails = {
+      event,
+      taskAnalytics,
+      guestAnalytics,
+    };
+    return res.status(200).json({ eventDetails });
   } catch (err) {
     return res.status(err.statusCode).json({ err: err.message });
   }

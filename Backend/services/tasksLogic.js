@@ -3,6 +3,7 @@ import { GeneralServerError } from "../errors/GeneralServerError.js";
 import eventModel from "../models/Event.js";
 import { getEventById } from "./eventsLogic.js";
 import { roundedPercentagesToHundred } from "./eventsLogic.js";
+import mongoose from "mongoose";
 export const getTasks = async (userId, eventId) => {
   try {
     const event = await getEventById(userId, eventId);
@@ -30,68 +31,73 @@ export const getTasksAnalytics = async (userId, eventId) => {
     const pipeLine = [
       {
         $match: {
-          _id: mongoose.Types.ObjectId(eventId),
-          collaborators: mongoose.Types.ObjectId(userId)
-        }
+          _id: new mongoose.Types.ObjectId(eventId),
+          collaborators: new mongoose.Types.ObjectId(userId),
+        },
       },
       {
-        $unwind: "$cards"
+        $unwind: "$cards",
       },
-     {
-       $facet: {
-         countByStatus: [
-          {
-            $group: {
-              _id: "$cards.column",
-              count: {$sum : 1}
-            }
-          },
-          {
-            $project: {
-              _id: 0,
-              column: "$_id",
-              count: 1
-            }
-          }
-        ],
-        countTotal: [
-          {
-            $group: {
-              _id: null,
-              total: {$sum : 1}
-            }
-          }
-        ]
-       }
-     },
-     {
-        $unwind: "$countByStatus"
-     },
-     {
-        $unwind: "$countTotal"
-     },
+      {
+        $facet: {
+          countByStatus: [
+            {
+              $group: {
+                _id: "$cards.column",
+                count: { $sum: 1 },
+              },
+            },
+            {
+              $project: {
+                _id: 0,
+                column: "$_id",
+                count: 1,
+              },
+            },
+          ],
+          countTotal: [
+            {
+              $group: {
+                _id: null,
+                total: { $sum: 1 },
+              },
+            },
+          ],
+        },
+      },
+      {
+        $unwind: "$countByStatus",
+      },
+      {
+        $unwind: "$countTotal",
+      },
       {
         $project: {
           column: "$countByStatus.column",
-          rawPercentage: {
+          percentage: {
             $round: [
-              {$multiply: [{ $divide: ["$countByStatus.count", "$countTotal.total" ] }, 100]}, 1
-            ]
-                 
-          }
-        }
-      }
-    ]
-    const results = await eventModel.aggregate(pipeLine).toArray();
-    if(!results || results.length === 0)
+              {
+                $multiply: [
+                  { $divide: ["$countByStatus.count", "$countTotal.total"] },
+                  100,
+                ],
+              },
+              1,
+            ],
+          },
+        },
+      },
+    ];
+    const results = await eventModel.aggregate(pipeLine).exec();
+    if (!results)
       throw new DataNotFoundError("No datafound for the provided criteria");
-
+    if(results.length === 0) return results;
+    
     const roundedResults = roundedPercentagesToHundred(results);
-    console.log(roundedResults);
     return roundedResults;
-  } catch(err) {
-    if(err instanceof DataNotFoundError) throw err;
+  } catch (err) {
+    console.error("Error in getTasksAnalytics:", err); // Log the detailed error
+    if (err instanceof DataNotFoundError) throw err;
     throw new GeneralServerError();
   }
-    
-}
+};

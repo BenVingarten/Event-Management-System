@@ -4,6 +4,7 @@ import { GeneralServerError } from "../errors/GeneralServerError.js";
 import { findGuestById, getEventById } from "./eventsLogic.js";
 import { roundedPercentagesToHundred } from "./eventsLogic.js";
 import eventModel from "../models/Event.js";
+import mongoose from "mongoose";
 
 export const getGuests = async (userId, eventId) => {
   try {
@@ -85,75 +86,77 @@ export const deleteGuests = async (userId, eventId, selectedGuestsIDs) => {
   }
 };
 
-
-export const getTasksAnalytics = async (userId, eventId) => {
+export const getGuestsAnalytics = async (userId, eventId) => {
   try {
     const pipeLine = [
       {
         $match: {
-          _id: mongoose.Types.ObjectId(eventId),
-          collaborators: mongoose.Types.ObjectId(userId)
-        }
+          _id: new mongoose.Types.ObjectId(eventId),
+          collaborators: new mongoose.Types.ObjectId(userId),
+        },
       },
       {
-        $unwind: "$guestList"
+        $unwind: "$guestList",
       },
-     {
-       $facet: {
-         countByStatus: [
-          {
-            $group: {
-              _id: "$guestList.status",
-              count: {$sum : 1}
-            }
-          },
-          {
-            $project: {
-              _id: 0,
-              status: "$_id",
-              count: 1
-            }
-          }
-        ],
-        countTotal: [
-          {
-            $group: {
-              _id: null,
-              total: {$sum : 1}
-            }
-          }
-        ]
-       }
-     },
-     {
-        $unwind: "$countByStatus"
-     },
-     {
-        $unwind: "$countTotal"
-     },
+      {
+        $facet: {
+          countByStatus: [
+            {
+              $group: {
+                _id: "$guestList.status",
+                count: { $sum: 1 },
+              },
+            },
+            {
+              $project: {
+                _id: 0,
+                status: "$_id",
+                count: 1,
+              },
+            },
+          ],
+          countTotal: [
+            {
+              $group: {
+                _id: null,
+                total: { $sum: 1 },
+              },
+            },
+          ],
+        },
+      },
+      {
+        $unwind: "$countByStatus",
+      },
+      {
+        $unwind: "$countTotal",
+      },
       {
         $project: {
           status: "$countByStatus.status",
-          rawPercentage: {
+          percentage: {
             $round: [
-              {$multiply: [{ $divide: ["$countByStatus.count", "$countTotal.total" ] }, 100]}, 1
-            ]
-                 
-          }
-        }
-      }
-    ]
-    const results = await eventModel.aggregate(pipeLine).toArray();
-    if(!results || results.length === 0)
+              {
+                $multiply: [
+                  { $divide: ["$countByStatus.count", "$countTotal.total"] },
+                  100,
+                ],
+              },
+              1,
+            ],
+          },
+        },
+      },
+    ];
+    const results = await eventModel.aggregate(pipeLine).exec();
+    if (!results)
       throw new DataNotFoundError("No datafound for the provided criteria");
+    if (results.length === 0) return results;
 
     const roundedResults = roundedPercentagesToHundred(results);
-    console.log(roundedResults);
     return roundedResults;
-  } catch(err) {
-    if(err instanceof DataNotFoundError) throw err;
+  } catch (err) {
+    if (err instanceof DataNotFoundError) throw err;
     throw new GeneralServerError();
   }
-    
-}
-
+};
