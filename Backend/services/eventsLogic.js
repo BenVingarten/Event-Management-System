@@ -116,3 +116,16 @@ export const findGuestById = async (userId, eventId, guestId) => {
     throw new GeneralServerError();
   }
 };
+
+export const roundedPercentagesToHundred = (results) => {
+  const totalRoundedPercentage = results.reduce((sum, result) => sum + result.percentage, 0);
+
+    const lastResultIndex = results.length - 1;
+    results[lastResultIndex].percentage += 100 - totalRoundedPercentage;
+
+    const adjustedTotalPercentage = results.reduce((sum, result) => sum + result.percentage, 0);
+
+    if (adjustedTotalPercentage !== 100) 
+      results[lastResultIndex].percentage += 100 - adjustedTotalPercentage;
+    return results;
+}

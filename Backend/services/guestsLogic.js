@@ -2,6 +2,7 @@ import { DataNotFoundError } from "../errors/DataNotFoundError.js";
 import { DuplicateDataError } from "../errors/DuplicateDataError.js";
 import { GeneralServerError } from "../errors/GeneralServerError.js";
 import { findGuestById, getEventById } from "./eventsLogic.js";
+import { roundedPercentagesToHundred } from "./eventsLogic.js";
 import eventModel from "../models/Event.js";
 
 export const getGuests = async (userId, eventId) => {
@@ -83,3 +84,76 @@ export const deleteGuests = async (userId, eventId, selectedGuestsIDs) => {
     throw new GeneralServerError();
   }
 };
+
+
+export const getTasksAnalytics = async (userId, eventId) => {
+  try {
+    const pipeLine = [
+      {
+        $match: {
+          _id: mongoose.Types.ObjectId(eventId),
+          collaborators: mongoose.Types.ObjectId(userId)
+        }
+      },
+      {
+        $unwind: "$guestList"
+      },
+     {
+       $facet: {
+         countByStatus: [
+          {
+            $group: {
+              _id: "$guestList.status",
+              count: {$sum : 1}
+            }
+          },
+          {
+            $project: {
+              _id: 0,
+              status: "$_id",
+              count: 1
+            }
+          }
+        ],
+        countTotal: [
+          {
+            $group: {
+              _id: null,
+              total: {$sum : 1}
+            }
+          }
+        ]
+       }
+     },
+     {
+        $unwind: "$countByStatus"
+     },
+     {
+        $unwind: "$countTotal"
+     },
+      {
+        $project: {
+          status: "$countByStatus.status",
+          rawPercentage: {
+            $round: [
+              {$multiply: [{ $divide: ["$countByStatus.count", "$countTotal.total" ] }, 100]}, 1
+            ]
+                 
+          }
+        }
+      }
+    ]
+    const results = await eventModel.aggregate(pipeLine).toArray();
+    if(!results || results.length === 0)
+      throw new DataNotFoundError("No datafound for the provided criteria");
+
+    const roundedResults = roundedPercentagesToHundred(results);
+    console.log(roundedResults);
+    return roundedResults;
+  } catch(err) {
+    if(err instanceof DataNotFoundError) throw err;
+    throw new GeneralServerError();
+  }
+    
+}
+
