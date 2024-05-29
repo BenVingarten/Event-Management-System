@@ -19,9 +19,13 @@ import { FaQuestionCircle, FaMoneyBillWave } from "react-icons/fa";
 import { FaLocationDot } from "react-icons/fa6";
 
 import moment from "moment-timezone";
+import { ta } from "date-fns/locale";
 
 export default function EventDetails() {
   const [eventInfo, setEventInfo] = useState([]);
+  const [taskAnalytics, setTaskAnalytics] = useState([]);
+  const [guestAnalytics, setGuestAnalytics] = useState([]);
+  console.log(taskAnalytics);
 
   const { auth } = useAuth();
   const axiosPrivate = useAxiosPrivate();
@@ -53,8 +57,22 @@ export default function EventDetails() {
             signal: controller.signal,
           }
         );
-        //console.log(response.data.event);
-        isMounted && setEventInfo(response.data.event);
+        //console.log(response.data);
+        isMounted && setEventInfo(response.data.eventDetails.event);
+        setTaskAnalytics(
+          convertArray(
+            response.data.eventDetails.taskAnalytics,
+            "Tasks",
+            "Precentage"
+          )
+        );
+        setGuestAnalytics(
+          convertArray(
+            response.data.eventDetails.guestAnalytics,
+            "Guests",
+            "Precentage"
+          )
+        );
       } catch (err) {
         console.log(err);
         toast.error("Failed to fetch event info. Please try again later.");
@@ -79,9 +97,17 @@ export default function EventDetails() {
     ["Sleep", 7], // CSS-style declaration
   ];
 
+  const convertArray = (inputArray, headerName, type) => {
+    const header = [headerName, type];
+    const data = inputArray.map((item) => [item.column, item.percentage]);
+    return [header, ...data];
+  };
+
   const options = {
     pieHole: 0.4,
     is3D: false,
+    height: 300,
+    width: 400,
     backgroundColor: { fill: "transparent" },
   };
 
@@ -184,7 +210,7 @@ export default function EventDetails() {
 
     setIsModalOpen(false);
   };
-  console.log(eventInfo);
+  //console.log(eventInfo);
 
   const additionalInfoPresent = () => {
     return (
@@ -229,7 +255,7 @@ export default function EventDetails() {
       <Toaster />
       <h1 className=" p-4 text-xl font-bold">{eventInfo.name}</h1>
 
-      {/* First area */}
+      {/* First area - Event Details*/}
       <Card className=" p-4">
         <h5 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
           Details
@@ -248,19 +274,21 @@ export default function EventDetails() {
           </Button>
         </div>
       </Card>
-      <div className="grid grid-cols-2 gap-8 p-8">
-        {/* Second area */}
+      <div className="grid grid-rows-2 md:grid-cols-2 gap-8 p-8">
+        {/* Second area - Task List */}
         <Card className=" p-4">
           <h5 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
             Tasks
           </h5>
-          <Chart
-            chartType="PieChart"
-            width="100%"
-            height="100%"
-            data={data}
-            options={options}
-          />
+          {taskAnalytics.length === 1 ? (
+            <p className="">No tasks yet</p>
+          ) : (
+            <Chart
+              chartType="PieChart"
+              data={taskAnalytics}
+              options={options}
+            />
+          )}
           <Button
             onClick={() =>
               navigate(`/taskList`, {
@@ -275,15 +303,17 @@ export default function EventDetails() {
         {/* Third area - GuestList */}
         <Card className=" p-4">
           <h5 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
-            Tasks
+            Guests
           </h5>
-          <Chart
-            chartType="PieChart"
-            width="100%"
-            height="100%"
-            data={data}
-            options={options}
-          />
+          {guestAnalytics.length === 1 ? (
+            <p className="">No guests yet</p>
+          ) : (
+            <Chart
+              chartType="PieChart"
+              data={guestAnalytics}
+              options={options}
+            />
+          )}
           <Button
             onClick={() =>
               navigate(`/guestList`, {
