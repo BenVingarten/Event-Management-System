@@ -3,54 +3,73 @@ import useAxiosPrivate from "../hooks/useAxiosPrivate";
 import useAuth from "../hooks/useAuth";
 import { jwtDecode } from "jwt-decode";
 import { Toaster, toast } from "react-hot-toast";
-import { useLocation, useNavigate } from "react-router-dom";
 import { Button, Label, TextInput } from "flowbite-react";
+import { set } from "mongoose";
 
 export default function Account() {
   const axiosPrivate = useAxiosPrivate();
-  const auth = useAuth();
+  const { auth } = useAuth();
   const effectRun = useRef(false);
 
-  const userRole = auth?.auth?.role;
+  const userRole = jwtDecode(auth.accessToken).userInfo.role;
+  const userId = jwtDecode(auth.accessToken).userInfo.id;
+
+  //console.log(userRole);
 
   const [user, setUser] = useState({
     username: "example_user",
     email: "example@example.com",
-    password: "example_password",
     businessType: "example_business",
     businessLocation: "example_location",
     businessDescription: "example_description",
   });
-
-  // State for edited user information
-  const [editedUser, setEditedUser] = useState({
-    username: "",
-    email: "",
-    password: "",
-    businessType: "",
-    businessLocation: "",
-    businessDescription: "",
-  });
+  const [updatedDetails, setUpdatedDetails] = useState({});
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setEditedUser({ ...editedUser, [name]: value });
+    setUpdatedDetails((prevDetails) => ({
+      ...prevDetails,
+      [name]: value,
+    }));
+    console.log(updatedDetails);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Update user state with edited user information
-    setUser({ ...user, ...editedUser });
-    // Clear editedUser state
-    setEditedUser({
-      username: "",
-      email: "",
-      password: "",
-      businessType: "",
-      businessLocation: "",
-      businessDescription: "",
-    });
-    //TODO: Send edited user information to the backend
+
+    const controller = new AbortController();
+    try {
+      console.log(updatedDetails);
+      const response = await axiosPrivate.patch(
+        `/users/${userId}/`,
+        updatedDetails,
+        {
+          headers: { "Content-Type": "application/json" },
+          withCredentials: true,
+          signal: controller.signal,
+        }
+      );
+      setUpdatedDetails({});
+      if (userRole !== "Vendor") {
+        setUser({
+          username: response.data.user.username,
+          email: response.data.user.email,
+        });
+      } else {
+        setUser({
+          username: response.data.user.username,
+          email: response.data.user.email,
+          businessType: response.data.user.businessType,
+          businessLocation: response.data.user.businessLocation,
+          businessDescription: response.data.user.businessDescription,
+        });
+      }
+
+      //console.log(response.data.event);
+    } catch (err) {
+      console.log(err);
+      toast.error("Failed to fetch event info. Please try again later.");
+    }
   };
 
   useEffect(() => {
@@ -59,14 +78,29 @@ export default function Account() {
     // Fetch user's events from the backend
 
     const fetchUserDetails = async () => {
+      console.log(userId);
       try {
-        const userId = jwtDecode(auth.accessToken).userInfo.id;
         const response = await axiosPrivate.get(`/users/${userId}/`, {
           signal: controller.signal,
         });
 
-        console.log(response.data);
-        //TODO: Set user state with fetched user information
+        console.log(response.data.user);
+
+        if (userRole !== "Vendor") {
+          setUser({
+            username: response.data.user.username,
+            email: response.data.user.email,
+          });
+        } else {
+          setUser({
+            username: response.data.user.username,
+            email: response.data.user.email,
+            businessType: response.data.user.businessType,
+            businessLocation: response.data.user.businessLocation,
+            businessDescription: response.data.user.businessDescription,
+          });
+        }
+        console.log(user);
       } catch (err) {
         console.log("Error: " + err.response?.data);
         toast.error("Failed fetching user details. Try again.");
@@ -90,8 +124,9 @@ export default function Account() {
           </div>
           <TextInput
             id="businessType"
+            name="businessType"
             type="text"
-            value={editedUser.businessType || user.businessType}
+            value={updatedDetails.businessType || user.businessType}
             onChange={handleInputChange}
             required
           />
@@ -102,8 +137,9 @@ export default function Account() {
           </div>
           <TextInput
             id="businessLocation"
+            name="businessLocation"
             type="text"
-            value={editedUser.businessLocation || user.businessLocation}
+            value={updatedDetails.businessLocation || user.businessLocation}
             onChange={handleInputChange}
             required
           />
@@ -114,8 +150,11 @@ export default function Account() {
           </div>
           <TextInput
             id="businessDescription"
+            name="businessDescription"
             type="text"
-            value={editedUser.businessDescription || user.businessDescription}
+            value={
+              updatedDetails.businessDescription || user.businessDescription
+            }
             onChange={handleInputChange}
             required
           />
@@ -137,8 +176,9 @@ export default function Account() {
               </div>
               <TextInput
                 id="username"
+                name="username"
                 type="text"
-                value={editedUser.username || user.username}
+                value={updatedDetails.username || user.username}
                 onChange={handleInputChange}
                 required
               />
@@ -149,24 +189,12 @@ export default function Account() {
               </div>
               <TextInput
                 id="email1"
+                name="email"
                 type="email"
-                value={editedUser.email || user.email}
+                value={updatedDetails.email || user.email}
                 onChange={handleInputChange}
               />
             </div>
-            <div>
-              <div className="mb-2 block">
-                <Label htmlFor="password1" value="Your password" />
-              </div>
-              <TextInput
-                id="password1"
-                type="password"
-                placeholder="Enter your password"
-                onChange={handleInputChange}
-                required
-              />
-            </div>
-
             <Button className="mt-5" type="submit">
               Save Changes
             </Button>

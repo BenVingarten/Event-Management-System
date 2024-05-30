@@ -166,7 +166,7 @@ export default function EventDetails() {
 
   const handleSaveChanges = async () => {
     console.log("Save changes");
-    // TODO: Implement the save changes logic
+
     // check which fields are updated
     const updatedFields = {};
     for (let [field, value] of Object.entries(updatedDetails)) {
