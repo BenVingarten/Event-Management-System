@@ -41,7 +41,7 @@ export default function Account() {
     try {
       console.log(updatedDetails);
       const response = await axiosPrivate.patch(
-        `/users/${userId}/`,
+        `/users/${userId}`,
         updatedDetails,
         {
           headers: { "Content-Type": "application/json" },

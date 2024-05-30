@@ -102,15 +102,37 @@ function patchUserValidation() {
       notEmpty: { errorMessage: "email cant be empty" },
       isEmail: { errorMessage: "invalid email format" },
     },
-    password: {
+    businessType: {
       optional: { options: { nullable: true } },
-      notEmpty: { errorMessage: "password can't be empty" },
-      isLength: {
-        options: { min: 5, max: 20 },
-        errorMessage:
-          "username needs to be at range of 5 to 20 characters long",
-      },
+      custom: {
+        options: (value, { req }) => {
+          // Check if role is Vendor and businessType is provided
+          return req.role !== 'Vendor' || (req.role === 'Vendor' && value);
+        },
+        errorMessage: "Business type is required for vendors"
+      }
     },
+    businessLocation: {
+      optional: { options: { nullable: true } },
+      custom: {
+        options: (value, { req }) => {
+          // Check if role is Vendor and location is provided
+          return req.role !== 'Vendor' || (req.role === 'Vendor' && value);
+        },
+        errorMessage: "Location is required for vendors"
+      }
+    },
+    businessDescription: {
+      optional: { options: { nullable: true } },
+      custom: {
+        options: (value, { req }) => {
+          // Check if role is Vendor and description is provided
+          return req.role !== 'Vendor' || (req.role === 'Vendor' && value);
+        },
+        errorMessage: "Description is required for vendors"
+      }
+    }
+    
   };
 }
 

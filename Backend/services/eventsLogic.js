@@ -3,7 +3,7 @@ import { DataNotFoundError } from "../errors/DataNotFoundError.js";
 import { GeneralServerError } from "../errors/GeneralServerError.js";
 import eventModel from "../models/Event.js";
 import userModel from "../models/User.js";
-import { deleteUserEvent, getIdbyEmail, getUserById } from "./UserLogic.js";
+import { deleteUserEvent, getIdbyEmail } from "./UserLogic.js";
 
 export const getEvents = async (id) => {
   try {

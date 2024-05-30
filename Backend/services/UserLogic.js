@@ -126,13 +126,11 @@ export const createUser = async (userInfo) => {
   }
 };
 
-export const getUserById = async (id, populateOptions) => {
+export const getUserById = async (id) => {
   try {
-    const isPopulate =
-      populateOptions && Object.keys(populateOptions).length > 0;
-    const query = userModel.findById(id);
-    if (isPopulate) query.populate(populateOptions);
-    const user = await query.exec();
+    const selectOptions = "-_id username email businessType businessLocation businessDescription";
+    
+    const user = await userModel.findOne({ _id: id }).select(selectOptions).exec();
     if (!user) throw new DataNotFoundError("User with that ID is not found");
     return user;
   } catch (err) {
@@ -155,16 +153,13 @@ export const patchUser = async (id, updatedValues) => {
       if (foundUser)
         throw new DuplicateDataError("There is already a user with that email");
     }
-
-    if (updatedValues?.password) {
-      const hasedPwd = await bcrypt.hash(updatedValues.password, 10);
-      updatedValues.password = hasedPwd;
-    }
-
-    const updatedUser = await userModel.findByIdAndUpdate(id, updatedValues, {
-      new: true,
-    });
-
+    
+    const selectedFields = "-_id username email businessType businessLocation businessDescription";
+    const updatedUser = await userModel.findOneAndUpdate(
+      {_id: id}, 
+      updatedValues, 
+      {new: true}
+    ).select(selectedFields).exec(); 
     if (!updatedUser) throw new DataNotFoundError();
     return updatedUser;
   } catch (err) {
