@@ -4,7 +4,6 @@ import useAuth from "../hooks/useAuth";
 import { jwtDecode } from "jwt-decode";
 import { Toaster, toast } from "react-hot-toast";
 import { Button, Label, TextInput } from "flowbite-react";
-import { set } from "mongoose";
 
 export default function Account() {
   const axiosPrivate = useAxiosPrivate();
@@ -31,15 +30,16 @@ export default function Account() {
       ...prevDetails,
       [name]: value,
     }));
-    console.log(updatedDetails);
   };
+  //console.log(updatedDetails);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const { name, value } = e.target;
 
     const controller = new AbortController();
     try {
-      console.log(updatedDetails);
+      //console.log(updatedDetails);
       const response = await axiosPrivate.patch(
         `/users/${userId}`,
         updatedDetails,
@@ -49,21 +49,12 @@ export default function Account() {
           signal: controller.signal,
         }
       );
+      //console.log(response);
       setUpdatedDetails({});
-      if (userRole !== "Vendor") {
-        setUser({
-          username: response.data.user.username,
-          email: response.data.user.email,
-        });
-      } else {
-        setUser({
-          username: response.data.user.username,
-          email: response.data.user.email,
-          businessType: response.data.user.businessType,
-          businessLocation: response.data.user.businessLocation,
-          businessDescription: response.data.user.businessDescription,
-        });
-      }
+      setUser((prevDetails) => ({
+        ...prevDetails,
+        [name]: value,
+      }));
 
       //console.log(response.data.event);
     } catch (err) {
@@ -78,31 +69,19 @@ export default function Account() {
     // Fetch user's events from the backend
 
     const fetchUserDetails = async () => {
-      console.log(userId);
       try {
         const response = await axiosPrivate.get(`/users/${userId}/`, {
           signal: controller.signal,
         });
 
-        console.log(response.data.user);
-
-        if (userRole !== "Vendor") {
-          setUser({
-            username: response.data.user.username,
-            email: response.data.user.email,
-          });
-        } else {
-          setUser({
-            username: response.data.user.username,
-            email: response.data.user.email,
-            businessType: response.data.user.businessType,
-            businessLocation: response.data.user.businessLocation,
-            businessDescription: response.data.user.businessDescription,
-          });
-        }
-        console.log(user);
+        setUser(response.data.user);
+        //setUpdatedDetails(response.data.user);
+        //console.log(response.data);
+        //console.log("User details fetched");
+        //console.log(user);
       } catch (err) {
-        console.log("Error: " + err.response?.data);
+        console.log("Error: " + err.response);
+        console.log(err);
         toast.error("Failed fetching user details. Try again.");
       }
     };
@@ -114,54 +93,6 @@ export default function Account() {
       effectRun.current = true;
     };
   }, []);
-
-  const PresentVendorInfo = () => {
-    return (
-      <div>
-        <div>
-          <div className="mb-2 block">
-            <Label htmlFor="type" value="Business type" />
-          </div>
-          <TextInput
-            id="businessType"
-            name="businessType"
-            type="text"
-            value={updatedDetails.businessType || user.businessType}
-            onChange={handleInputChange}
-            required
-          />
-        </div>
-        <div>
-          <div className="mb-2 block">
-            <Label htmlFor="type" value="Business location" />
-          </div>
-          <TextInput
-            id="businessLocation"
-            name="businessLocation"
-            type="text"
-            value={updatedDetails.businessLocation || user.businessLocation}
-            onChange={handleInputChange}
-            required
-          />
-        </div>
-        <div>
-          <div className="mb-2 block">
-            <Label htmlFor="type" value="Business description" />
-          </div>
-          <TextInput
-            id="businessDescription"
-            name="businessDescription"
-            type="text"
-            value={
-              updatedDetails.businessDescription || user.businessDescription
-            }
-            onChange={handleInputChange}
-            required
-          />
-        </div>
-      </div>
-    );
-  };
 
   return (
     <div className="ml-5">
@@ -178,9 +109,9 @@ export default function Account() {
                 id="username"
                 name="username"
                 type="text"
-                value={updatedDetails.username || user.username}
+                value={updatedDetails.username}
                 onChange={handleInputChange}
-                required
+                placeholder={user.username}
               />
             </div>
             <div>
@@ -191,15 +122,62 @@ export default function Account() {
                 id="email1"
                 name="email"
                 type="email"
-                value={updatedDetails.email || user.email}
+                value={updatedDetails.email}
                 onChange={handleInputChange}
+                placeholder={user.email}
               />
             </div>
-            <Button className="mt-5" type="submit">
-              Save Changes
-            </Button>
           </div>
-          {userRole == "Vendor" ? <PresentVendorInfo /> : null}
+          {userRole == "Vendor" ? (
+            <div>
+              <div>
+                <div className="mb-2 block">
+                  <Label htmlFor="type" value="Business type" />
+                </div>
+                <TextInput
+                  id="businessType"
+                  name="businessType"
+                  type="text"
+                  value={updatedDetails.businessType}
+                  onChange={handleInputChange}
+                  placeholder={user.businessType}
+                />
+              </div>
+              <div>
+                <div className="mb-2 block">
+                  <Label htmlFor="type" value="Business location" />
+                </div>
+                <TextInput
+                  id="businessLocation"
+                  name="businessLocation"
+                  type="text"
+                  value={updatedDetails.businessLocation}
+                  onChange={handleInputChange}
+                  placeholder={user.businessLocation}
+                />
+              </div>
+            </div>
+          ) : null}
+        </div>
+        {userRole == "Vendor" ? (
+          <div className="">
+            <div className="mb-2 block">
+              <Label htmlFor="type" value="Business description" />
+            </div>
+            <TextInput
+              id="businessDescription"
+              name="businessDescription"
+              type="text"
+              value={updatedDetails.businessDescription}
+              onChange={handleInputChange}
+              placeholder={user.businessDescription}
+            />
+          </div>
+        ) : null}
+        <div className="self-center">
+          <Button className="mt-5" type="submit">
+            Save Changes
+          </Button>
         </div>
       </form>
     </div>
