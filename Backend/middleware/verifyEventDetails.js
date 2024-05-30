@@ -67,6 +67,17 @@ function patchEventValidation() {
       optional: { options: { nullable: true } },
       notEmpty: { errorMessage: "event must have a location" },
     },
+    collaborators: {
+      optional: { options: { nullable: true } },
+      custom: {
+        options: (value) => {
+          if (!Array.isArray(value)) return false;
+          return (!value.every((email) => validator.isEmail(email)));
+
+        },
+        errorMessage: "Invalid email format for collaborator",
+      },
+    },
   }
 }
 
