@@ -55,11 +55,11 @@ export default function Account() {
         ...prevDetails,
         [name]: value,
       }));
-
+      toast.success("details updated successfully");
       //console.log(response.data.event);
     } catch (err) {
       console.log(err);
-      toast.error("Failed to fetch event info. Please try again later.");
+      toast.error(err.response.data.err);
     }
   };
 
