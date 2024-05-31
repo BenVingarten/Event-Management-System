@@ -24,7 +24,10 @@ export default function EventDetails() {
   const [eventInfo, setEventInfo] = useState([]);
   const [taskAnalytics, setTaskAnalytics] = useState([]);
   const [guestAnalytics, setGuestAnalytics] = useState([]);
-  console.log(guestAnalytics);
+  const [collaborators, setCollaborators] = useState([]);
+  const [additionalInfo, setAdditionalInfo] = useState([]);
+
+  console.log(collaborators);
 
   const { auth } = useAuth();
   const axiosPrivate = useAxiosPrivate();
@@ -40,6 +43,7 @@ export default function EventDetails() {
     date: null,
   });
 
+  // Fetch event details
   const effectRun = useRef(false);
   useEffect(() => {
     let isMounted = true;
@@ -56,7 +60,7 @@ export default function EventDetails() {
             signal: controller.signal,
           }
         );
-        console.log(response.data);
+        //console.log(response.data);
         isMounted && setEventInfo(response.data.eventDetails.event);
         setTaskAnalytics(
           convertArray(
@@ -72,6 +76,8 @@ export default function EventDetails() {
             "Precentage"
           )
         );
+        setCollaborators(response.data.eventDetails.event.collaborators);
+        setAdditionalInfo(response.data.eventDetails.event.additionalInfo);
       } catch (err) {
         console.log(err);
         toast.error("Failed to fetch event info. Please try again later.");
@@ -87,6 +93,7 @@ export default function EventDetails() {
     };
   }, [isModalOpen]);
 
+  // Sample data for the pie chart
   const data = [
     ["Task", "Hours per Day"],
     ["Work", 11],
@@ -96,6 +103,7 @@ export default function EventDetails() {
     ["Sleep", 7], // CSS-style declaration
   ];
 
+  // Convert array to format required by Google Charts
   const convertArray = (inputArray, headerName, type) => {
     const header = [headerName, type];
     const data = inputArray.map((item) => [
@@ -105,6 +113,7 @@ export default function EventDetails() {
     return [header, ...data];
   };
 
+  // Chart options
   const options = {
     pieHole: 0.4,
     is3D: false,
@@ -113,6 +122,7 @@ export default function EventDetails() {
     backgroundColor: { fill: "transparent" },
   };
 
+  // Display event details
   const displayEventDetails = () => {
     // Parse the date string into a Date object
     const eventDate = new Date(eventInfo.date);
@@ -145,16 +155,15 @@ export default function EventDetails() {
           </span>
 
           {/* Additional Info */}
-          {eventInfo.additionalInfo && eventInfo.additionalInfo.length > 0
-            ? additionalInfoPresent()
-            : null}
+          {additionalInfo.length > 0 && additionalInfoPresent()}
 
-          {collaboratorsPresent()}
+          {collaborators.length > 0 && collaboratorsPresent()}
         </div>
       </div>
     );
   };
 
+  // Handle input change
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setUpdatedDetails((prevDetails) => ({
@@ -162,8 +171,8 @@ export default function EventDetails() {
       [name]: value,
     }));
   };
-  //console.log(updatedDetails);
 
+  // Save changes to event details
   const handleSaveChanges = async () => {
     console.log("Save changes");
 
@@ -198,6 +207,8 @@ export default function EventDetails() {
       const response = await axiosPrivate.patch(
         `/users/${userId}/events/${eventId}`,
         updatedFields,
+        collaborators,
+        additionalInfo,
         {
           headers: { "Content-Type": "application/json" },
           withCredentials: true,
@@ -212,14 +223,13 @@ export default function EventDetails() {
 
     setIsModalOpen(false);
   };
-  //console.log(eventInfo);
 
+  // Present additional info
   const additionalInfoPresent = () => {
     return (
       <div>
         <ListGroup className="mr-5 mt-5">
-          {eventInfo.additionalInfo.map((info) => (
-            //TODO: manage info
+          {additionalInfo.map((info) => (
             <ListGroup.Item key={info}>{info}</ListGroup.Item>
           ))}
         </ListGroup>
@@ -227,6 +237,7 @@ export default function EventDetails() {
     );
   };
 
+  // Present collaborators
   const collaboratorsPresent = () => {
     return (
       <div className="mt-5">
@@ -237,9 +248,8 @@ export default function EventDetails() {
           outline
           gradientDuoTone={"pinkToOrange"}
         >
-          {eventInfo.collaborators ? ( //TODO: Change the c to collab name and manage it
-            //TODO: Modal is open? than add delete button
-            eventInfo.collaborators.map((c) => (
+          {collaborators.length > 0 ? (
+            collaborators.map((c) => (
               <Dropdown.Item key={c._id}>
                 {c.username} | {c.email}
               </Dropdown.Item>
@@ -250,6 +260,40 @@ export default function EventDetails() {
         </Dropdown>
       </div>
     );
+  };
+
+  // Edit collaborators functionality
+  const handleAddCollaborator = () => {
+    setCollaborators([...collaborators, ""]);
+  };
+
+  const handleRemoveCollaborator = (index) => {
+    const newCollaborators = [...collaborators];
+    newCollaborators.splice(index, 1);
+    setCollaborators(newCollaborators);
+  };
+
+  const handleCollaboratorChange = (index, value) => {
+    const newCollaborators = [...collaborators];
+    newCollaborators[index] = value;
+    setCollaborators(newCollaborators);
+  };
+
+  // Edit additional info functionality
+  const handleAddAdditionalInfo = () => {
+    setAdditionalInfo([...additionalInfo, ""]);
+  };
+
+  const handleRemoveAdditionalInfo = (index) => {
+    const newAdditionalInfo = [...additionalInfo];
+    newAdditionalInfo.splice(index, 1);
+    setAdditionalInfo(newAdditionalInfo);
+  };
+
+  const handleAdditionalInfoChange = (index, value) => {
+    const newAdditionalInfo = [...additionalInfo];
+    newAdditionalInfo[index] = value;
+    setAdditionalInfo(newAdditionalInfo);
   };
 
   return (
@@ -334,6 +378,7 @@ export default function EventDetails() {
           <form>
             <h3 className="text-lg font-bold mb-3">Edit your event details</h3>
 
+            {/* Event Name */}
             <div>
               <div className="m-2 block">
                 <Label htmlFor="name" value="Event Name" />
@@ -347,6 +392,7 @@ export default function EventDetails() {
               />
             </div>
 
+            {/* Event Budget */}
             <div>
               <div className="m-2 block">
                 <Label htmlFor="budget" value="Event Budget" />
@@ -360,6 +406,7 @@ export default function EventDetails() {
               />
             </div>
 
+            {/* Event Location */}
             <div>
               <div className="m-2 block">
                 <Label htmlFor="location" value="Event Location" />
@@ -373,6 +420,7 @@ export default function EventDetails() {
               />
             </div>
 
+            {/* Event Date */}
             <div>
               <div className="m-2 block">
                 <Label htmlFor="date" value="Event Date" />
@@ -385,6 +433,61 @@ export default function EventDetails() {
               />
             </div>
 
+            {/* Collaborators */}
+            <div className="mt-4">
+              <Label htmlFor="collaborators" value="Collaborators" />
+              {collaborators.map((collaborator, index) => (
+                <div key={index} className="flex items-center mb-2">
+                  <TextInput
+                    value={collaborator.email}
+                    onChange={(e) =>
+                      handleCollaboratorChange(index, e.target.value)
+                    }
+                    className="flex-grow"
+                  />
+                  <Button
+                    color="red"
+                    size="sm"
+                    className="ml-2"
+                    onClick={() => handleRemoveCollaborator(index)}
+                  >
+                    Remove
+                  </Button>
+                </div>
+              ))}
+              <Button color="blue" size="sm" onClick={handleAddCollaborator}>
+                Add Collaborator
+              </Button>
+            </div>
+
+            {/* Additional Info */}
+            <div className="mt-4">
+              <Label htmlFor="additionalInfo" value="Additional Info" />
+              {additionalInfo.map((info, index) => (
+                <div key={index} className="flex items-center mb-2">
+                  <TextInput
+                    value={info}
+                    onChange={(e) =>
+                      handleAdditionalInfoChange(index, e.target.value)
+                    }
+                    className="flex-grow"
+                  />
+                  <Button
+                    color="red"
+                    size="sm"
+                    className="ml-2"
+                    onClick={() => handleRemoveAdditionalInfo(index)}
+                  >
+                    Remove
+                  </Button>
+                </div>
+              ))}
+              <Button color="blue" size="sm" onClick={handleAddAdditionalInfo}>
+                Add Info
+              </Button>
+            </div>
+
+            {/* Save and Cancel Buttons */}
             <div className="flex justify-end mt-5">
               <Button
                 color={"green"}
