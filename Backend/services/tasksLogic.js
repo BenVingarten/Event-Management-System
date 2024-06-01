@@ -1,12 +1,17 @@
 import { DataNotFoundError } from "../errors/DataNotFoundError.js";
 import { GeneralServerError } from "../errors/GeneralServerError.js";
 import eventModel from "../models/Event.js";
+import taskModel from "../models/Task.js";
 import { getEventById } from "./eventsLogic.js";
 import { roundedPercentagesToHundred } from "./eventsLogic.js";
 import mongoose from "mongoose";
 export const getTasks = async (userId, eventId) => {
   try {
-    const event = await getEventById(userId, eventId);
+    const event = await eventModel
+      .findOne({ _id: eventId, collaborators: userId })
+      .populate({ path: "cards"})
+      .exec();
+    if (!event) throw new DataNotFoundError();
     return event.cards;
   } catch (err) {
     if (err instanceof DataNotFoundError) throw err;
@@ -14,12 +19,39 @@ export const getTasks = async (userId, eventId) => {
   }
 };
 
-export const updateTasks = async (userId, eventId, updatedTaskList) => {
+export const createTask = async (userId, eventId, taskData) => {
   try {
     const event = await getEventById(userId, eventId);
-    event.cards = updatedTaskList;
+    const newTaskObj = taskData;
+    newTaskObj.event = event._id;
+    const newTask = await taskModel.create(newTaskObj);
+    event.cards.push(newTask);
     await event.save();
-    return event.cards;
+    return newTask;
+  }catch (err) {
+    if(err instanceof DataNotFoundError) throw err;
+    throw new GeneralServerError();
+  }
+};
+
+export const updateTasks = async (userId, eventId, cards) => {
+  try {
+    const event = await getEventById(userId, eventId);
+    const updateCriteria = cards.map(card => ({
+      _id: card._id
+    }));
+    const updateData = cards.map(card => ({
+      $set: {
+        title: card.title,
+        column: card.column,
+        id: card.id
+      }
+    }));
+    const result = await taskModel.updateMany(
+      { $or: updateCriteria },
+      updateData
+    );
+    if(!result) throw new DataNotFoundError();
   } catch (err) {
     if (err instanceof DataNotFoundError) throw err;
     throw new GeneralServerError();
@@ -30,70 +62,50 @@ export const getTasksAnalytics = async (userId, eventId) => {
   try {
     const pipeLine = [
       {
-        $match: {
-          _id: new mongoose.Types.ObjectId(eventId),
-          collaborators: new mongoose.Types.ObjectId(userId),
-        },
-      },
-      {
-        $unwind: "$cards",
+        $match: { event: new mongoose.Types.ObjectId(eventId) }
       },
       {
         $facet: {
           countByStatus: [
-            {
-              $group: {
-                _id: "$cards.column",
-                count: { $sum: 1 },
-              },
-            },
-            {
-              $project: {
-                _id: 0,
-                column: "$_id",
-                count: 1,
-              },
-            },
+            { $group: { _id: "$column", count: { $sum: 1 } } },
+            { $project: { _id: 0, column: "$_id", count: 1 } }
           ],
           countTotal: [
-            {
-              $group: {
-                _id: null,
-                total: { $sum: 1 },
-              },
-            },
-          ],
-        },
+            { $group: { _id: null, total: { $sum: 1 } } }
+          ]
+        }
       },
       {
-        $unwind: "$countByStatus",
-      },
-      {
-        $unwind: "$countTotal",
-      },
-      {
-        $project: {
-          column: "$countByStatus.column",
-          percentage: {
-            $round: [
-              {
-                $multiply: [
-                  { $divide: ["$countByStatus.count", "$countTotal.total"] },
-                  100,
+            $unwind: "$countByStatus",
+          },
+          {
+            $unwind: "$countTotal",
+          },
+          {
+            $project: {
+              status: "$countByStatus.status",
+              percentage: {
+                $round: [
+                  {
+                    $multiply: [
+                      { $divide: ["$countByStatus.count", "$countTotal.total"] },
+                      100,
+                    ],
+                  },
+                  1,
                 ],
               },
-              1,
-            ],
+            },
           },
-        },
-      },
     ];
-    const results = await eventModel.aggregate(pipeLine).exec();
+    const event = getEventById(userId, eventId);
+    const results = await taskModel.aggregate(pipeLine).exec();
     if (!results)
       throw new DataNotFoundError("No datafound for the provided criteria");
-    if(results.length === 0) return results;
-    
+    if (results.length === 0) return results;
+
     const roundedResults = roundedPercentagesToHundred(results);
+
     return roundedResults;
   } catch (err) {
     console.error("Error in getTasksAnalytics:", err); // Log the detailed error
@@ -101,3 +113,21 @@ export const getTasksAnalytics = async (userId, eventId) => {
     throw new GeneralServerError();
   }
 };
+
+export const deleteTask = async (userId, eventId, taskId) => {
+  try {
+    const event = await eventModel.updateOne(
+      { _id: eventId, collaborators: userId },
+      { $pull: { cards: taskId} }
+    );
+    if (!event) throw new DataNotFoundError();
+    const result = await taskModel.deleteOne({
+      _id: taskId, event: eventId
+    });
+    if(!result)
+        throw new DataNotFoundError();
+  } catch (err) {
+    if (err instanceof DataNotFoundError || GeneralServerError) throw err;
+    throw new GeneralServerError();
+  }
+}

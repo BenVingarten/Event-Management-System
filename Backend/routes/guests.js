@@ -10,7 +10,6 @@ import {
   handleGetGuests,
   handleGetGuest,
   handlePatchGuest,
-  handlePutGuest,
   handleDeleteGuests,
 } from "../Controllers/guestsController.js";
 const router = Router();
@@ -18,38 +17,11 @@ const router = Router();
 router
   .route("/users/:id/events/:eventId/guests")
   .get(verifyUserIdMatchAuthId, verifyParamId("eventId"), handleGetGuests)
-  .post(
-    verifyUserIdMatchAuthId,
-    verifyParamId("eventId"),
-    validateAddGuest,
-    handleAddGuest
-  )
-  .delete(
-    verifyUserIdMatchAuthId,
-    verifyParamId("eventId"),
-    handleDeleteGuests
-  );
+  .post(verifyUserIdMatchAuthId,verifyParamId("eventId"),validateAddGuest,handleAddGuest)
+  .delete(verifyUserIdMatchAuthId,verifyParamId("eventId"),handleDeleteGuests);
 
 router
   .route("/users/:id/events/:eventId/guests/:guestId")
-  .get(
-    verifyUserIdMatchAuthId,
-    verifyParamId("eventId"),
-    verifyParamId("guestId"),
-    handleGetGuest
-  )
-  .patch(
-    verifyUserIdMatchAuthId,
-    verifyParamId("eventId"),
-    verifyParamId("guestId"),
-    validateUpdateGuest,
-    handlePatchGuest
-  )
-  .put(
-    verifyUserIdMatchAuthId,
-    verifyParamId("eventId"),
-    verifyParamId("guestId"),
-    handlePutGuest
-  );
-
+  .get(verifyUserIdMatchAuthId,verifyParamId("eventId"),verifyParamId("guestId"),handleGetGuest)
+  .patch(verifyUserIdMatchAuthId,verifyParamId("eventId"),verifyParamId("guestId"),validateUpdateGuest,handlePatchGuest)
 export default router;

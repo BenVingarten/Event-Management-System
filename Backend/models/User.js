@@ -61,7 +61,7 @@ userSchema.add({
 });
 
 userSchema.pre(
-  ["save", "updateOne", "updateMany", "findOneAndUpdate"],
+  ["save", "updateOne", "updateMany", "findOneAndUpdate", "findByIdAndUpdate"],
   function (next) {
     this.updatedAt = Date.now();
     next();

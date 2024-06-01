@@ -1,14 +1,35 @@
 import { Router } from "express";
 import { verifyParamId } from "../middleware/verifyParamId.js";
 import { verifyUserIdMatchAuthId } from "../middleware/verifyUserIdMatchAuthId.js";
-import { handleGetTasks, handleUpdateTaskList } from "../Controllers/tasksController.js"
-import { validatePutTask } from "../middleware/verifyTaskDetails.js";
+import {
+  handleGetTasks,
+  handleUpdateTaskList,
+  handleDeleteTask,
+} from "../Controllers/tasksController.js";
+import {
+  validatePutTask,
+  validateCreateTask,
+} from "../middleware/verifyTaskDetails.js";
 const router = Router();
 
 router
   .route("/users/:id/events/:eventId/tasks")
-  .get(verifyUserIdMatchAuthId, verifyParamId ('eventId'), handleGetTasks)
-  .put(verifyUserIdMatchAuthId, verifyParamId ('eventId'), validatePutTask, handleUpdateTaskList);
-    
+  .get(verifyUserIdMatchAuthId, verifyParamId("eventId"), handleGetTasks)
+  .post(verifyUserIdMatchAuthId, verifyParamId("eventId"), validateCreateTask)
+  .put(
+    verifyUserIdMatchAuthId,
+    verifyParamId("eventId"),
+    validatePutTask,
+    handleUpdateTaskList
+  );
+
+router
+  .route("/users/:id/events/:eventId/tasks/:taskId")
+  .delete(
+    verifyUserIdMatchAuthId,
+    verifyParamId("eventId"),
+    verifyParamId("taskId"),
+    handleDeleteTask
+  );
 
 export default router;

@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 const { Schema } = mongoose;
-import { taskStatus, guestStatus } from "../constants/event.js";
+import { taskStatus } from "../constants/event.js";
 const eventSchema = new Schema({
   name: {
     type: String,
@@ -34,48 +34,14 @@ const eventSchema = new Schema({
   ],
   cards: [
     {
-      _id: false,
-      title: {
-        type: String,
-        required: true,
-      },
-      column: {
-        type: String,
-        default: taskStatus[1],
-      },
-      id: {
-        type: String,
-        required: true,
-      },
+      type: Schema.Types.ObjectId,
+      ref: "Task",
     },
   ],
   guestList: [
     {
-      name: {
-        type: String,
-        required: true,
-      },
-      phoneNumber: {
-        type: String,
-        required: true,
-      },
-      status: {
-        type: String,
-        enum: guestStatus,
-        default: guestStatus[1],
-      },
-      group: {
-        type: String,
-        required: true,
-      },
-      peopleCount: {
-        type: Number,
-        required: true,
-      },
-      comments: {
-        type: String,
-        default: "",
-      },
+      type: Schema.Types.ObjectId,
+      ref: "Guest",
     },
   ],
   createdAt: {
@@ -90,7 +56,7 @@ const eventSchema = new Schema({
 
 eventSchema.index({ collabrators: 1, guestList: 1, _id: 1 });
 eventSchema.pre(
-  ["save", "updateOne", "updateMany", "findOneAndUpdate"],
+  ["save", "updateOne", "updateMany", "findOneAndUpdate", "findByIdAndUpdate"],
   function (next) {
     this.updatedAt = Date.now();
     next();

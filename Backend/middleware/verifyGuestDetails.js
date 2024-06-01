@@ -52,15 +52,23 @@ function addGuestValidation() {
 
 function updateGuestValidation() {
   return {
-    peopleCount: {
+    name: {
       optional: { options: { nullable: true } },
-      notEmpty: { errorMessage: "guest must have a status" },
+      notEmpty: { errorMessage: "guest must have a name" },
+    },
+    phoneNumber: {
+      optional: { options: { nullable: true } },
+      notEmpty: { errorMessage: "guest must have a phoneNumber for contact" },
       custom: {
         options: (value) => {
-          return value > 0;
+          return isValidPhoneNumber(value);
         },
-        errorMessage: "number of guests must at least be 1",
+        errorMessage: "Invalid phone number",
       },
+    },
+    group: {
+      optional: { options: { nullable: true } },
+      notEmpty: { errorMessage: "guest must have a group" },
     },
     status: {
       optional: { options: { nullable: true } },
@@ -70,6 +78,19 @@ function updateGuestValidation() {
           return value && guestStatus.some((type) => type === value);
         },
         errorMessage: "Invalid guest's status",
+      },
+    },
+    peopleCount: {
+      optional: { options: { nullable: true } },
+      notEmpty: {
+        errorMessage:
+          "guest needs to inform the number of people he is going to bring with him",
+      },
+      custom: {
+        options: (value) => {
+          return value > 0;
+        },
+        errorMessage: "number of guests must at least be 1",
       },
     },
   };

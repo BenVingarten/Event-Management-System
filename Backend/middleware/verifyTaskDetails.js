@@ -31,5 +31,30 @@ function putTaskValidation() {
     },
   };
 }
+function createTaskValidation() {
+  return {
+    title: {
+      notEmpty: {
+        errorMessage: "Task must have content",
+      },
+    },
+    column: {
+      notEmpty: {
+        errorMessage: "Task must have a status",
+      },
+      custom: {
+        options: (value) => value && taskStatus.includes(value),
+        errorMessage: "Invalid task status",
+      },
+    },
+    id: {
+      notEmpty: {
+        errorMessage: "Task must have a id",
+      },
+    },
+  };
+}
 
 export const validatePutTask = checkSchema(putTaskValidation());
+export const validateCreateTask = checkSchema(createTaskValidation());
+
