@@ -3,31 +3,30 @@ import { taskStatus } from "../constants/event.js";
 const { Schema } = mongoose;
 
 const taskSchema = new Schema({
-    title: {
-      type: String,
-      required: true,
-    },
-    column: {
-      type: String,
-      default: taskStatus[1],
-    },
-    id: {
-      type: String,
-      required: true,
-    },
-    event: {
-      type: Schema.Types.ObjectId,
-      ref: "Event",
-      required: true
-    },
-    createdAt: {
-      type: Number,
-      default: Date.now(),
-      immutable: true,
-    },
-    updatedAt: {
-      type: Number,
-    },
+  title: {
+    type: String,
+    required: true,
+  },
+  column: {
+    type: String,
+    default: taskStatus[1],
+  },
+  id: {
+    type: String,
+  },
+  event: {
+    type: Schema.Types.ObjectId,
+    ref: "Event",
+    required: true,
+  },
+  createdAt: {
+    type: Number,
+    default: Date.now(),
+    immutable: true,
+  },
+  updatedAt: {
+    type: Number,
+  },
 });
 
 taskSchema.pre(

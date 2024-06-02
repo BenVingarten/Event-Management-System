@@ -1,5 +1,10 @@
 import { matchedData, validationResult } from "express-validator";
-import { createTask, getTasks, updateTasks, deleteTask } from "../services/tasksLogic.js";
+import {
+  createTask,
+  getTasks,
+  updateTasks,
+  deleteTask,
+} from "../services/tasksLogic.js";
 export const handleGetTasks = async (req, res) => {
   try {
     const { userId } = req;
@@ -41,10 +46,10 @@ export const handleUpdateTaskList = async (req, res) => {
 export const handleDeleteTask = async (req, res) => {
   try {
     const { userId } = req;
-    const {eventId, taskId } = req.params;
+    const { eventId, taskId } = req.params;
     await deleteTask(userId, eventId, taskId);
     return res.status(200).json({ success: "successfully deleted the task!" });
-  }catch(err){
+  } catch (err) {
     return res.status(err.statusCode).json({ err: err.message });
   }
-}
+};

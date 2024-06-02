@@ -24,11 +24,8 @@ function putTaskValidation() {
         errorMessage: "Invalid task status",
       },
     },
-    "cards.*.id": {
-      notEmpty: {
-        errorMessage: "Task must have a id",
-      },
-    },
+    
+    
   };
 }
 function createTaskValidation() {
@@ -47,14 +44,8 @@ function createTaskValidation() {
         errorMessage: "Invalid task status",
       },
     },
-    id: {
-      notEmpty: {
-        errorMessage: "Task must have a id",
-      },
-    },
   };
 }
 
 export const validatePutTask = checkSchema(putTaskValidation());
 export const validateCreateTask = checkSchema(createTaskValidation());
-

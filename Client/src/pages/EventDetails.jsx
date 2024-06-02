@@ -24,10 +24,9 @@ export default function EventDetails() {
   const [eventInfo, setEventInfo] = useState([]);
   const [taskAnalytics, setTaskAnalytics] = useState([]);
   const [guestAnalytics, setGuestAnalytics] = useState([]);
+
   const [collaborators, setCollaborators] = useState([]);
   const [additionalInfo, setAdditionalInfo] = useState([]);
-
-  console.log(collaborators);
 
   const { auth } = useAuth();
   const axiosPrivate = useAxiosPrivate();
@@ -174,8 +173,6 @@ export default function EventDetails() {
 
   // Save changes to event details
   const handleSaveChanges = async () => {
-    console.log("Save changes");
-
     // check which fields are updated
     const updatedFields = {};
     for (let [field, value] of Object.entries(updatedDetails)) {
@@ -189,8 +186,12 @@ export default function EventDetails() {
         updatedFields[field] = value;
       }
     }
+    //console.log("Save changes");
     //console.log("updated Fields are ");
-    console.log(updatedFields);
+    //console.log(updatedFields);
+    //console.log("Collaborators: " + collaborators);
+    //console.log("Additional Info: " + additionalInfo);
+
     // Reset updated details
     setUpdatedDetails({
       name: null,

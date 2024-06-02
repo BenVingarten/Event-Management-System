@@ -5,6 +5,7 @@ import {
   handleGetTasks,
   handleUpdateTaskList,
   handleDeleteTask,
+  handleCreateTask,
 } from "../Controllers/tasksController.js";
 import {
   validatePutTask,
@@ -15,7 +16,12 @@ const router = Router();
 router
   .route("/users/:id/events/:eventId/tasks")
   .get(verifyUserIdMatchAuthId, verifyParamId("eventId"), handleGetTasks)
-  .post(verifyUserIdMatchAuthId, verifyParamId("eventId"), validateCreateTask)
+  .post(
+    verifyUserIdMatchAuthId,
+    verifyParamId("eventId"),
+    validateCreateTask,
+    handleCreateTask
+  )
   .put(
     verifyUserIdMatchAuthId,
     verifyParamId("eventId"),

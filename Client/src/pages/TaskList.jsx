@@ -29,7 +29,8 @@ const Board = () => {
   const eventID = location.state.eventId;
   const userId = jwtDecode(auth.accessToken).userInfo.id;
   const [cards, setCards] = useState([]);
-  console.log(cards);
+  //console.log(cards);
+
   useEffect(() => {
     const controller = new AbortController();
 
@@ -43,7 +44,7 @@ const Board = () => {
           }
         );
 
-        console.log(response.data.tasks);
+        //console.log(response.data.tasks);
         setCards(response.data.tasks);
       } catch (err) {
         console.log("Error: " + err.response?.data.err);
@@ -69,6 +70,8 @@ const Board = () => {
         headingColor="text-red-500"
         cards={cards}
         setCards={setCards}
+        userId={userId}
+        eventId={eventID}
       />
       <Column
         title="TODO"
@@ -76,6 +79,8 @@ const Board = () => {
         headingColor="text-yellow-200"
         cards={cards}
         setCards={setCards}
+        userId={userId}
+        eventId={eventID}
       />
       <Column
         title="In progress"
@@ -83,6 +88,8 @@ const Board = () => {
         headingColor="text-blue-400"
         cards={cards}
         setCards={setCards}
+        userId={userId}
+        eventId={eventID}
       />
       <Column
         title="Complete"
@@ -90,20 +97,30 @@ const Board = () => {
         headingColor="text-emerald-500"
         cards={cards}
         setCards={setCards}
+        userId={userId}
+        eventId={eventID}
       />
       <div>
-        <BurnBarrel setCards={setCards} />
+        <BurnBarrel setCards={setCards} userId={userId} eventId={eventID} />
         <SaveTasks userId={userId} eventId={eventID} cards={cards} />
       </div>
     </div>
   );
 };
 
-const Column = ({ title, headingColor, cards, column, setCards }) => {
+const Column = ({
+  title,
+  headingColor,
+  cards,
+  column,
+  setCards,
+  userId,
+  eventId,
+}) => {
   const [active, setActive] = useState(false);
 
   const handleDragStart = (e, card) => {
-    e.dataTransfer.setData("cardId", card.id);
+    e.dataTransfer.setData("cardId", card._id);
   };
   const handleDragEnd = (e) => {
     const cardId = e.dataTransfer.getData("cardId");
@@ -119,11 +136,11 @@ const Column = ({ title, headingColor, cards, column, setCards }) => {
     if (before !== cardId) {
       let copy = [...cards];
 
-      let cardToTransfer = copy.find((c) => c.id === cardId);
+      let cardToTransfer = copy.find((c) => c._id === cardId);
       if (!cardToTransfer) return;
       cardToTransfer = { ...cardToTransfer, column };
 
-      copy = copy.filter((c) => c.id !== cardId);
+      copy = copy.filter((c) => c._id !== cardId);
 
       const moveToBack = before === "-1";
 
@@ -217,27 +234,74 @@ const Column = ({ title, headingColor, cards, column, setCards }) => {
         }`}
       >
         {filteredCards.map((c) => {
-          return <Card key={c.id} {...c} handleDragStart={handleDragStart} />;
+          return (
+            <Card
+              key={c._id}
+              {...c}
+              setCards={setCards}
+              handleDragStart={handleDragStart}
+            />
+          );
         })}
         <DropIndicator beforeId={null} column={column} />
-        <AddCard column={column} setCards={setCards} />
+        <AddCard
+          column={column}
+          setCards={setCards}
+          userId={userId}
+          eventId={eventId}
+        />
       </div>
     </div>
   );
 };
 
-const Card = ({ title, id, column, handleDragStart }) => {
+const Card = ({ title, _id, column, handleDragStart, setCards }) => {
+  const [isEditing, setIsEditing] = useState(false);
+  const [newTitle, setNewTitle] = useState(title);
+
+  const handleDoubleClick = () => {
+    setIsEditing(true);
+  };
+
+  const handleTitleChange = (e) => {
+    setNewTitle(e.target.value);
+  };
+
+  const handleFinishEdit = () => {
+    setCards((prevCards) =>
+      prevCards.map((card) =>
+        card._id === _id ? { ...card, title: newTitle } : card
+      )
+    );
+    setIsEditing(false);
+  };
+
   return (
     <>
-      <DropIndicator beforeId={id} column={column} />
+      <DropIndicator beforeId={_id} column={column} />
       <motion.div
         layout
-        layoutId={id}
-        draggable="true"
-        onDragStart={(e) => handleDragStart(e, { title, id, column })}
+        layoutId={_id}
+        draggable={!isEditing}
+        onDragStart={(e) => handleDragStart(e, { title, _id, column })}
         className="cursor-grab rounded border border-neutral-50 bg-neutral-100 p-3 active:cursor-grabbing"
+        onDoubleClick={handleDoubleClick}
       >
-        <p className="text-sm text-neutral-800">{title}</p>
+        {isEditing ? (
+          <div>
+            <input
+              value={newTitle}
+              onChange={handleTitleChange}
+              autoFocus
+              className="w-full border rounded p-1"
+            />
+            <button onClick={handleFinishEdit} className="text-xs text-blue-500">
+              Finish edit
+            </button>
+          </div>
+        ) : (
+          <p className="text-sm text-neutral-800">{title}</p>
+        )}
       </motion.div>
     </>
   );
@@ -253,8 +317,9 @@ const DropIndicator = ({ beforeId, column }) => {
   );
 };
 
-const BurnBarrel = ({ setCards }) => {
+const BurnBarrel = ({ setCards, userId, eventId }) => {
   const [active, setActive] = useState(false);
+  const axiosPrivate = useAxiosPrivate();
 
   const handleDragOver = (e) => {
     e.preventDefault();
@@ -265,12 +330,38 @@ const BurnBarrel = ({ setCards }) => {
     setActive(false);
   };
 
-  //TODO: Implement the functionality to delete a task
   const handleDragEnd = (e) => {
     const cardId = e.dataTransfer.getData("cardId");
 
-    setCards((pv) => pv.filter((c) => c.id !== cardId));
+    const handleDeleteCard = async (e) => {
+      e.preventDefault();
 
+      const controller = new AbortController();
+      try {
+        //console.log("User ID:", userId);
+        //console.log(cards);
+
+        const response = await axiosPrivate.delete(
+          `/users/${userId}/events/${eventId}/tasks/${cardId}`,
+          {
+            headers: { "Content-Type": "application/json" },
+            withCredentials: true,
+            signal: controller.signal,
+          }
+        );
+        toast.success("Task deleted successfully");
+
+        setCards((pv) => pv.filter((c) => c._id !== cardId));
+        //console.log);
+        //console.log("tasks saved successfully:", response.data);
+      } catch (error) {
+        console.error("Error deleting task:", error.response?.data);
+        if (!error?.response) toast.error("Error: No response from server.");
+        else toast.error("Error: " + error.response?.data.error);
+      }
+    };
+
+    handleDeleteCard(e);
     setActive(false);
   };
 
@@ -291,9 +382,8 @@ const BurnBarrel = ({ setCards }) => {
 };
 
 const SaveTasks = ({ userId, eventId, cards }) => {
-  //TODO: Implement the functionality to send tasks to the server
   const axiosPrivate = useAxiosPrivate();
-  console.log(userId);
+  //console.log(userId);
   const handleSave = async (e) => {
     e.preventDefault();
     const controller = new AbortController();
@@ -332,11 +422,12 @@ const SaveTasks = ({ userId, eventId, cards }) => {
   );
 };
 
-const AddCard = ({ column, setCards }) => {
+const AddCard = ({ column, setCards, userId, eventId }) => {
   const [text, setText] = useState("");
   const [adding, setAdding] = useState(false);
+  const axiosPrivate = useAxiosPrivate();
 
-  const handleSubmit = (e) => {
+  const handleAddCard = async (e) => {
     e.preventDefault();
 
     if (!text.trim().length) return;
@@ -344,10 +435,32 @@ const AddCard = ({ column, setCards }) => {
     const newCard = {
       title: text.trim(),
       column,
-      id: Math.random().toString(),
+      //id: Math.random().toString(),
     };
+    console.log("user id:", userId);
+    const controller = new AbortController();
+    try {
+      //console.log("User ID:", userId);
+      //console.log(cards);
 
-    setCards((pv) => [...pv, newCard]);
+      const response = await axiosPrivate.post(
+        `/users/${userId}/events/${eventId}/tasks`,
+        newCard,
+        {
+          headers: { "Content-Type": "application/json" },
+          withCredentials: true,
+          signal: controller.signal,
+        }
+      );
+      toast.success("Task added successfully");
+      setCards((pv) => [...pv, response.data.newTask]);
+      //console.log);
+      //console.log("tasks saved successfully:", response.data);
+    } catch (error) {
+      console.error("Error adding task:", error.response?.data);
+      if (!error?.response) toast.error("Error: No response from server.");
+      else toast.error("Error: " + error.response?.data.error);
+    }
 
     setText("");
     setAdding(false);
@@ -356,7 +469,7 @@ const AddCard = ({ column, setCards }) => {
   return (
     <>
       {adding ? (
-        <motion.form layout onSubmit={handleSubmit}>
+        <motion.form layout onSubmit={handleAddCard}>
           <textarea
             onChange={(e) => setText(e.target.value)}
             autoFocus
@@ -437,13 +550,16 @@ Column.propTypes = {
   cards: PropTypes.array.isRequired,
   column: PropTypes.string.isRequired,
   setCards: PropTypes.func.isRequired,
+  userId: PropTypes.string.isRequired,
+  eventId: PropTypes.string.isRequired,
 };
 
 Card.propTypes = {
   title: PropTypes.string.isRequired,
-  id: PropTypes.string.isRequired,
+  _id: PropTypes.string.isRequired,
   column: PropTypes.string.isRequired,
   handleDragStart: PropTypes.func.isRequired,
+  setCards: PropTypes.func.isRequired,
 };
 
 DropIndicator.propTypes = {
@@ -453,11 +569,15 @@ DropIndicator.propTypes = {
 
 BurnBarrel.propTypes = {
   setCards: PropTypes.func.isRequired,
+  userId: PropTypes.string.isRequired,
+  eventId: PropTypes.string.isRequired,
 };
 
 AddCard.propTypes = {
   column: PropTypes.string.isRequired,
   setCards: PropTypes.func.isRequired,
+  userId: PropTypes.string.isRequired,
+  eventId: PropTypes.string.isRequired,
 };
 
 SaveTasks.propTypes = {

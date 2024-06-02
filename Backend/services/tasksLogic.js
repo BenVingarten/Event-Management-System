@@ -9,7 +9,7 @@ export const getTasks = async (userId, eventId) => {
   try {
     const event = await eventModel
       .findOne({ _id: eventId, collaborators: userId })
-      .populate({ path: "cards"})
+      .populate({ path: "cards" })
       .exec();
     if (!event) throw new DataNotFoundError();
     return event.cards;
@@ -28,8 +28,8 @@ export const createTask = async (userId, eventId, taskData) => {
     event.cards.push(newTask);
     await event.save();
     return newTask;
-  }catch (err) {
-    if(err instanceof DataNotFoundError) throw err;
+  } catch (err) {
+    if (err instanceof DataNotFoundError) throw err;
     throw new GeneralServerError();
   }
 };
@@ -37,21 +37,13 @@ export const createTask = async (userId, eventId, taskData) => {
 export const updateTasks = async (userId, eventId, cards) => {
   try {
     const event = await getEventById(userId, eventId);
-    const updateCriteria = cards.map(card => ({
-      _id: card._id
-    }));
-    const updateData = cards.map(card => ({
-      $set: {
-        title: card.title,
-        column: card.column,
-        id: card.id
-      }
-    }));
-    const result = await taskModel.updateMany(
-      { $or: updateCriteria },
-      updateData
-    );
-    if(!result) throw new DataNotFoundError();
+    for (const card of cards) {
+      const task = await taskModel.updateOne(
+        { _id: card._id, event: card.event },
+        card
+      );
+      if (!task) throw new DataNotFoundError();
+    }
   } catch (err) {
     if (err instanceof DataNotFoundError) throw err;
     throw new GeneralServerError();
@@ -62,41 +54,39 @@ export const getTasksAnalytics = async (userId, eventId) => {
   try {
     const pipeLine = [
       {
-        $match: { event: new mongoose.Types.ObjectId(eventId) }
+        $match: { event: new mongoose.Types.ObjectId(eventId) },
       },
       {
         $facet: {
           countByStatus: [
             { $group: { _id: "$column", count: { $sum: 1 } } },
-            { $project: { _id: 0, column: "$_id", count: 1 } }
+            { $project: { _id: 0, column: "$_id", count: 1 } },
           ],
-          countTotal: [
-            { $group: { _id: null, total: { $sum: 1 } } }
-          ]
-        }
+          countTotal: [{ $group: { _id: null, total: { $sum: 1 } } }],
+        },
       },
       {
-            $unwind: "$countByStatus",
-          },
-          {
-            $unwind: "$countTotal",
-          },
-          {
-            $project: {
-              status: "$countByStatus.status",
-              percentage: {
-                $round: [
-                  {
-                    $multiply: [
-                      { $divide: ["$countByStatus.count", "$countTotal.total"] },
-                      100,
-                    ],
-                  },
-                  1,
+        $unwind: "$countByStatus",
+      },
+      {
+        $unwind: "$countTotal",
+      },
+      {
+        $project: {
+          column: "$countByStatus.column",
+          percentage: {
+            $round: [
+              {
+                $multiply: [
+                  { $divide: ["$countByStatus.count", "$countTotal.total"] },
+                  100,
                 ],
               },
-            },
+              1,
+            ],
           },
+        },
+      },
     ];
     const event = getEventById(userId, eventId);
     const results = await taskModel.aggregate(pipeLine).exec();
@@ -118,16 +108,16 @@ export const deleteTask = async (userId, eventId, taskId) => {
   try {
     const event = await eventModel.updateOne(
       { _id: eventId, collaborators: userId },
-      { $pull: { cards: taskId} }
+      { $pull: { cards: taskId } }
     );
     if (!event) throw new DataNotFoundError();
     const result = await taskModel.deleteOne({
-      _id: taskId, event: eventId
+      _id: taskId,
+      event: eventId,
     });
-    if(!result)
-        throw new DataNotFoundError();
+    if (!result) throw new DataNotFoundError();
   } catch (err) {
     if (err instanceof DataNotFoundError || GeneralServerError) throw err;
     throw new GeneralServerError();
   }
-}
+};

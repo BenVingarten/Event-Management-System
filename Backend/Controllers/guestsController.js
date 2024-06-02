@@ -28,7 +28,7 @@ export const handleAddGuest = async (req, res) => {
     const { eventId } = req.params;
     const newGuest = await addGuest(userId, eventId, verifiedData);
     return res.status(201).json({
-      success: `new guest ${newGuest.name} has been added to the guestList`,
+      newGuest,
     });
   } catch (err) {
     return res.status(err.statusCode).json({ err: err.message });
