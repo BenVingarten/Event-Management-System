@@ -80,6 +80,7 @@ function patchEventValidation() {
     additionalInfo: {
       optional: { options: { nullable: true } },
       isArray: { errorMessage: "additionalInfo needs to be sent as an array" },
+      notEmpty: { errorMessage: "cant add an empty additional info" },
     },
   };
 }

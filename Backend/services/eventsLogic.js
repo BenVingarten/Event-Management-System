@@ -61,15 +61,18 @@ export const getEventById = async (userId, eventId, populateOptions = {}) => {
 };
 export const patchEvent = async (userId, eventId, eventDetails) => {
   try {
-    const { collaborators, ...otherData } = eventDetails;
+    const { collaborators, additionalInfo, ...otherData } = eventDetails;
     const event = await eventModel.findOneAndUpdate(
       { _id: eventId, collaborators: userId },
       otherData,
       { new: true }
     );
     if (!event) throw new DataNotFoundError();
-    const idArray = await getNewCollaboratorsArray(userId, collaborators);
-    event.collaborators = idArray;
+    if (collaborators.length !== 0) {
+      const idArray = await getNewCollaboratorsArray(userId, collaborators);
+      event.collaborators = idArray;
+    }
+    if (additionalInfo.length !== 0) event.additionalInfo = additionalInfo;
     await event.save();
     return event;
   } catch (err) {
