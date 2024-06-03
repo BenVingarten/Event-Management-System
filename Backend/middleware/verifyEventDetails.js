@@ -72,8 +72,7 @@ function patchEventValidation() {
       isArray: { errorMessage: "collaborators needs to be sent as an array" },
       custom: {
         options: (value) => {
-          return (!value.every((email) => validator.isEmail(email)));
-
+          return value.every((email) => validator.isEmail(email));
         },
         errorMessage: "Invalid email format for collaborator",
       },
@@ -81,8 +80,8 @@ function patchEventValidation() {
     additionalInfo: {
       optional: { options: { nullable: true } },
       isArray: { errorMessage: "additionalInfo needs to be sent as an array" },
-      },
-  }
+    },
+  };
 }
 
 export const validateCreateEvent = checkSchema(createEventValidation());

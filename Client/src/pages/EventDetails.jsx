@@ -42,6 +42,10 @@ export default function EventDetails() {
     date: null,
   });
 
+  console.log(eventInfo);
+  console.log(collaborators);
+  console.log(additionalInfo);
+
   // Fetch event details
   const effectRun = useRef(false);
   useEffect(() => {
@@ -204,9 +208,11 @@ export default function EventDetails() {
     try {
       const userId = jwtDecode(auth.accessToken).userInfo.id;
       const eventId = state.state.eventId;
-      updatedFields.collaborators = collaborators.map(collaborator => collaborator.email);
+      updatedFields.collaborators = collaborators.map(
+        (collaborator) => collaborator.email
+      );
       updatedFields.additionalInfo = additionalInfo;
-      console.log(updatedFields.collaborators);
+      //console.log(updatedFields.collaborators);
       //console.log("Event ID: " + eventId);
       const response = await axiosPrivate.patch(
         `/users/${userId}/events/${eventId}`,
@@ -217,13 +223,17 @@ export default function EventDetails() {
           signal: controller.signal,
         }
       );
-      //console.log(response.data.event);
-    } catch (err) {
-      console.log(err);
-      toast.error("Failed to fetch event info. Please try again later.");
-    }
+      //console.log(response.data);
+      setEventInfo(response.data.event);
+      setCollaborators(response.data.event.collaborators);
+      setAdditionalInfo(response.data.event.additionalInfo);
 
-    setIsModalOpen(false);
+      setIsModalOpen(false);
+      toast.success("Event details updated successfully!");
+    } catch (err) {
+      console.log(err.response.data.error[0].msg);
+      toast.error(err.response.data.error[0].msg);
+    }
   };
 
   // Present additional info
@@ -266,7 +276,7 @@ export default function EventDetails() {
 
   // Edit collaborators functionality
   const handleAddCollaborator = () => {
-    setCollaborators([...collaborators, ""]);
+    setCollaborators([...collaborators, { email: "" }]);
   };
 
   const handleRemoveCollaborator = (index) => {
@@ -277,8 +287,9 @@ export default function EventDetails() {
 
   const handleCollaboratorChange = (index, value) => {
     const newCollaborators = [...collaborators];
-    newCollaborators[index] = value;
+    newCollaborators[index].email = value;
     setCollaborators(newCollaborators);
+    //console.log(collaborators);
   };
 
   // Edit additional info functionality
