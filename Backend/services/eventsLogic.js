@@ -25,19 +25,7 @@ export const createEvent = async (id, event) => {
       additionalInfo,
       collaborators,
     } = event;
-    //set collaborators
-    const idSet = new Set();
-    idSet.add(id);
-    for (const email of collaborators) {
-      const collaboratorId = await getIdbyEmail(email);
-      if (collaboratorId) {
-        idSet.add(collaboratorId.toString());
-      }
-    }
-
-    // Convert the set to an array of ObjectIds
-    const idArray = Array.from(idSet).map((id) => new ObjectId(id));
-
+    const idArray = await getNewCollaboratorsArray(id, collaborators);
     const newEvent = await eventModel.create({
       name,
       date,
@@ -73,12 +61,16 @@ export const getEventById = async (userId, eventId, populateOptions = {}) => {
 };
 export const patchEvent = async (userId, eventId, eventDetails) => {
   try {
+    const { collaborators, ...otherData } = eventDetails;
     const event = await eventModel.findOneAndUpdate(
       { _id: eventId, collaborators: userId },
-      eventDetails,
+      otherData,
       { new: true }
     );
     if (!event) throw new DataNotFoundError();
+    const idArray = await getNewCollaboratorsArray(userId, collaborators);
+    event.collaborators = idArray;
+    await event.save();
     return event;
   } catch (err) {
     if (err instanceof DataNotFoundError) throw err;
@@ -115,7 +107,6 @@ export const findGuestById = async (userId, eventId, guestId) => {
     throw new GeneralServerError();
   }
 };
-
 export const roundedPercentagesToHundred = (results) => {
   // Calculate total percentage to be adjusted
   let totalRoundedPercentage = results.reduce(
@@ -146,4 +137,19 @@ export const roundedPercentagesToHundred = (results) => {
   }
 
   return results;
+};
+export const getNewCollaboratorsArray = async (userId, collaborators) => {
+  try {
+    const idSet = new Set();
+    idSet.add(userId);
+    for (const email of collaborators) {
+      const collaboratorId = await getIdbyEmail(email);
+      if (collaboratorId) idSet.add(collaboratorId.toString());
+    }
+    const idArray = Array.from(idSet).map((id) => new ObjectId(id));
+    return idArray;
+  } catch (err) {
+    if (err instanceof DataNotFoundError) throw err;
+    else throw new GeneralServerError();
+  }
 };

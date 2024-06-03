@@ -57,13 +57,13 @@ export const handleGetEventById = async (req, res) => {
 
 export const handlePatchEvent = async (req, res) => {
   try {
+    console.log(req.body);
     const errors = validationResult(req);
     if (!errors.isEmpty())
       return res.status(400).json({ error: errors.array() });
     const eventDetails = matchedData(req);
     if (Object.keys(eventDetails).length === 0)
-      throw new InvalidFieldModifyError();
-
+      return res.status(204).json({ msg: "no changes made" });
     const { eventId } = req.params;
     const { userId } = req;
     const event = await patchEvent(userId, eventId, eventDetails);

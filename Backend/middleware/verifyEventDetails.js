@@ -69,15 +69,19 @@ function patchEventValidation() {
     },
     collaborators: {
       optional: { options: { nullable: true } },
+      isArray: { errorMessage: "collaborators needs to be sent as an array" },
       custom: {
         options: (value) => {
-          if (!Array.isArray(value)) return false;
           return (!value.every((email) => validator.isEmail(email)));
 
         },
         errorMessage: "Invalid email format for collaborator",
       },
     },
+    additionalInfo: {
+      optional: { options: { nullable: true } },
+      isArray: { errorMessage: "additionalInfo needs to be sent as an array" },
+      },
   }
 }
 

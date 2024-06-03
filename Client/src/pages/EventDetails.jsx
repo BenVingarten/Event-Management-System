@@ -204,12 +204,13 @@ export default function EventDetails() {
     try {
       const userId = jwtDecode(auth.accessToken).userInfo.id;
       const eventId = state.state.eventId;
+      updatedFields.collaborators = collaborators.map(collaborator => collaborator.email);
+      updatedFields.additionalInfo = additionalInfo;
+      console.log(updatedFields.collaborators);
       //console.log("Event ID: " + eventId);
       const response = await axiosPrivate.patch(
         `/users/${userId}/events/${eventId}`,
         updatedFields,
-        collaborators,
-        additionalInfo,
         {
           headers: { "Content-Type": "application/json" },
           withCredentials: true,
