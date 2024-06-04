@@ -9,8 +9,16 @@ import useAxiosPrivate from "../hooks/useAxiosPrivate";
 import useAuth from "../hooks/useAuth";
 import { Toaster, toast } from "react-hot-toast";
 import { useLocation, useNavigate } from "react-router-dom";
+import ChatWidget from "../components/ChatWidget";
 
-export const taskStatus = ["Backlog", "TODO", "In progress", "Complete"];
+const taskStatus = ["Backlog", "TODO", "In progress", "Complete"];
+const taskSuggestions = [
+  "Buy groceries",
+  "Schedule meeting",
+  "Write report",
+  "Plan event",
+  "Book tickets",
+];
 
 export default function TaskList() {
   return (
@@ -104,6 +112,12 @@ const Board = () => {
         <BurnBarrel setCards={setCards} userId={userId} eventId={eventID} />
         <SaveTasks userId={userId} eventId={eventID} cards={cards} />
       </div>
+      <ChatWidget
+        suggestions={taskSuggestions}
+        userId={userId}
+        eventId={eventID}
+        setCards={setCards}
+      />
     </div>
   );
 };
@@ -295,7 +309,10 @@ const Card = ({ title, _id, column, handleDragStart, setCards }) => {
               autoFocus
               className="w-full border rounded p-1"
             />
-            <button onClick={handleFinishEdit} className="text-xs text-blue-500">
+            <button
+              onClick={handleFinishEdit}
+              className="text-xs text-blue-500"
+            >
               Finish edit
             </button>
           </div>
@@ -423,6 +440,12 @@ const SaveTasks = ({ userId, eventId, cards }) => {
 };
 
 const AddCard = ({ column, setCards, userId, eventId }) => {
+  /*
+  console.log("User ID:", userId);
+  console.log("Event ID:", eventId);
+  console.log("Column:", column);
+  console.log("Cards:", setCards);
+  */
   const [text, setText] = useState("");
   const [adding, setAdding] = useState(false);
   const axiosPrivate = useAxiosPrivate();
