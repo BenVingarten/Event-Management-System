@@ -1,22 +1,31 @@
 import mongoose from "mongoose";
 const { Schema } = mongoose;
 
-const suggstedTaskSchema = new Schema({
+const suggestedTaskSchema = new Schema({
   title: {
     type: String,
     required: true,
   },
-  
-  
+  eventTypes: {
+    type: [String],
+    required: true,
+  },
+  locations: {
+    type: [String],
+    required: true,
+  },
+  avgPrice: {
+    type: Number,
+    required: true,
+  },
+  category: {
+    type: String,
+    required: true,
+  },
 });
 
-taskSchema.pre(
-  ["save", "updateOne", "updateMany", "findOneAndUpdate", "findByIdAndUpdate"],
-  function (next) {
-    this.updatedAt = Date.now();
-    next();
-  }
+const suggestedTaskModel = mongoose.model(
+  "SuggestedTasks",
+  suggestedTaskSchema
 );
-taskSchema.index({ _id: 1, event: 1 });
-const taskModel = mongoose.model("Task", taskSchema);
-export default taskModel;
+export default suggestedTaskModel;

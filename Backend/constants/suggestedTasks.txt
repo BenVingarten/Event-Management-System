@@ -1,0 +1,28 @@
+  {
+    title: "Caterer Selection (Kosher)",
+    eventTypes: ["Wedding", "Birthday", "Company Event", "Bar/Bat Mitzvah", "Holiday"],
+    locations: ["Home", "Hotel", "Restaurant", "Event Hall/Garden", "Office"],
+    avgPrice: 6000,
+    category: "Food & Drinks"
+  },
+  {
+    title: "Floral Arrangements with Israeli Flowers (e.g., Anemone, Cyclamen)",
+    eventTypes: ["Wedding", "Birthday", "Bar/Bat Mitzvah"],
+    locations: ["Home", "Hotel", "Restaurant", "Event Hall/Garden", "Office", "Park"],
+    avgPrice: 2750,
+    category: "Decorations"
+  },
+  {
+    title: "DJ Booking (Specializing in Israeli Music)",
+    eventTypes: ["Wedding", "Birthday", "Company Event", "Bar/Bat Mitzvah"],
+    locations: ["Home", "Hotel", "Restaurant", "Event Hall/Garden", "Office"],
+    avgPrice: 5000,
+    category: "Music & Entertainment"
+  },
+
+
+
+
+
+
+}
