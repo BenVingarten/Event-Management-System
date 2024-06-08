@@ -468,7 +468,7 @@ const AddCard = ({ column, setCards, userId, eventId }) => {
 
       const response = await axiosPrivate.post(
         `/users/${userId}/events/${eventId}/tasks`,
-        newCard,
+        { newCard, suggested: false },
         {
           headers: { "Content-Type": "application/json" },
           withCredentials: true,
