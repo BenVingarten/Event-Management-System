@@ -130,7 +130,7 @@ export const getSuggestedTasks = async (userId, eventId) => {
     const { location, type } = event;
     const pipeLine = [
       {
-        $match: { eventTypes: type },
+        $match: { eventTypes: type, locations: location },
       },
       {},
       {},
