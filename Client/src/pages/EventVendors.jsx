@@ -68,7 +68,7 @@ function EventVendors() {
   };
 
   return (
-    <div className="grid sm:grid-rows-3 md:grid-cols-3">
+    <div className="grid sm:grid-rows-3 md:grid-cols-3 pl-5">
       {/* Event Vendors */}
       <div className="overflow-y-auto">
         <h1 className="text-2xl font-bold mb-2">Event Vendors</h1>
