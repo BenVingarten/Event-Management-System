@@ -320,10 +320,21 @@ export default function EventDetails() {
           Details
         </h5>
         {displayEventDetails()}
-        <div className="flex justify-end">
+        <div className="flex justify-between">
+          <Button
+            gradientDuoTone="purpleToBlue"
+            size="lg"
+            onClick={() =>
+              navigate(`/eventVendors`, {
+                state: { eventId: eventID },
+              })
+            }
+          >
+            Event Vendors
+          </Button>
           <Button
             size={"lg"}
-            className="w-30"
+            className="w-30 "
             gradientDuoTone={"greenToBlue"}
             onClick={() => {
               setIsModalOpen(true);

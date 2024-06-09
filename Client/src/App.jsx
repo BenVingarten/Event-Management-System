@@ -14,6 +14,7 @@ import Header from "./components/Header";
 import Layout from "./components/Layout";
 import Admin from "./pages/Admin";
 import Account from "./pages/Account";
+import EventVendors from "./pages/EventVendors";
 
 function App() {
   return (
@@ -43,6 +44,7 @@ function App() {
               <Route path="guestList" element={<GuestList />} />
               <Route path="taskList" element={<TaskList />} />
               <Route path="myEvents" element={<MyEvents />} />
+              <Route path="eventVendors" element={<EventVendors />} />
             </Route>
             {/* Vendors */}
             {/* will be added later */}
