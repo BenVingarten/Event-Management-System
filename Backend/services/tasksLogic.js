@@ -5,6 +5,8 @@ import taskModel from "../models/Task.js";
 import { getEventById } from "./eventsLogic.js";
 import { roundedPercentagesToHundred } from "./eventsLogic.js";
 import mongoose from "mongoose";
+import suggestedTasksModel from "../models/SuggestedTask.js";
+import { eventType } from "../constants/event.js";
 export const getTasks = async (userId, eventId) => {
   try {
     const event = await eventModel
@@ -19,7 +21,7 @@ export const getTasks = async (userId, eventId) => {
   }
 };
 
-export const createTask = async (userId, eventId, taskData) => {
+export const createTask = async (userId, eventId, taskData, suggested) => {
   try {
     const event = await getEventById(userId, eventId);
     const newTaskObj = taskData;
@@ -120,4 +122,20 @@ export const deleteTask = async (userId, eventId, taskId) => {
     if (err instanceof DataNotFoundError || GeneralServerError) throw err;
     throw new GeneralServerError();
   }
+};
+
+export const getSuggestedTasks = async (userId, eventId) => {
+  try {
+    const event = await getEventById(userId, eventId);
+    const { location, type } = event;
+    const pipeLine = [
+      {
+        $match: { eventTypes: type, locations: location },
+      },
+      {},
+      {},
+      {},
+    ];
+    const suggestedTasks = suggestedTasksModel.aggregate(pipeLine);
+  } catch (err) {}
 };

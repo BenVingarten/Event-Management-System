@@ -10,12 +10,8 @@ const suggestedTaskSchema = new Schema({
     type: [String],
     required: true,
   },
-  locations: {
+  venues: {
     type: [String],
-    required: true,
-  },
-  avgPrice: {
-    type: Number,
     required: true,
   },
   category: {

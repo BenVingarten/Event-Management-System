@@ -30,12 +30,12 @@ function putTaskValidation() {
 }
 function createTaskValidation() {
   return {
-    title: {
+    'newCard.title': {
       notEmpty: {
         errorMessage: "Task must have content",
       },
     },
-    column: {
+    'newCard.column': {
       notEmpty: {
         errorMessage: "Task must have a status",
       },

@@ -21,9 +21,10 @@ export const handleCreateTask = async (req, res) => {
     if (!errors.isEmpty())
       return res.status(400).json({ error: errors.array() });
     const verifiedTask = matchedData(req);
+    const { suggested, newCard } = req.body
     const { userId } = req;
     const { eventId } = req.params;
-    const newTask = await createTask(userId, eventId, verifiedTask);
+    const newTask = await createTask(userId, eventId, newCard, suggested);
     return res.status(200).json({ newTask });
   } catch (err) {
     return res.status(err.statusCode).json({ err: err.message });
