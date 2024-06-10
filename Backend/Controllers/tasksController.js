@@ -4,13 +4,17 @@ import {
   getTasks,
   updateTasks,
   deleteTask,
+  getSuggestedTasks,
 } from "../services/tasksLogic.js";
 export const handleGetTasks = async (req, res) => {
   try {
     const { userId } = req;
     const { eventId } = req.params;
     const tasks = await getTasks(userId, eventId);
-    return res.status(200).json({ tasks });
+    const suggestedTasks = await getSuggestedTasks(userId, eventId);
+    console.log(suggestedTasks);
+    const allTasks = { tasks, suggestedTasks };
+    return res.status(200).json(allTasks);
   } catch (err) {
     return res.status(err.statusCode).json({ err: err.message });
   }

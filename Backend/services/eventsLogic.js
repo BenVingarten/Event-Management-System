@@ -156,3 +156,28 @@ export const getNewCollaboratorsArray = async (userId, collaborators) => {
     else throw new GeneralServerError();
   }
 };
+export const inviteCollaborators = async (
+  sendEmail,
+  eventId,
+  collaborators
+) => {
+  try {
+    let transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: "sender-email@gmail.com",
+        pass: "sender-email-password",
+      },
+    });
+
+    let mailOptions = {
+      from: "sender-email@gmail.com",
+      to: collaborators.join(", "),
+      subject: "",
+      text: "",
+    };
+
+    // Send the email using async/await
+    const info = await transporter.sendMail(mailOptions);
+  } catch (err) {}
+};

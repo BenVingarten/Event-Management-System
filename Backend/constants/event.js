@@ -20,3 +20,4 @@ export const excludedFieldsInPatch = [
   "updatedAt",
 ];
 export const tasksFilters = ["status", "priority", "created"]; // needs to complete
+export const  CollaboratorInvite = ""

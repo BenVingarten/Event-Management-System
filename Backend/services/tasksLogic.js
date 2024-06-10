@@ -6,7 +6,6 @@ import { getEventById } from "./eventsLogic.js";
 import { roundedPercentagesToHundred } from "./eventsLogic.js";
 import mongoose from "mongoose";
 import suggestedTasksModel from "../models/SuggestedTask.js";
-import { eventType } from "../constants/event.js";
 export const getTasks = async (userId, eventId) => {
   try {
     const event = await eventModel
@@ -100,7 +99,6 @@ export const getTasksAnalytics = async (userId, eventId) => {
 
     return roundedResults;
   } catch (err) {
-    console.error("Error in getTasksAnalytics:", err); // Log the detailed error
     if (err instanceof DataNotFoundError) throw err;
     throw new GeneralServerError();
   }
@@ -128,14 +126,30 @@ export const getSuggestedTasks = async (userId, eventId) => {
   try {
     const event = await getEventById(userId, eventId);
     const { location, type } = event;
+    console.log(location, type);
     const pipeLine = [
       {
-        $match: { eventTypes: type, locations: location },
+        $match: { eventTypes: type/*, venues: location*/ },
       },
-      {},
-      {},
-      {},
+      {
+        $group: { _id: "$category", tasks: { $push: "$title" } },
+      },
+      {
+        $project: {
+          _id: 0,
+          category: "$_id",
+          tasks: 1,
+        },
+      },
     ];
-    const suggestedTasks = suggestedTasksModel.aggregate(pipeLine);
-  } catch (err) {}
+    const suggestedTasks = suggestedTasksModel.aggregate(pipeLine).exec();
+    if (!suggestedTasks)
+      throw new DataNotFoundError(
+        "No suggested Tasks matched the event criteria"
+      );
+    return suggestedTasks;
+  } catch (err) {
+    if (err instanceof DataNotFoundError) throw err;
+    throw new GeneralServerError(err.meesage);
+  }
 };
