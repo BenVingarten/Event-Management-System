@@ -5,26 +5,30 @@ import {
   handleCreateEvent,
   handleGetEventById,
   handleDeleteEvent,
-  handlePatchEvent
+  handlePatchEvent,
 } from "../Controllers/eventsController.js";
-import { validateCreateEvent, validatePathchEvent } from "../middleware/verifyEventDetails.js";
+import {
+  validateCreateEvent,
+  validatePathchEvent,
+} from "../middleware/verifyEventDetails.js";
 import { verifyParamId } from "../middleware/verifyParamId.js";
-
 
 const router = Router();
 
 router
   .route("/users/:id/events")
   .get(verifyUserIdMatchAuthId, handleGetEvents)
-  .post(
-    verifyUserIdMatchAuthId,
-    validateCreateEvent,
-    handleCreateEvent
-  );
+  .post(verifyUserIdMatchAuthId, validateCreateEvent, handleCreateEvent);
 
-router.route("/users/:id/events/:eventId")
-.get(verifyUserIdMatchAuthId, verifyParamId("eventId"), handleGetEventById)
-.patch(verifyUserIdMatchAuthId, verifyParamId("eventId"), validatePathchEvent, handlePatchEvent)
-.delete(verifyUserIdMatchAuthId, verifyParamId("eventId"), handleDeleteEvent);
+router
+  .route("/users/:id/events/:eventId")
+  .get(verifyUserIdMatchAuthId, verifyParamId("eventId"), handleGetEventById)
+  .patch(
+    verifyUserIdMatchAuthId,
+    verifyParamId("eventId"),
+    validatePathchEvent,
+    handlePatchEvent
+  )
+  .delete(verifyUserIdMatchAuthId, verifyParamId("eventId"), handleDeleteEvent);
 
 export default router;

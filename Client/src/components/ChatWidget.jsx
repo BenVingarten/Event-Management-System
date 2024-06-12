@@ -44,7 +44,7 @@ const ChatWidget = ({ suggestions, setCards, userId, eventId }) => {
       else toast.error("Error: " + error.response?.data.error);
     }
   };
-
+  console.log(suggestions[0]);
   return (
     <div
       className={`fixed bottom-4 right-4 w-64 bg-white shadow-lg rounded-lg overflow-hidden transition-all duration-300 ${
@@ -61,7 +61,7 @@ const ChatWidget = ({ suggestions, setCards, userId, eventId }) => {
       {isOpen && (
         <div className="p-3 overflow-y-auto">
           <ul className="space-y-2">
-            {suggestions.map((suggestion, index) => (
+            {suggestions[0].tasks.map((suggestion, index) => (
               <li
                 key={index}
                 className="p-2 bg-gray-100 rounded-lg cursor-pointer hover:bg-gray-200"

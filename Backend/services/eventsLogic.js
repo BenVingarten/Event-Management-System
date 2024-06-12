@@ -4,6 +4,7 @@ import { GeneralServerError } from "../errors/GeneralServerError.js";
 import eventModel from "../models/Event.js";
 import userModel from "../models/User.js";
 import { deleteUserEvent, getIdbyEmail } from "./UserLogic.js";
+import { sendMail } from "../constants/email.js";
 
 export const getEvents = async (id) => {
   try {
@@ -156,28 +157,6 @@ export const getNewCollaboratorsArray = async (userId, collaborators) => {
     else throw new GeneralServerError();
   }
 };
-export const inviteCollaborators = async (
-  sendEmail,
-  eventId,
-  collaborators
-) => {
-  try {
-    let transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: "sender-email@gmail.com",
-        pass: "sender-email-password",
-      },
-    });
-
-    let mailOptions = {
-      from: "sender-email@gmail.com",
-      to: collaborators.join(", "),
-      subject: "",
-      text: "",
-    };
-
-    // Send the email using async/await
-    const info = await transporter.sendMail(mailOptions);
-  } catch (err) {}
+export const inviteCollaborators = async () => {
+  
 };

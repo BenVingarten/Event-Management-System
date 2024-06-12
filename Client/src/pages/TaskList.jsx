@@ -37,6 +37,7 @@ const Board = () => {
   const eventID = location.state.eventId;
   const userId = jwtDecode(auth.accessToken).userInfo.id;
   const [cards, setCards] = useState([]);
+  const [suggestedTasks, setSuggestedTasks] = useState([]);
   //console.log(cards);
 
   useEffect(() => {
@@ -54,6 +55,7 @@ const Board = () => {
 
         //console.log(response.data.tasks);
         setCards(response.data.tasks);
+        setSuggestedTasks(response.data.suggestedTasks);
       } catch (err) {
         console.log("Error: " + err.response?.data.err);
         toast.error("No Events Found!");
@@ -113,7 +115,7 @@ const Board = () => {
         <SaveTasks userId={userId} eventId={eventID} cards={cards} />
       </div>
       <ChatWidget
-        suggestions={taskSuggestions}
+        suggestions={suggestedTasks}
         userId={userId}
         eventId={eventID}
         setCards={setCards}

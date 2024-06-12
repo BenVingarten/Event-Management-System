@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 const { Schema } = mongoose;
-import { taskStatus } from "../constants/event.js";
+import { collabStatus } from "../constants/event.js";
 const eventSchema = new Schema({
   name: {
     type: String,
@@ -30,6 +30,10 @@ const eventSchema = new Schema({
     {
       type: Schema.Types.ObjectId,
       ref: "User",
+      status: {
+        type: String,
+        default: collabStatus[0],
+      },
     },
   ],
   cards: [
