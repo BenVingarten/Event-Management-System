@@ -3,12 +3,17 @@ import { DataNotFoundError } from "../errors/DataNotFoundError.js";
 import { GeneralServerError } from "../errors/GeneralServerError.js";
 import eventModel from "../models/Event.js";
 import userModel from "../models/User.js";
-import { deleteUserEvent, getIdbyEmail } from "./UserLogic.js";
+import { deleteUserEvent, getUserWithIdbyEmail } from "./UserLogic.js";
 import { sendMail } from "../constants/email.js";
+
 
 export const getEvents = async (id) => {
   try {
-    const events = await eventModel.find({ collaborators: id });
+    const conditions = [
+      { owner: id },
+      {"collaborators.id": id}
+    ]
+    const events = await eventModel.find({ $or: conditions }).exec();
     if (!events) throw new DataNotFoundError();
     return events;
   } catch (err) {
@@ -17,16 +22,7 @@ export const getEvents = async (id) => {
 };
 export const createEvent = async (id, event) => {
   try {
-    const {
-      name,
-      date,
-      type,
-      budget,
-      location,
-      additionalInfo,
-      collaborators,
-    } = event;
-    const idArray = await getNewCollaboratorsArray(id, collaborators);
+    const { name, date, type, budget, location, additionalInfo } = event;
     const newEvent = await eventModel.create({
       name,
       date,
@@ -34,29 +30,33 @@ export const createEvent = async (id, event) => {
       budget,
       location,
       additionalInfo,
-      collaborators: idArray,
+      owner: id,
     });
-    // set event to the user
-
     await userModel.findByIdAndUpdate(id, {
       $push: { events: newEvent._id },
     });
     return newEvent;
   } catch (err) {
+    console.error(err);
     throw err;
   }
 };
 export const getEventById = async (userId, eventId, populateOptions = {}) => {
   try {
+    const conditions = [
+      { owner: userId },
+      {"collaborators.id": userId}
+    ];
     const isPopulate =
       populateOptions && Object.keys(populateOptions).length > 0;
-    const query = eventModel.findOne({ _id: eventId, collaborators: userId });
+    const query = eventModel.findOne({ _id: eventId, $or: conditions });
     if (isPopulate) query.populate(populateOptions);
     const event = await query.exec();
     if (!event) throw new DataNotFoundError();
     return event;
   } catch (err) {
     if (err instanceof DataNotFoundError) throw err;
+    console.error(err);
     throw new GeneralServerError();
   }
 };
@@ -64,14 +64,15 @@ export const patchEvent = async (userId, eventId, eventDetails) => {
   try {
     const { collaborators, additionalInfo, ...otherData } = eventDetails;
     const event = await eventModel.findOneAndUpdate(
-      { _id: eventId, collaborators: userId },
+      { _id: eventId, owner: userId },
       otherData,
       { new: true }
-    );
+    ).populate({ path: "owner", select: "email" });
     if (!event) throw new DataNotFoundError();
     if (collaborators.length !== 0) {
-      const idArray = await getNewCollaboratorsArray(userId, collaborators);
-      event.collaborators = idArray;
+      const ownerEmail = event.owner.email
+      const invites = await inviteCollaborators(ownerEmail, collaborators)
+      
     }
     if (additionalInfo.length !== 0) event.additionalInfo = additionalInfo;
     await event.save();
@@ -85,30 +86,15 @@ export const deleteEvent = async (userId, eventId) => {
   try {
     const deletedEvent = await eventModel.findOneAndDelete({
       _id: eventId,
-      collaborators: userId,
+      owner: userId,
     });
+    if(!deletedEvent)
+      throw new DataNotFoundError("couldnt find the event or user is not the owner");
     await deleteUserEvent(userId, eventId);
     return deletedEvent;
   } catch (err) {
     if (err instanceof DataNotFoundError) throw err;
-    throw new GeneralServerError();
-  }
-};
-export const findGuestById = async (userId, eventId, guestId) => {
-  try {
-    const event = await eventModel
-      .findOne({
-        _id: eventId,
-        collaborators: userId,
-        "guestList._id": guestId,
-      })
-      .select("guestList")
-      .exec();
-    if (!event || event.guestList.length === 0) throw new DataNotFoundError();
-    return event.guestList[0];
-  } catch (err) {
-    if (err instanceof DataNotFoundError) throw err;
-    throw new GeneralServerError();
+    throw new GeneralServerError("error in deleting event");
   }
 };
 export const roundedPercentagesToHundred = (results) => {
@@ -144,19 +130,22 @@ export const roundedPercentagesToHundred = (results) => {
 };
 export const getNewCollaboratorsArray = async (userId, collaborators) => {
   try {
-    const idSet = new Set();
-    idSet.add(userId);
-    for (const email of collaborators) {
-      const collaboratorId = await getIdbyEmail(email);
-      if (collaboratorId) idSet.add(collaboratorId.toString());
-    }
-    const idArray = Array.from(idSet).map((id) => new ObjectId(id));
-    return idArray;
+   
   } catch (err) {
     if (err instanceof DataNotFoundError) throw err;
     else throw new GeneralServerError();
   }
 };
-export const inviteCollaborators = async () => {
-  
+export const inviteCollaborators = async (ownerEmail, collaborators) => {
+  try {
+    const idSet = new Set();
+    for(const email of collaborators) {
+      const user = await getUserWithIdbyEmail(email);
+      if(user) {
+        
+      }
+    }
+  } catch(err) {
+
+  }
 };

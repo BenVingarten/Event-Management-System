@@ -26,15 +26,6 @@ function createEventValidation() {
     location: {
       notEmpty: { errorMessage: "event must have a location" },
     },
-    collaborators: {
-      custom: {
-        options: (value) => {
-          if (!Array.isArray(value)) return false;
-          return value.every((email) => validator.isEmail(email));
-        },
-        errorMessage: "Invalid email format for collaborator",
-      },
-    },
   };
 }
 

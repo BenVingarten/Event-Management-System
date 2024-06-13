@@ -20,4 +20,4 @@ export const excludedFieldsInPatch = [
   "updatedAt",
 ];
 export const tasksFilters = ["status", "priority", "created"]; // needs to complete
-export const collabStatus = ["Pending", "Accepted", "Declined", "Owner"];
+export const collabStatus = ["Pending", "Accepted", "Declined"];

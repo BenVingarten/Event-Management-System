@@ -8,8 +8,12 @@ import mongoose from "mongoose";
 import suggestedTasksModel from "../models/SuggestedTask.js";
 export const getTasks = async (userId, eventId) => {
   try {
+    const conditions = [
+      { owner: userId },
+      {"collaborators.id": userId}
+    ]
     const event = await eventModel
-      .findOne({ _id: eventId, collaborators: userId })
+      .findOne({ _id: eventId, $or: conditions})
       .populate({ path: "cards" })
       .exec();
     if (!event) throw new DataNotFoundError();
@@ -106,8 +110,12 @@ export const getTasksAnalytics = async (userId, eventId) => {
 
 export const deleteTask = async (userId, eventId, taskId) => {
   try {
+    const conditions = [
+      { owner: userId },
+      {"collaborators.id": userId}
+    ]
     const event = await eventModel.updateOne(
-      { _id: eventId, collaborators: userId },
+      { _id: eventId, $or: conditions },
       { $pull: { cards: taskId } }
     );
     if (!event) throw new DataNotFoundError();
@@ -126,7 +134,6 @@ export const getSuggestedTasks = async (userId, eventId) => {
   try {
     const event = await getEventById(userId, eventId);
     const { location, type } = event;
-    console.log(location, type);
     const pipeLine = [
       {
         $match: { eventTypes: type/*, venues: location*/ },

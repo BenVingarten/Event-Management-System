@@ -8,7 +8,7 @@ export const verifyUserIdMatchAuthId = (req, res, next) => {
   if (!ObjectId.isValid(id))
     return res.status(400).json({ error: "user id is not valid" });
 
-  if (!req?.userId || req.params.id !== req.userId) {
+  if (!req?.userId || id !== req.userId.toString()) {
     return res
       .status(401)
       .json({ msg: "you dont have an access to this resource" });

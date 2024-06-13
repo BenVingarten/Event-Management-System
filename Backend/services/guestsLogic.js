@@ -1,7 +1,7 @@
 import { DataNotFoundError } from "../errors/DataNotFoundError.js";
 import { DuplicateDataError } from "../errors/DuplicateDataError.js";
 import { GeneralServerError } from "../errors/GeneralServerError.js";
-import { findGuestById, getEventById } from "./eventsLogic.js";
+import { getEventById } from "./eventsLogic.js";
 import { roundedPercentagesToHundred } from "./eventsLogic.js";
 import eventModel from "../models/Event.js";
 import mongoose from "mongoose";
@@ -9,8 +9,12 @@ import guestModel from "../models/Guest.js";
 
 export const getGuests = async (userId, eventId) => {
   try {
+    const conditions = [
+      { owner: userId },
+      {"collaborators.id": userId}
+    ]
     const event = await eventModel
-      .findOne({ _id: eventId, collaborators: userId })
+      .findOne({ _id: eventId, $or: conditions})
       .populate({ path: "guestList" })
       .exec();
     if (!event) throw new DataNotFoundError();
@@ -88,8 +92,12 @@ export const patchGuest = async (userId, eventId, guestId, updatedGuest) => {
 
 export const deleteGuests = async (userId, eventId, selectedGuestsIDs) => {
   try {
+    const conditions = [
+      { owner: userId },
+      {"collaborators.id": userId}
+    ]
     const event = await eventModel.updateOne(
-      { _id: eventId, collaborators: userId },
+      { _id: eventId, $or: conditions },
       { $pull: { guestList: { $in: selectedGuestsIDs } } }
     );
     if (!event) throw new DataNotFoundError();

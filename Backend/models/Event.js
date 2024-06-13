@@ -26,10 +26,20 @@ const eventSchema = new Schema({
     type: [String],
     default: [],
   },
+  owner: {
+    type: Schema.Types.ObjectId,
+    ref: "User", 
+  },
   collaborators: [
     {
-      type: Schema.Types.ObjectId,
-      ref: "User",
+      _id: false,
+      id: {
+        type: Schema.Types.ObjectId,
+        ref: "User"
+      },
+      email: {
+        type: String,
+      },
       status: {
         type: String,
         default: collabStatus[0],
@@ -58,7 +68,7 @@ const eventSchema = new Schema({
   },
 });
 
-eventSchema.index({ collabrators: 1, guestList: 1, _id: 1 });
+eventSchema.index({ "collabrators.id": 1, guestList: 1, _id: 1, owner: 1 });
 eventSchema.pre(
   ["save", "updateOne", "updateMany", "findOneAndUpdate", "findByIdAndUpdate"],
   function (next) {

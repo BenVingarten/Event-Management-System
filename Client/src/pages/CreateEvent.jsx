@@ -20,36 +20,36 @@ const CreateEventPage = () => {
   const [additionalInfo, setAdditionalInfo] = useState([]);
   const [additionalInfoInput, setAdditionalInfoInput] = useState("");
 
-  const [collaborators, setCollaborators] = useState([]);
+  //const [collaborators, setCollaborators] = useState([]);
   const [emailInput, setEmailInput] = useState("");
 
   const handleEmailInputChange = (e) => {
     setEmailInput(e.target.value);
   };
 
-  const addCollaborator = () => {
-    if (emailInput.trim() !== "") {
-      //TODO: Add email validation
-      if (collaborators.includes(emailInput)) {
-        toast.error("Email already added");
-        return;
-      }
-      if (!/^\S+@\S+\.\S+$/.test(emailInput)) {
-        toast.error("Invalid email");
-        return;
-      }
-      setCollaborators([...collaborators, emailInput]);
-      setEmailInput("");
-    } else {
-      toast.error("Please enter an email");
-    }
-  };
+  // const addCollaborator = () => {
+  //   if (emailInput.trim() !== "") {
+  //     //TODO: Add email validation
+  //     if (collaborators.includes(emailInput)) {
+  //       toast.error("Email already added");
+  //       return;
+  //     }
+  //     if (!/^\S+@\S+\.\S+$/.test(emailInput)) {
+  //       toast.error("Invalid email");
+  //       return;
+  //     }
+  //     setCollaborators([...collaborators, emailInput]);
+  //     setEmailInput("");
+  //   } else {
+  //     toast.error("Please enter an email");
+  //   }
+  // };
 
-  const deleteCollaborator = (index) => {
-    const updatedCollaborators = [...collaborators];
-    updatedCollaborators.splice(index, 1);
-    setCollaborators(updatedCollaborators);
-  };
+  // const deleteCollaborator = (index) => {
+  //   const updatedCollaborators = [...collaborators];
+  //   updatedCollaborators.splice(index, 1);
+  //   setCollaborators(updatedCollaborators);
+  // };
 
   const handleBudgetChange = (e) => {
     setBudget(e.target.value);
@@ -95,8 +95,7 @@ const CreateEventPage = () => {
       type: eventType,
       budget,
       location,
-      additionalInfo,
-      collaborators,
+      additionalInfo
     };
     console.log("Event Data:", eventData);
     try {
@@ -260,7 +259,7 @@ const CreateEventPage = () => {
           ))}
         </div>
 
-        <div>
+        {/* <div>
           <label
             htmlFor="emailInput"
             className="block text-gray-700 font-bold mb-2 mr-2"
@@ -284,9 +283,9 @@ const CreateEventPage = () => {
               Add
             </button>
           </div>
-        </div>
+        </div> */}
 
-        <div>
+        {/* <div>
           <h3 className="block text-gray-700 font-bold mb-2 ">
             Collaborators:
           </h3>
@@ -306,7 +305,7 @@ const CreateEventPage = () => {
               </li>
             ))}
           </ul>
-        </div>
+        </div> */}
 
         <button
           type="submit"

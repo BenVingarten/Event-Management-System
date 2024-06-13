@@ -16,14 +16,12 @@ export const getAllUsers = async () => {
   }
 };
 
-export const getIdbyEmail = async (email) => {
+export const getUserWithIdbyEmail = async (email) => {
   try {
-    const user = await userModel.findOne({ email });
-    if (!user) throw new DataNotFoundError("couldnt find user with that email");
-    return user._id;
+    const user = await userModel.findOne({ email }).select("_id").exec();
+    return user;
   } catch (err) {
-    if (err instanceof DataNotFoundError) throw err;
-    else throw new GeneralServerError();
+    throw new GeneralServerError();
   }
 };
 
@@ -58,7 +56,7 @@ export const issueAccessToken = (user) => {
     const accessToken = jwt.sign(
       {
         userInfo: {
-          id: user._id.toString(),
+          id: user._id,
           role: user.role,
         },
       },
@@ -76,7 +74,7 @@ export const issueRefreshToken = (user) => {
     const refreshToken = jwt.sign(
       {
         userInfo: {
-          id: user._id.toString(),
+          id: user._id,
           role: user.role,
         },
       },
