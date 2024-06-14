@@ -66,19 +66,22 @@ export const patchEvent = async (userId, eventId, eventDetails) => {
       throw new DataNotFoundError(
         "couldnt find the event or user is not the event owner"
       );
+    if (additionalInfo.length !== 0) event.additionalInfo = additionalInfo;
     if (collaborators.length !== 0) {
       const ownerEmail = event.owner.email;
-      const invites = await inviteCollaborators(
+      const eventCollaborators = await inviteCollaborators(
         ownerEmail,
         event,
         collaborators
       );
+      event.collaborators = eventCollaborators;
     }
-    if (additionalInfo.length !== 0) event.additionalInfo = additionalInfo;
-    await event.save();
+    if (additionalInfo.length !== 0 || collaborators.length !== 0)
+      await event.save();
     return event;
   } catch (err) {
-    if (err instanceof DataNotFoundError) throw err;
+    if (err instanceof DataNotFoundError || err instanceof GeneralServerError)
+      throw err;
     throw new GeneralServerError();
   }
 };
@@ -130,13 +133,13 @@ export const roundedPercentagesToHundred = (results) => {
 
   return results;
 };
-export const getNewCollaboratorsArray = async (userId, collaborators) => {
-  try {
-  } catch (err) {
-    if (err instanceof DataNotFoundError) throw err;
-    else throw new GeneralServerError();
-  }
-};
+// export const getNewCollaboratorsArray = async (userId, collaborators) => {
+//   try {
+//   } catch (err) {
+//     if (err instanceof DataNotFoundError) throw err;
+//     else throw new GeneralServerError();
+//   }
+// };
 export const inviteCollaborators = async (ownerEmail, event, collaborators) => {
   try {
     // prevent duplicates email
@@ -151,5 +154,15 @@ export const inviteCollaborators = async (ownerEmail, event, collaborators) => {
       if (!newInvite)
         throw GeneralServerError("unexpected error creating user invite");
     }
-  } catch (err) {}
+    // set collaborators to event
+    const eventCollaborators = uniqueCollaborators.map((email) => ({
+      email,
+      status: "Pending",
+      
+    }));
+    return eventCollaborators;
+  } catch (err) {
+    if (err instanceof GeneralServerError) throw err;
+    throw new GeneralServerError();
+  }
 };

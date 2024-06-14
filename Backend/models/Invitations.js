@@ -1,19 +1,21 @@
 import mongoose from "mongoose";
+import { collabStatus } from "../constants/event.js";
 const { Schema } = mongoose;
 
 const inviteSchema = new Schema({
   email: {
     type: String,
     required: true,
-    index: true,
   },
   event: {
     type: Schema.Types.ObjectId,
     ref: "Event",
+    required: true,
   },
   status: {
     type: String,
-    default: "Pending",
+    enum: collabStatus,
+    default: collabStatus[0],
   },
   createdAt: {
     type: Number,

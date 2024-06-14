@@ -44,6 +44,7 @@ const eventSchema = new Schema({
       },
       status: {
         type: String,
+        enum: collabStatus,
         default: collabStatus[0],
       },
     },

@@ -9,9 +9,11 @@ export const sendCollabMail = async (fromEmail, toEmail) => {
     const text = `Hello ${toName},\n You have been invited by ${fromName} to collaborate on his event!\n 
     for more information on the event you can navigate to CelebrightEMS.com and view the invitation details.\n
     good luck and happy planning!\n
-    CelebrightEMS Team`;
+    Best regards, CelebrightEMS Team`;
     const transporter = nodemailer.createTransport({
       service: "gmail",
+      host: "smtp.gmail.com",
+      port: 587,
       auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS,
@@ -26,7 +28,7 @@ export const sendCollabMail = async (fromEmail, toEmail) => {
     const info = await transporter.sendMail(mailOptions);
     if (!info)
       throw new GeneralServerError(
-        `unexpected error occurred in sending email: ${err.message}`
+        `unexpected error occurred in sending email: ${info.response}`
       );
   } catch (err) {
     throw err;
