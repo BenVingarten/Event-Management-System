@@ -35,10 +35,12 @@ const eventSchema = new Schema({
       _id: false,
       id: {
         type: Schema.Types.ObjectId,
-        ref: "User"
+        ref: "User",
+        default: null
       },
       email: {
         type: String,
+        required: true
       },
       status: {
         type: String,
@@ -68,7 +70,7 @@ const eventSchema = new Schema({
   },
 });
 
-eventSchema.index({ "collabrators.id": 1, guestList: 1, _id: 1, owner: 1 });
+eventSchema.index({ "collabrators.id": 1, "collaborators.email": 1, guestList: 1, _id: 1, owner: 1 });
 eventSchema.pre(
   ["save", "updateOne", "updateMany", "findOneAndUpdate", "findByIdAndUpdate"],
   function (next) {

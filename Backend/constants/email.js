@@ -1,7 +1,7 @@
 import nodemailer from "nodemailer";
 import "../config/loadEnv.js";
 import { GeneralServerError } from "../errors/GeneralServerError.js";
-export const sendMail = async (fromEmail, toEmail) => {
+export const sendCollabMail = async (fromEmail, toEmail) => {
   try {
     const subject = "invitation to collaborate";
     const toName = toEmail.split("@")[0];
@@ -23,8 +23,12 @@ export const sendMail = async (fromEmail, toEmail) => {
       subject,
       text,
     };
-    await transporter.sendEmail(mailOptions);
+    const info = await transporter.sendMail(mailOptions);
+    if (!info)
+      throw new GeneralServerError(
+        `unexpected error occurred in sending email: ${err.message}`
+      );
   } catch (err) {
-    throw new GeneralServerError(err.message);
+    throw err;
   }
 };

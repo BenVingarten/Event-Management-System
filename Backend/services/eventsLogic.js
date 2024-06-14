@@ -4,15 +4,12 @@ import { GeneralServerError } from "../errors/GeneralServerError.js";
 import eventModel from "../models/Event.js";
 import userModel from "../models/User.js";
 import { deleteUserEvent, getUserWithIdbyEmail } from "./UserLogic.js";
-import { sendMail } from "../constants/email.js";
-
+import { sendCollabMail } from "../constants/email.js";
+import InvitesModel from "../models/Invitations.js";
 
 export const getEvents = async (id) => {
   try {
-    const conditions = [
-      { owner: id },
-      {"collaborators.id": id}
-    ]
+    const conditions = [{ owner: id }, { "collaborators.id": id }];
     const events = await eventModel.find({ $or: conditions }).exec();
     if (!events) throw new DataNotFoundError();
     return events;
@@ -43,10 +40,7 @@ export const createEvent = async (id, event) => {
 };
 export const getEventById = async (userId, eventId, populateOptions = {}) => {
   try {
-    const conditions = [
-      { owner: userId },
-      {"collaborators.id": userId}
-    ];
+    const conditions = [{ owner: userId }, { "collaborators.id": userId }];
     const isPopulate =
       populateOptions && Object.keys(populateOptions).length > 0;
     const query = eventModel.findOne({ _id: eventId, $or: conditions });
@@ -63,16 +57,22 @@ export const getEventById = async (userId, eventId, populateOptions = {}) => {
 export const patchEvent = async (userId, eventId, eventDetails) => {
   try {
     const { collaborators, additionalInfo, ...otherData } = eventDetails;
-    const event = await eventModel.findOneAndUpdate(
-      { _id: eventId, owner: userId },
-      otherData,
-      { new: true }
-    ).populate({ path: "owner", select: "email" });
-    if (!event) throw new DataNotFoundError();
+    const event = await eventModel
+      .findOneAndUpdate({ _id: eventId, owner: userId }, otherData, {
+        new: true,
+      })
+      .populate({ path: "owner", select: "email" });
+    if (!event)
+      throw new DataNotFoundError(
+        "couldnt find the event or user is not the event owner"
+      );
     if (collaborators.length !== 0) {
-      const ownerEmail = event.owner.email
-      const invites = await inviteCollaborators(ownerEmail, collaborators)
-      
+      const ownerEmail = event.owner.email;
+      const invites = await inviteCollaborators(
+        ownerEmail,
+        event,
+        collaborators
+      );
     }
     if (additionalInfo.length !== 0) event.additionalInfo = additionalInfo;
     await event.save();
@@ -88,8 +88,10 @@ export const deleteEvent = async (userId, eventId) => {
       _id: eventId,
       owner: userId,
     });
-    if(!deletedEvent)
-      throw new DataNotFoundError("couldnt find the event or user is not the owner");
+    if (!deletedEvent)
+      throw new DataNotFoundError(
+        "couldnt find the event or user is not the event owner"
+      );
     await deleteUserEvent(userId, eventId);
     return deletedEvent;
   } catch (err) {
@@ -130,22 +132,24 @@ export const roundedPercentagesToHundred = (results) => {
 };
 export const getNewCollaboratorsArray = async (userId, collaborators) => {
   try {
-   
   } catch (err) {
     if (err instanceof DataNotFoundError) throw err;
     else throw new GeneralServerError();
   }
 };
-export const inviteCollaborators = async (ownerEmail, collaborators) => {
+export const inviteCollaborators = async (ownerEmail, event, collaborators) => {
   try {
-    const idSet = new Set();
-    for(const email of collaborators) {
-      const user = await getUserWithIdbyEmail(email);
-      if(user) {
-        
-      }
+    // prevent duplicates email
+    const uniqueCollaborators = [...new Set(collaborators)];
+    // send mails and create invatations
+    for (const email of uniqueCollaborators) {
+      await sendCollabMail(ownerEmail, email);
+      const newInvite = await InvitesModel.create({
+        email,
+        event: event._id,
+      });
+      if (!newInvite)
+        throw GeneralServerError("unexpected error creating user invite");
     }
-  } catch(err) {
-
-  }
+  } catch (err) {}
 };
