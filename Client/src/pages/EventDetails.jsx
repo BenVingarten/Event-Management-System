@@ -33,6 +33,7 @@ export default function EventDetails() {
   const navigate = useNavigate();
   const state = useLocation();
   const eventID = state.state.eventId;
+  const userId = jwtDecode(auth.accessToken).userInfo.id;
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [updatedDetails, setUpdatedDetails] = useState({
@@ -42,9 +43,9 @@ export default function EventDetails() {
     date: null,
   });
 
-  console.log(eventInfo);
+  //console.log(eventInfo);
   console.log(collaborators);
-  console.log(additionalInfo);
+  //console.log(additionalInfo);
 
   // Fetch event details
   const effectRun = useRef(false);
@@ -54,7 +55,6 @@ export default function EventDetails() {
 
     const getInfo = async () => {
       try {
-        const userId = jwtDecode(auth.accessToken).userInfo.id;
         const eventId = state.state.eventId;
         //console.log("Event ID: " + eventId);
         const response = await axiosPrivate.get(
@@ -190,11 +190,6 @@ export default function EventDetails() {
         updatedFields[field] = value;
       }
     }
-    //console.log("Save changes");
-    //console.log("updated Fields are ");
-    //console.log(updatedFields);
-    //console.log("Collaborators: " + collaborators);
-    //console.log("Additional Info: " + additionalInfo);
 
     // Reset updated details
     setUpdatedDetails({
@@ -206,14 +201,14 @@ export default function EventDetails() {
 
     const controller = new AbortController();
     try {
-      const userId = jwtDecode(auth.accessToken).userInfo.id;
       const eventId = state.state.eventId;
+
       updatedFields.collaborators = collaborators.map(
         (collaborator) => collaborator.email
       );
+
       updatedFields.additionalInfo = additionalInfo;
-      //console.log(updatedFields.collaborators);
-      //console.log("Event ID: " + eventId);
+      console.log(updatedFields);
       const response = await axiosPrivate.patch(
         `/users/${userId}/events/${eventId}`,
         updatedFields,
@@ -231,8 +226,8 @@ export default function EventDetails() {
       setIsModalOpen(false);
       toast.success("Event details updated successfully!");
     } catch (err) {
-      console.log(err.response.data.error[0].msg);
-      toast.error(err.response.data.error[0].msg);
+      console.log(err.response);
+      toast.error(err.response.data.err);
     }
   };
 
@@ -263,7 +258,7 @@ export default function EventDetails() {
           {collaborators.length > 0 ? (
             collaborators.map((c) => (
               <Dropdown.Item key={c._id}>
-                {c.username} | {c.email}
+                {c.email} {c.status && " | " + c.status}
               </Dropdown.Item>
             ))
           ) : (
@@ -332,16 +327,19 @@ export default function EventDetails() {
           >
             Event Vendors
           </Button>
-          <Button
-            size={"lg"}
-            className="w-30 "
-            gradientDuoTone={"greenToBlue"}
-            onClick={() => {
-              setIsModalOpen(true);
-            }}
-          >
-            Edit Details
-          </Button>
+
+          {userId === eventInfo.owner && (
+            <Button
+              size={"lg"}
+              className="w-30 "
+              gradientDuoTone={"greenToBlue"}
+              onClick={() => {
+                setIsModalOpen(true);
+              }}
+            >
+              Edit Details
+            </Button>
+          )}
         </div>
       </Card>
       <div className="grid grid-rows-2 md:grid-cols-2 gap-8 p-8">
@@ -458,6 +456,7 @@ export default function EventDetails() {
             </div>
 
             {/* Collaborators */}
+
             <div className="mt-4">
               <Label htmlFor="collaborators" value="Collaborators" />
               {collaborators.map((collaborator, index) => (

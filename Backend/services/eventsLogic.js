@@ -160,10 +160,10 @@ export const inviteCollaborators = async (ownerEmail, event, collaborators) => {
     const eventCollaborators = uniqueCollaborators.map((email) => ({
       email,
       status: "Pending",
-      
     }));
     return eventCollaborators;
   } catch (err) {
+    //console.error(err);
     if (err instanceof GeneralServerError) throw err;
     throw new GeneralServerError();
   }

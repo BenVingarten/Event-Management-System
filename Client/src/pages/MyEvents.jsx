@@ -19,7 +19,7 @@ const MyEvents = () => {
   const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedEventId, setSelectedEventId] = useState(null);
-  console.log(events);
+  //console.log(events);
 
   useEffect(() => {
     const controller = new AbortController();

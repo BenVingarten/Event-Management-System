@@ -24,18 +24,16 @@ function putTaskValidation() {
         errorMessage: "Invalid task status",
       },
     },
-    
-    
   };
 }
 function createTaskValidation() {
   return {
-    'newCard.title': {
+    "newCard.title": {
       notEmpty: {
         errorMessage: "Task must have content",
       },
     },
-    'newCard.column': {
+    "newCard.column": {
       notEmpty: {
         errorMessage: "Task must have a status",
       },

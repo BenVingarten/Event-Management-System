@@ -13,10 +13,14 @@ export const sendCollabMail = async (fromEmail, toEmail) => {
     const transporter = nodemailer.createTransport({
       service: "gmail",
       host: "smtp.gmail.com",
-      port: 587,
+      port: 465,
       auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS,
+      },
+      tls: {
+        // Do not fail on invalid certs
+        rejectUnauthorized: false,
       },
     });
     const mailOptions = {
@@ -31,6 +35,7 @@ export const sendCollabMail = async (fromEmail, toEmail) => {
         `unexpected error occurred in sending email: ${info.response}`
       );
   } catch (err) {
+    console.error(err);
     throw err;
   }
 };
