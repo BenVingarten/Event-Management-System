@@ -56,6 +56,7 @@ export const getEventById = async (userId, eventId, populateOptions = {}) => {
 };
 export const patchEvent = async (userId, eventId, eventDetails) => {
   try {
+    // find the event and update otherData
     const { collaborators, additionalInfo, ...otherData } = eventDetails;
     const event = await eventModel
       .findOneAndUpdate({ _id: eventId, owner: userId }, otherData, {
@@ -67,6 +68,7 @@ export const patchEvent = async (userId, eventId, eventDetails) => {
         "couldnt find the event or user is not the event owner"
       );
     if (additionalInfo.length !== 0) event.additionalInfo = additionalInfo;
+    //handle collaborators
     if (collaborators.length !== 0) {
       const ownerEmail = event.owner.email;
       const eventCollaborators = await inviteCollaborators(
