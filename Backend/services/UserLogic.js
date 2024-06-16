@@ -58,6 +58,7 @@ export const issueAccessToken = (user) => {
         userInfo: {
           id: user._id,
           role: user.role,
+          email: user.email
         },
       },
       process.env.ACCESS_TOKEN_SECRET,
@@ -76,6 +77,7 @@ export const issueRefreshToken = (user) => {
         userInfo: {
           id: user._id,
           role: user.role,
+          email: user.email
         },
       },
       process.env.REFRESH_TOKEN_SECRET,

@@ -1,10 +1,11 @@
-import validator from "validator";
 import { getEventById } from "./eventsLogic.js";
 import eventModel from "../models/Event";
 import { DuplicateDataError } from "../errors/DuplicateDataError.js";
 import { DataNotFoundError } from "../errors/DataNotFoundError.js";
 import { GeneralServerError } from "../errors/GeneralServerError.js";
 import { sendCollabMail } from "../constants/email.js";
+import InvitesModel from "../models/Invitations.js";
+import { addInvite } from "./invitesLogic.js";
 export const addCollaborator = async (userId, eventId, collaborator) => {
   try {
     const options = {
@@ -19,12 +20,16 @@ export const addCollaborator = async (userId, eventId, collaborator) => {
       throw new DuplicateDataError(
         "there is already a collaborator with that email"
       );
-    event.collaborators.push(collaborator);
+    const collabratorsLength = event.collaborators.push(collaborator);
     await event.save();
     await inviteCollaborator(event, collaborator.email);
-    
+    return await event.collaborators[collabratorsLength - 1];
   } catch (err) {
-    if (err instanceof DataNotFoundError || err instanceof DuplicateDataError)
+    if (
+      err instanceof DataNotFoundError ||
+      err instanceof DuplicateDataError ||
+      err instanceof GeneralServerError
+    )
       throw err;
     throw new GeneralServerError("unexpected error adding collaborator");
   }
@@ -32,17 +37,38 @@ export const addCollaborator = async (userId, eventId, collaborator) => {
 
 export const inviteCollaborator = async (event, collaboratorEmail) => {
   try {
-      const ownerEmail = event.owner.email;
-      await sendCollabMail(ownerEmail, collaboratorEmail);
-      const newInvite = await InvitesModel.create({
-        email: collaboratorEmail,
-        event: event._id,
-      });
-      if (!newInvite)
-        throw GeneralServerError("unexpected error creating user invite");
-  }
-  catch (err) {
+    const ownerEmail = event.owner.email;
+    await sendCollabMail(ownerEmail, collaboratorEmail);
+    await addInvite(ownerEmail, event);
+  } catch (err) {
     if (err instanceof GeneralServerError) throw err;
     throw new GeneralServerError();
+  }
+};
+
+export const deleteCollaborator = async (userId, eventId, collaborator) => {
+  try {
+    // first remove the collaborator from the array
+    const removeOptions = {
+      $pull: {
+        collaborators: collaborator.id ? collaborator.id : collaborator.email,
+      },
+    };
+    const updatedEvent = eventModel
+      .findOneAndUpdate(
+        {
+          _id: eventId,
+          owner: userId,
+        },
+        removeOptions,
+        { new: true }
+      )
+      .exec();
+    if (!updatedEvent)
+      throw new DataNotFoundError("couldnt find the collaborator");
+   
+  } catch (err) {
+    if (err instanceof DataNotFoundError) throw err;
+    throw new GeneralServerError("unexpected error in deleting collaborator");
   }
 };
