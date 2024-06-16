@@ -26,11 +26,11 @@ export const addInvite = async (collaboratorEmail, event) => {
     }
 };
 
-export const deleteInvite = async (collaboratorEmail, event) => {
+export const deleteInvite = async (collaboratorEmail, eventId) => {
     try{
         await InvitesModel.findOneAndDelete({
         email: collaboratorEmail,
-        event: event._Id,
+        event: eventId,
       }).exec();
     } catch (err) {
         if(err instanceof GeneralServerError) throw err;

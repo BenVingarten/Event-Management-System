@@ -5,7 +5,7 @@ import { DataNotFoundError } from "../errors/DataNotFoundError.js";
 import { GeneralServerError } from "../errors/GeneralServerError.js";
 import { sendCollabMail } from "../constants/email.js";
 import InvitesModel from "../models/Invitations.js";
-import { addInvite } from "./invitesLogic.js";
+import { addInvite, deleteInvite } from "./invitesLogic.js";
 export const addCollaborator = async (userId, eventId, collaborator) => {
   try {
     const options = {
@@ -66,7 +66,8 @@ export const deleteCollaborator = async (userId, eventId, collaborator) => {
       .exec();
     if (!updatedEvent)
       throw new DataNotFoundError("couldnt find the collaborator");
-   
+
+    await deleteInvite(collaborator.email, eventId);
   } catch (err) {
     if (err instanceof DataNotFoundError) throw err;
     throw new GeneralServerError("unexpected error in deleting collaborator");
