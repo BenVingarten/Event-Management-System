@@ -35,16 +35,19 @@ export default function EventDetails() {
   const eventID = state.state.eventId;
   const userId = jwtDecode(auth.accessToken).userInfo.id;
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+  const [isCollaboratorsModalOpen, setIsCollaboratorsModalOpen] =
+    useState(false);
   const [updatedDetails, setUpdatedDetails] = useState({
     name: null,
     budget: null,
     location: null,
     date: null,
   });
+  const [newCollab, setNewCollab] = useState("");
 
   //console.log(eventInfo);
-  console.log(collaborators);
+  //console.log(collaborators);
   //console.log(additionalInfo);
 
   // Fetch event details
@@ -94,17 +97,7 @@ export default function EventDetails() {
       controller.abort();
       effectRun.current = true;
     };
-  }, [isModalOpen]);
-
-  // Sample data for the pie chart
-  const data = [
-    ["Task", "Hours per Day"],
-    ["Work", 11],
-    ["Eat", 2],
-    ["Commute", 2],
-    ["Watch TV", 2],
-    ["Sleep", 7], // CSS-style declaration
-  ];
+  }, [isDetailsModalOpen]);
 
   // Convert array to format required by Google Charts
   const convertArray = (inputArray, headerName, type) => {
@@ -223,7 +216,7 @@ export default function EventDetails() {
       setCollaborators(response.data.event.collaborators);
       setAdditionalInfo(response.data.event.additionalInfo);
 
-      setIsModalOpen(false);
+      setIsDetailsModalOpen(false);
       toast.success("Event details updated successfully!");
     } catch (err) {
       console.log(err.response);
@@ -264,6 +257,15 @@ export default function EventDetails() {
           ) : (
             <Dropdown.Item>No Collaborators!</Dropdown.Item>
           )}
+          <Dropdown.Item className="flex justify-center">
+            <Button
+              color="blue"
+              outline
+              onClick={() => setIsCollaboratorsModalOpen(true)}
+            >
+              Edit Collaborators
+            </Button>
+          </Dropdown.Item>
         </Dropdown>
       </div>
     );
@@ -271,20 +273,21 @@ export default function EventDetails() {
 
   // Edit collaborators functionality
   const handleAddCollaborator = () => {
-    setCollaborators([...collaborators, { email: "" }]);
+    //TODO: Add collaborator in backend
+    setCollaborators([...collaborators, { email: newCollab }]);
+    setNewCollab("");
+    console.log(collaborators);
   };
 
   const handleRemoveCollaborator = (index) => {
+    //TODO: Remove collaborator in backend
     const newCollaborators = [...collaborators];
     newCollaborators.splice(index, 1);
     setCollaborators(newCollaborators);
   };
 
-  const handleCollaboratorChange = (index, value) => {
-    const newCollaborators = [...collaborators];
-    newCollaborators[index].email = value;
-    setCollaborators(newCollaborators);
-    //console.log(collaborators);
+  const handleNewCollabChange = (value) => {
+    setNewCollab(value);
   };
 
   // Edit additional info functionality
@@ -334,7 +337,7 @@ export default function EventDetails() {
               className="w-30 "
               gradientDuoTone={"greenToBlue"}
               onClick={() => {
-                setIsModalOpen(true);
+                setIsDetailsModalOpen(true);
               }}
             >
               Edit Details
@@ -395,7 +398,10 @@ export default function EventDetails() {
       </div>
 
       {/* Edit Event Details Details */}
-      <Modal show={isModalOpen} onClose={() => setIsModalOpen(false)}>
+      <Modal
+        show={isDetailsModalOpen}
+        onClose={() => setIsDetailsModalOpen(false)}
+      >
         <div className="p-5">
           <form>
             <h3 className="text-lg font-bold mb-3">Edit your event details</h3>
@@ -455,34 +461,6 @@ export default function EventDetails() {
               />
             </div>
 
-            {/* Collaborators */}
-
-            <div className="mt-4">
-              <Label htmlFor="collaborators" value="Collaborators" />
-              {collaborators.map((collaborator, index) => (
-                <div key={index} className="flex items-center mb-2">
-                  <TextInput
-                    value={collaborator.email}
-                    onChange={(e) =>
-                      handleCollaboratorChange(index, e.target.value)
-                    }
-                    className="flex-grow"
-                  />
-                  <Button
-                    color="red"
-                    size="sm"
-                    className="ml-2"
-                    onClick={() => handleRemoveCollaborator(index)}
-                  >
-                    Remove
-                  </Button>
-                </div>
-              ))}
-              <Button color="blue" size="sm" onClick={handleAddCollaborator}>
-                Add Collaborator
-              </Button>
-            </div>
-
             {/* Additional Info */}
             <div className="mt-4">
               <Label htmlFor="additionalInfo" value="Additional Info" />
@@ -520,11 +498,61 @@ export default function EventDetails() {
               >
                 Save
               </Button>
-              <Button size="sm" onClick={() => setIsModalOpen(false)}>
+              <Button size="sm" onClick={() => setIsDetailsModalOpen(false)}>
                 Cancel
               </Button>
             </div>
           </form>
+        </div>
+      </Modal>
+
+      {/* Edit Collaborators Modal */}
+      <Modal
+        show={isCollaboratorsModalOpen}
+        onClose={() => setIsCollaboratorsModalOpen(false)}
+      >
+        <div className="p-5">
+          <h3 className="text-lg font-bold mb-3">Edit Collaborators</h3>
+
+          {/* Collaborators */}
+          <div className="mt-4">
+            <Label htmlFor="collaborators" value="Collaborators" />
+            {collaborators.map((collaborator, index) => (
+              <div key={index} className="flex items-center mb-2">
+                <TextInput
+                  value={collaborator.email}
+                  onChange={(e) => handleNewCollabChange(index, e.target.value)}
+                  className="flex-grow"
+                />
+                <Button
+                  color="red"
+                  size="sm"
+                  className="ml-2"
+                  onClick={() => handleRemoveCollaborator(index)}
+                >
+                  Remove
+                </Button>
+              </div>
+            ))}
+            {/* Add Collaborator */}
+            <div className="flex items-center mb-2">
+              <TextInput
+                value={newCollab}
+                type="email"
+                placeholder="Enter new collaborator email"
+                onChange={(e) => handleNewCollabChange(e.target.value)}
+                className="flex-grow"
+              />
+              <Button
+                color="green"
+                size="sm"
+                className="ml-2"
+                onClick={() => handleAddCollaborator()}
+              >
+                Add
+              </Button>
+            </div>
+          </div>
         </div>
       </Modal>
     </div>
