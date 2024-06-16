@@ -40,8 +40,11 @@ export const handleGetEventById = async (req, res) => {
   try {
     const { userId } = req;
     const { eventId } = req.params;
-    const populateOptions = { path: "collaborators.id", select: "username email" };
-    const event = await getEventById(userId, eventId, populateOptions);
+    const options = {
+      poupulate: { path: "collaborators.id", select: "username email" },
+      select: null
+    };
+    const event = await getEventById(userId, eventId, options);
     const taskAnalytics = await getTasksAnalytics(userId, eventId);
     const guestAnalytics = await getGuestsAnalytics(userId, eventId);
     const eventDetails = {

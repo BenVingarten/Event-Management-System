@@ -38,13 +38,18 @@ export const createEvent = async (id, event) => {
     throw err;
   }
 };
-export const getEventById = async (userId, eventId, populateOptions = {}) => {
+export const getEventById = async (userId, eventId, options = {}) => {
   try {
     const conditions = [{ owner: userId }, { "collaborators.id": userId }];
     const isPopulate =
-      populateOptions && Object.keys(populateOptions).length > 0;
+      options.populate && Object.keys(options.populate).length > 0;
+    const isSelect = options.select !== null;
+
     const query = eventModel.findOne({ _id: eventId, $or: conditions });
-    if (isPopulate) query.populate(populateOptions);
+
+    if(isPopulate) query.populate(options.populate);
+    if(isSelect) query.select(options.select);
+
     const event = await query.exec();
     if (!event) throw new DataNotFoundError();
     return event;
@@ -57,34 +62,19 @@ export const getEventById = async (userId, eventId, populateOptions = {}) => {
 export const patchEvent = async (userId, eventId, eventDetails) => {
   try {
     // find the event and update otherData
-    const { collaborators, additionalInfo, ...otherData } = eventDetails;
     const event = await eventModel
-      .findOneAndUpdate({ _id: eventId, owner: userId }, otherData, {
+      .findOneAndUpdate({ _id: eventId, owner: userId }, eventDetails, {
         new: true,
-      })
-      .populate({ path: "owner", select: "email" });
+      }).exec();
     if (!event)
       throw new DataNotFoundError(
         "couldnt find the event or user is not the event owner"
       );
-    if (additionalInfo.length !== 0) event.additionalInfo = additionalInfo;
-    //handle collaborators
-    if (collaborators.length !== 0) {
-      const ownerEmail = event.owner.email;
-      const eventCollaborators = await inviteCollaborators(
-        ownerEmail,
-        event,
-        collaborators
-      );
-      event.collaborators = eventCollaborators;
-    }
-    if (additionalInfo.length !== 0 || collaborators.length !== 0)
-      await event.save();
     return event;
   } catch (err) {
-    if (err instanceof DataNotFoundError || err instanceof GeneralServerError)
+    if (err instanceof DataNotFoundError)
       throw err;
-    throw new GeneralServerError();
+    throw new GeneralServerError("unexpected error in modifying event details");
   }
 };
 export const deleteEvent = async (userId, eventId) => {
@@ -142,29 +132,4 @@ export const roundedPercentagesToHundred = (results) => {
 //     else throw new GeneralServerError();
 //   }
 // };
-export const inviteCollaborators = async (ownerEmail, event, collaborators) => {
-  try {
-    // prevent duplicates email
-    const uniqueCollaborators = [...new Set(collaborators)];
-    // send mails and create invatations
-    for (const email of uniqueCollaborators) {
-      await sendCollabMail(ownerEmail, email);
-      const newInvite = await InvitesModel.create({
-        email,
-        event: event._id,
-      });
-      if (!newInvite)
-        throw GeneralServerError("unexpected error creating user invite");
-    }
-    // set collaborators to event
-    const eventCollaborators = uniqueCollaborators.map((email) => ({
-      email,
-      status: "Pending",
-    }));
-    return eventCollaborators;
-  } catch (err) {
-    //console.error(err);
-    if (err instanceof GeneralServerError) throw err;
-    throw new GeneralServerError();
-  }
-};
+

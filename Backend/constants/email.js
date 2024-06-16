@@ -32,7 +32,7 @@ export const sendCollabMail = async (fromEmail, toEmail) => {
     const info = await transporter.sendMail(mailOptions);
     if (!info)
       throw new GeneralServerError(
-        `unexpected error occurred in sending email: ${info.response}`
+        `unexpected error occurred in sending email`
       );
   } catch (err) {
     console.error(err);

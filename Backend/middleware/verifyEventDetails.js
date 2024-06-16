@@ -58,9 +58,17 @@ function patchEventValidation() {
       optional: { options: { nullable: true } },
       notEmpty: { errorMessage: "event must have a location" },
     },
-    collaborators: {
+    additionalInfo: {
       optional: { options: { nullable: true } },
-      isArray: { errorMessage: "collaborators needs to be sent as an array" },
+      isArray: { errorMessage: "additionalInfo needs to be sent as an array" },
+      //notEmpty: { errorMessage: "cant add an empty additional info" },
+    },
+  };
+}
+
+function postCollaboratorValidation() {
+  return {
+    email: {
       custom: {
         options: (value) => {
           return value.every((email) => validator.isEmail(email));
@@ -68,13 +76,11 @@ function patchEventValidation() {
         errorMessage: "Invalid email format for collaborator",
       },
     },
-    additionalInfo: {
-      optional: { options: { nullable: true } },
-      isArray: { errorMessage: "additionalInfo needs to be sent as an array" },
-      notEmpty: { errorMessage: "cant add an empty additional info" },
-    },
   };
 }
 
 export const validateCreateEvent = checkSchema(createEventValidation());
 export const validatePathchEvent = checkSchema(patchEventValidation());
+export const validateAddCollaborator = checkSchema(
+  postCollaboratorValidation()
+);
