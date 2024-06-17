@@ -47,8 +47,8 @@ export const getEventById = async (userId, eventId, options = {}) => {
 
     const query = eventModel.findOne({ _id: eventId, $or: conditions });
 
-    if(isPopulate) query.populate(options.populate);
-    if(isSelect) query.select(options.select);
+    if (isPopulate) query.populate(options.populate);
+    if (isSelect) query.select(options.select);
 
     const event = await query.exec();
     if (!event) throw new DataNotFoundError();
@@ -65,15 +65,15 @@ export const patchEvent = async (userId, eventId, eventDetails) => {
     const event = await eventModel
       .findOneAndUpdate({ _id: eventId, owner: userId }, eventDetails, {
         new: true,
-      }).exec();
+      })
+      .exec();
     if (!event)
       throw new DataNotFoundError(
         "couldnt find the event or user is not the event owner"
       );
     return event;
   } catch (err) {
-    if (err instanceof DataNotFoundError)
-      throw err;
+    if (err instanceof DataNotFoundError) throw err;
     throw new GeneralServerError("unexpected error in modifying event details");
   }
 };
@@ -132,4 +132,3 @@ export const roundedPercentagesToHundred = (results) => {
 //     else throw new GeneralServerError();
 //   }
 // };
-

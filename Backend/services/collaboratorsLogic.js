@@ -4,8 +4,8 @@ import { DuplicateDataError } from "../errors/DuplicateDataError.js";
 import { DataNotFoundError } from "../errors/DataNotFoundError.js";
 import { GeneralServerError } from "../errors/GeneralServerError.js";
 import { sendCollabMail } from "../constants/email.js";
-import InvitesModel from "../models/Invitations.js";
-import { addInvite, deleteInvite } from "./invitesLogic.js";
+import { addInvite, deleteInviteByMailAndEvent } from "./invitesLogic.js";
+import { deleteUserEvent } from "./UserLogic.js";
 export const addCollaborator = async (userId, eventId, collaborator) => {
   try {
     const options = {
@@ -48,10 +48,10 @@ export const inviteCollaborator = async (event, collaboratorEmail) => {
 
 export const deleteCollaborator = async (userId, eventId, collaborator) => {
   try {
-    // first remove the collaborator from the array
+    // first remove the collaborator from the collavorators array
     const removeOptions = {
       $pull: {
-        collaborators: collaborator.id ? collaborator.id : collaborator.email,
+        collaborators: collaborator.collaboratorId ? collaborator.collaboratorId : collaborator.email,
       },
     };
     const updatedEvent = eventModel
@@ -66,7 +66,9 @@ export const deleteCollaborator = async (userId, eventId, collaborator) => {
       .exec();
     if (!updatedEvent)
       throw new DataNotFoundError("couldnt find the collaborator");
-
+    // now we want to remove the event from the user events if exists there
+    await deleteUserEvent(userId, eventId);
+    // delete the invite for collaboration if exists
     await deleteInvite(collaborator.email, eventId);
   } catch (err) {
     if (err instanceof DataNotFoundError) throw err;
