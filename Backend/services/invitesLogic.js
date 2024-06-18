@@ -38,10 +38,13 @@ export const addInvite = async (collaboratorEmail, event) => {
 
 export const deleteInvite = async (collaboratorEmail, eventId) => {
   try {
-    await InvitesModel.findOneAndDelete({
+    console.log(collaboratorEmail, eventId);
+    const result = await InvitesModel.findOneAndDelete({
       email: collaboratorEmail,
       event: eventId,
     }).exec();
+    if(!result)
+      throw new DataNotFoundError("couldnt find the invite to delete");
   } catch (err) {
     if (err instanceof GeneralServerError) throw err;
     throw new GeneralServerError(

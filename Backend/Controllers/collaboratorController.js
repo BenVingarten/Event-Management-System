@@ -18,7 +18,6 @@ export const handleAddCollaborator = async (req, res) => {
       eventId,
       collaboratorData
     );
-    console.log(newCollaborator);
     return res.status(201).json({
       newCollaborator,
     });
@@ -32,7 +31,6 @@ export const handleDeleteCollaborator = async (req, res) => {
     const { userId } = req;
     const { eventId } = req.params;
     const collaborator = req.body;
-    console.log(collaborator);
     const deletedCollab = await deleteCollaborator(
       userId,
       eventId,
