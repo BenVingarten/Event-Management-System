@@ -12,7 +12,9 @@ export const getAllUsers = async () => {
     const users = await userModel.find({});
     return users;
   } catch (err) {
-    throw new GeneralServerError();
+    throw new GeneralServerError(
+      `unexpected error in getting users: ${err.message}`
+    );
   }
 };
 
@@ -21,7 +23,9 @@ export const getUserWithIdbyEmail = async (email) => {
     const user = await userModel.findOne({ email }).select("_id").exec();
     return user;
   } catch (err) {
-    throw new GeneralServerError();
+    throw new GeneralServerError(
+      `unexpected error in getting user with that email: ${err.message}`
+    );
   }
 };
 
@@ -32,7 +36,9 @@ export const getUserByUsername = async (username) => {
       .exec();
     return foundUser;
   } catch (error) {
-    throw new GeneralServerError();
+    throw new GeneralServerError(
+      `unexpected error in getting user by username: ${err.message}`
+    );
   }
 };
 
@@ -47,7 +53,9 @@ export const getUserByEmail = async (email) => {
       .exec();
     return foundUser;
   } catch (error) {
-    throw new GeneralServerError();
+    throw new GeneralServerError(
+      `unexpected error in getting user with that email: ${err.message}`
+    );
   }
 };
 
@@ -58,7 +66,7 @@ export const issueAccessToken = (user) => {
         userInfo: {
           id: user._id,
           role: user.role,
-          email: user.email
+          email: user.email,
         },
       },
       process.env.ACCESS_TOKEN_SECRET,
@@ -66,7 +74,9 @@ export const issueAccessToken = (user) => {
     );
     return accessToken;
   } catch (err) {
-    throw new GeneralServerError();
+    throw new GeneralServerError(
+      `unexpected error in issuing access token for the user: ${err.message}`
+    );
   }
 };
 
@@ -77,7 +87,7 @@ export const issueRefreshToken = (user) => {
         userInfo: {
           id: user._id,
           role: user.role,
-          email: user.email
+          email: user.email,
         },
       },
       process.env.REFRESH_TOKEN_SECRET,
@@ -85,7 +95,9 @@ export const issueRefreshToken = (user) => {
     );
     return refreshToken;
   } catch (error) {
-    throw new GeneralServerError();
+    throw new GeneralServerError(
+      `unexpected error in issuing refresh token for the user: ${err.message}`
+    );
   }
 };
 
@@ -120,22 +132,30 @@ export const createUser = async (userInfo) => {
     const newUser = await userModel.create(newUserObj);
     return newUser;
   } catch (err) {
-    console.error(err.message);
     if (err instanceof DuplicateDataError) throw err;
-    else throw new GeneralServerError();
+    else
+      throw new GeneralServerError(
+        `unexpected error in creating user: ${err.message}`
+      );
   }
 };
 
 export const getUserById = async (id) => {
   try {
-    const selectOptions = "-_id username email businessType businessLocation businessDescription";
-    
-    const user = await userModel.findOne({ _id: id }).select(selectOptions).exec();
+    const selectOptions =
+      "-_id username email businessType businessLocation businessDescription";
+
+    const user = await userModel
+      .findOne({ _id: id })
+      .select(selectOptions)
+      .exec();
     if (!user) throw new DataNotFoundError("User with that ID is not found");
     return user;
   } catch (err) {
     if (err instanceof DataNotFoundError) throw err;
-    else throw new GeneralServerError();
+    throw new GeneralServerError(
+      `unexpected error in getting user id: ${err.message}`
+    );
   }
 };
 
@@ -153,19 +173,21 @@ export const patchUser = async (id, updatedValues) => {
       if (foundUser)
         throw new DuplicateDataError("There is already a user with that email");
     }
-    
-    const selectedFields = "-_id username email businessType businessLocation businessDescription";
-    const updatedUser = await userModel.findOneAndUpdate(
-      {_id: id}, 
-      updatedValues, 
-      {new: true}
-    ).select(selectedFields).exec(); 
+
+    const selectedFields =
+      "-_id username email businessType businessLocation businessDescription";
+    const updatedUser = await userModel
+      .findOneAndUpdate({ _id: id }, updatedValues, { new: true })
+      .select(selectedFields)
+      .exec();
     if (!updatedUser) throw new DataNotFoundError();
     return updatedUser;
   } catch (err) {
     if (err instanceof DataNotFoundError || err instanceof DuplicateDataError)
       throw err;
-    throw new GeneralServerError();
+    throw new GeneralServerError(
+      `unexpected error in updating user details: ${err.message}`
+    );
   }
 };
 
@@ -177,7 +199,9 @@ export const deleteUser = async (id) => {
     return userToDelete;
   } catch (err) {
     if (err instanceof DataNotFoundError) throw err;
-    throw new GeneralServerError();
+    throw new GeneralServerError(
+      `unexpected error in deleting user: ${err.message}`
+    );
   }
 };
 
@@ -201,7 +225,9 @@ export const authenticateUser = async (user) => {
   } catch (err) {
     if (err instanceof DataNotFoundError || err instanceof UnauthorizedError)
       throw err;
-    throw new GeneralServerError();
+    throw new GeneralServerError(
+      `unexpected error in authenticating user: ${err.message}`
+    );
   }
 };
 
@@ -219,7 +245,10 @@ export const authenticateUserWithGoogle = async (email) => {
     return tokens;
   } catch (err) {
     if (err instanceof DataNotFoundError) throw err;
-    else throw GeneralServerError();
+    else
+      throw GeneralServerError(
+        `unexpected error in authenticating user via google: ${err.message}`
+      );
   }
 };
 
@@ -245,7 +274,9 @@ export const assignNewAccessToken = async (refreshToken) => {
   } catch (err) {
     if (err instanceof DataNotFoundError || err instanceof UnauthorizedError)
       throw err;
-    throw new GeneralServerError();
+    throw new GeneralServerError(
+      `unexpected error in issuing new access token: ${err.message}`
+    );
   }
 };
 
@@ -257,12 +288,23 @@ export const logoutUser = async (refreshToken) => {
       await findUser.save();
     }
   } catch (err) {
-    throw new GeneralServerError();
+    throw new GeneralServerError(
+      `unexpected error in logging out user: ${err.message}`
+    );
   }
 };
 
 export const deleteUserEvent = async (userId, eventId) => {
-  await userModel.findByIdAndUpdate(userId, {
-    $pull: { events: eventId },
-  });
+  try {
+    const user = await userModel.findByIdAndUpdate(userId, {
+      $pull: { events: eventId },
+    });
+    if (!user)
+      throw new DataNotFoundError("couldnt not found a user with that id");
+  } catch (err) {
+    if (err instanceof DataNotFoundError) throw err;
+    throw new GeneralServerError(
+      `unexpected error in deleting user's event: ${err.message}`
+    );
+  }
 };

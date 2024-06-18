@@ -14,7 +14,8 @@ export const getEvents = async (id) => {
     if (!events) throw new DataNotFoundError();
     return events;
   } catch (err) {
-    throw err;
+    if(err instanceof DataNotFoundError) throw err;
+    throw new GeneralServerError(`unexpected error in getting user's events: ${err.message}`);
   }
 };
 export const createEvent = async (id, event) => {
@@ -29,13 +30,14 @@ export const createEvent = async (id, event) => {
       additionalInfo,
       owner: id,
     });
-    await userModel.findByIdAndUpdate(id, {
+    const user = await userModel.findByIdAndUpdate(id, {
       $push: { events: newEvent._id },
     });
+    if(!user) throw new DataNotFoundError("couldnt find user with that id");
     return newEvent;
   } catch (err) {
-    console.error(err);
-    throw err;
+    if(err instanceof DataNotFoundError) throw err;
+    throw new GeneralServerError(`unexpected error in creating user's event: ${err.message}`);
   }
 };
 export const getEventById = async (userId, eventId, options = {}) => {
@@ -55,8 +57,7 @@ export const getEventById = async (userId, eventId, options = {}) => {
     return event;
   } catch (err) {
     if (err instanceof DataNotFoundError) throw err;
-    console.error(err);
-    throw new GeneralServerError();
+    throw new GeneralServerError(`unexpected error in getting event by Id: ${err.message}`);
   }
 };
 export const patchEvent = async (userId, eventId, eventDetails) => {
@@ -74,7 +75,7 @@ export const patchEvent = async (userId, eventId, eventDetails) => {
     return event;
   } catch (err) {
     if (err instanceof DataNotFoundError) throw err;
-    throw new GeneralServerError("unexpected error in modifying event details");
+    throw new GeneralServerError(`unexpected error in updating event's details: ${err.message}`);
   }
 };
 export const deleteEvent = async (userId, eventId) => {
@@ -91,7 +92,7 @@ export const deleteEvent = async (userId, eventId) => {
     return deletedEvent;
   } catch (err) {
     if (err instanceof DataNotFoundError) throw err;
-    throw new GeneralServerError("error in deleting event");
+    throw new GeneralServerError(`unexpected error in deleting user's event: ${err.message}`);
   }
 };
 export const roundedPercentagesToHundred = (results) => {

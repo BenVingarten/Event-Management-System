@@ -29,13 +29,10 @@ export const sendCollabMail = async (fromEmail, toEmail) => {
       subject,
       text,
     };
-    const info = await transporter.sendMail(mailOptions);
-    if (!info)
-      throw new GeneralServerError(
-        `unexpected error occurred in sending email`
-      );
+    await transporter.sendMail(mailOptions);
   } catch (err) {
-    console.error(err);
-    throw err;
+    throw new GeneralServerError(
+      `unexpected error in sending email to collaborator: ${err.message}`
+    );
   }
 };

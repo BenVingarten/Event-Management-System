@@ -12,7 +12,7 @@ export const addCollaborator = async (userId, eventId, collaborator) => {
       populate: { path: "owner", select: "email" },
       select: "collaborators",
     };
-    const event = getEventById(userId, eventId, options);
+    const event = await getEventById(userId, eventId, options);
     const duplicate = event.collaborators.find(
       (email) => email === collaborator.email
     );
@@ -25,13 +25,16 @@ export const addCollaborator = async (userId, eventId, collaborator) => {
     await inviteCollaborator(event, collaborator.email);
     return event.collaborators[collabratorsLength - 1];
   } catch (err) {
+    console.error(err);
     if (
       err instanceof DataNotFoundError ||
       err instanceof DuplicateDataError ||
       err instanceof GeneralServerError
     )
       throw err;
-    throw new GeneralServerError("unexpected error adding collaborator");
+    throw new GeneralServerError(
+      `unexpected error in adding collaborator: ${err.message}`
+    );
   }
 };
 
@@ -42,7 +45,9 @@ export const inviteCollaborator = async (event, collaboratorEmail) => {
     await addInvite(ownerEmail, event);
   } catch (err) {
     if (err instanceof GeneralServerError) throw err;
-    throw new GeneralServerError();
+    throw new GeneralServerError(
+      `unexpected error in inviting collaborator: ${err.message}`
+    );
   }
 };
 
@@ -74,6 +79,8 @@ export const deleteCollaborator = async (userId, eventId, collaborator) => {
     await deleteInvite(collaborator.email, eventId);
   } catch (err) {
     if (err instanceof DataNotFoundError) throw err;
-    throw new GeneralServerError("unexpected error in deleting collaborator");
+    throw new GeneralServerError(
+      `unexpected error in deleting collaborator: ${err.message}`
+    );
   }
 };

@@ -10,8 +10,8 @@ import logoutRoute from "./logout.js";
 import eventsRoute from "./events.js";
 import tasksRoute from "./tasks.js";
 import guestsRoute from "./guests.js";
-import invitations from "./invitations.js";
-import collaborators from "./collaborators.js";
+import invitesRoute from "./invitations.js";
+import collaboratorsRoute from "./collaborators.js";
 import { verifyJWT } from "../middleware/verifyJWT.js";
 
 const router = Router();
@@ -26,9 +26,9 @@ router.use(logoutRoute);
 
 router.use(verifyJWT);
 router.use(usersRoute);
-router.use(invitations);
+router.use(invitesRoute);
 router.use(eventsRoute);
-router.use(collaborators);
+router.use(collaboratorsRoute);
 router.use(tasksRoute);
 router.use(guestsRoute);
 

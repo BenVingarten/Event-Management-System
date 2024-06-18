@@ -9,19 +9,18 @@ import guestModel from "../models/Guest.js";
 
 export const getGuests = async (userId, eventId) => {
   try {
-    const conditions = [
-      { owner: userId },
-      {"collaborators.id": userId}
-    ]
+    const conditions = [{ owner: userId }, { "collaborators.id": userId }];
     const event = await eventModel
-      .findOne({ _id: eventId, $or: conditions})
+      .findOne({ _id: eventId, $or: conditions })
       .populate({ path: "guestList" })
       .exec();
     if (!event) throw new DataNotFoundError();
     return event.guestList;
   } catch (err) {
     if (err instanceof DataNotFoundError) throw err;
-    throw new GeneralServerError();
+    throw new GeneralServerError(
+      `unexpected error in getting guests: ${err.message}`
+    );
   }
 };
 
@@ -48,7 +47,9 @@ export const addGuest = async (userId, eventId, guestData) => {
   } catch (err) {
     if (err instanceof DataNotFoundError || err instanceof DuplicateDataError)
       throw err;
-    throw new GeneralServerError();
+    throw new GeneralServerError(
+      `unexpected error in creating guest: ${err.message}`
+    );
   }
 };
 
@@ -62,7 +63,9 @@ export const getGuestById = async (userId, eventId, guestId) => {
     return guest;
   } catch (err) {
     if (err instanceof DataNotFoundError) throw err;
-    throw new GeneralServerError();
+    throw new GeneralServerError(
+      `unexpected error in getting guest by id: ${err.message}`
+    );
   }
 };
 
@@ -86,16 +89,15 @@ export const patchGuest = async (userId, eventId, guestId, updatedGuest) => {
     if (!guest) throw new DataNotFoundError();
   } catch (err) {
     if (err instanceof DataNotFoundError) throw err;
-    throw new GeneralServerError();
+    throw new GeneralServerError(
+      `unexpected error in updating guests: ${err.message}`
+    );
   }
 };
 
 export const deleteGuests = async (userId, eventId, selectedGuestsIDs) => {
   try {
-    const conditions = [
-      { owner: userId },
-      {"collaborators.id": userId}
-    ]
+    const conditions = [{ owner: userId }, { "collaborators.id": userId }];
     const event = await eventModel.updateOne(
       { _id: eventId, $or: conditions },
       { $pull: { guestList: { $in: selectedGuestsIDs } } }
@@ -112,7 +114,9 @@ export const deleteGuests = async (userId, eventId, selectedGuestsIDs) => {
     return result.deletedCount;
   } catch (err) {
     if (err instanceof DataNotFoundError || GeneralServerError) throw err;
-    throw new GeneralServerError();
+    throw new GeneralServerError(
+      `unexpected error in deleting guests: ${err.message}`
+    );
   }
 };
 
@@ -120,41 +124,39 @@ export const getGuestsAnalytics = async (userId, eventId) => {
   try {
     const pipeLine = [
       {
-        $match: { event: new mongoose.Types.ObjectId(eventId) }
+        $match: { event: new mongoose.Types.ObjectId(eventId) },
       },
       {
         $facet: {
           countByStatus: [
             { $group: { _id: "$status", count: { $sum: 1 } } },
-            { $project: { _id: 0, status: "$_id", count: 1 } }
+            { $project: { _id: 0, status: "$_id", count: 1 } },
           ],
-          countTotal: [
-            { $group: { _id: null, total: { $sum: 1 } } }
-          ]
-        }
+          countTotal: [{ $group: { _id: null, total: { $sum: 1 } } }],
+        },
       },
       {
-            $unwind: "$countByStatus",
-          },
-          {
-            $unwind: "$countTotal",
-          },
-          {
-            $project: {
-              status: "$countByStatus.status",
-              percentage: {
-                $round: [
-                  {
-                    $multiply: [
-                      { $divide: ["$countByStatus.count", "$countTotal.total"] },
-                      100,
-                    ],
-                  },
-                  1,
+        $unwind: "$countByStatus",
+      },
+      {
+        $unwind: "$countTotal",
+      },
+      {
+        $project: {
+          status: "$countByStatus.status",
+          percentage: {
+            $round: [
+              {
+                $multiply: [
+                  { $divide: ["$countByStatus.count", "$countTotal.total"] },
+                  100,
                 ],
               },
-            },
+              1,
+            ],
           },
+        },
+      },
     ];
     const event = getEventById(userId, eventId);
     const results = await guestModel.aggregate(pipeLine).exec();
@@ -167,6 +169,8 @@ export const getGuestsAnalytics = async (userId, eventId) => {
     return roundedResults;
   } catch (err) {
     if (err instanceof DataNotFoundError) throw err;
-    throw new GeneralServerError();
+    throw new GeneralServerError(
+      `unexpected error in getting guests analytics: ${err.message}`
+    );
   }
 };

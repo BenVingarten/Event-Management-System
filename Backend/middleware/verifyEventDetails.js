@@ -71,7 +71,6 @@ function postCollaboratorValidation() {
     email: {
       custom: {
         options: (value) => {
-          //console.log(value);
           return validator.isEmail(value);
         },
         errorMessage: "Invalid email format for collaborator",

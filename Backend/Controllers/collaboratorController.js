@@ -7,6 +7,7 @@ export const handleAddCollaborator = async (req, res) => {
     if (!errors.isEmpty())
       return res.status(400).json({ error: errors.array() });
     const collaboratorData = matchedData(req);
+    console.log(collaboratorData);
     const { userId } = req;
     const { eventId } = req.params;
     const newCollaborator = await addCollaborator(

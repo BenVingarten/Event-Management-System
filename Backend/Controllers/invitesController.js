@@ -1,7 +1,7 @@
 import {
   getInvites,
   updateByInviteResponse,
-} from "../Services/invitesLogic.js";
+} from "../services/invitesLogic.js";
 
 export const handleGetUserInvites = async (req, res) => {
   try {

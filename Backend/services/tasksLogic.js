@@ -8,19 +8,18 @@ import mongoose from "mongoose";
 import suggestedTasksModel from "../models/SuggestedTask.js";
 export const getTasks = async (userId, eventId) => {
   try {
-    const conditions = [
-      { owner: userId },
-      {"collaborators.id": userId}
-    ]
+    const conditions = [{ owner: userId }, { "collaborators.id": userId }];
     const event = await eventModel
-      .findOne({ _id: eventId, $or: conditions})
+      .findOne({ _id: eventId, $or: conditions })
       .populate({ path: "cards" })
       .exec();
     if (!event) throw new DataNotFoundError();
     return event.cards;
   } catch (err) {
     if (err instanceof DataNotFoundError) throw err;
-    throw new GeneralServerError();
+    throw new GeneralServerError(
+      `unexpected error in getting tasks: ${err.message}`
+    );
   }
 };
 
@@ -35,7 +34,9 @@ export const createTask = async (userId, eventId, taskData, suggested) => {
     return newTask;
   } catch (err) {
     if (err instanceof DataNotFoundError) throw err;
-    throw new GeneralServerError();
+    throw new GeneralServerError(
+      `unexpected error in creating task: ${err.message}`
+    );
   }
 };
 
@@ -51,7 +52,9 @@ export const updateTasks = async (userId, eventId, cards) => {
     }
   } catch (err) {
     if (err instanceof DataNotFoundError) throw err;
-    throw new GeneralServerError();
+    throw new GeneralServerError(
+      `unexpected error in updating tasks: ${err.message}`
+    );
   }
 };
 
@@ -104,16 +107,15 @@ export const getTasksAnalytics = async (userId, eventId) => {
     return roundedResults;
   } catch (err) {
     if (err instanceof DataNotFoundError) throw err;
-    throw new GeneralServerError();
+    throw new GeneralServerError(
+      `unexpected error in getting tasks analytics: ${err.message}`
+    );
   }
 };
 
 export const deleteTask = async (userId, eventId, taskId) => {
   try {
-    const conditions = [
-      { owner: userId },
-      {"collaborators.id": userId}
-    ]
+    const conditions = [{ owner: userId }, { "collaborators.id": userId }];
     const event = await eventModel.updateOne(
       { _id: eventId, $or: conditions },
       { $pull: { cards: taskId } }
@@ -126,7 +128,9 @@ export const deleteTask = async (userId, eventId, taskId) => {
     if (!result) throw new DataNotFoundError();
   } catch (err) {
     if (err instanceof DataNotFoundError || GeneralServerError) throw err;
-    throw new GeneralServerError();
+    throw new GeneralServerError(
+      `unexpected error in deleting task: ${err.message}`
+    );
   }
 };
 
@@ -136,7 +140,7 @@ export const getSuggestedTasks = async (userId, eventId) => {
     const { location, type } = event;
     const pipeLine = [
       {
-        $match: { eventTypes: type/*, venues: location*/ },
+        $match: { eventTypes: type /*, venues: location*/ },
       },
       {
         $group: { _id: "$category", tasks: { $push: "$title" } },
@@ -157,6 +161,8 @@ export const getSuggestedTasks = async (userId, eventId) => {
     return suggestedTasks;
   } catch (err) {
     if (err instanceof DataNotFoundError) throw err;
-    throw new GeneralServerError(err.meesage);
+    throw new GeneralServerError(
+      `unexpected error in getting  suggested tasks: ${err.message}`
+    );
   }
 };
