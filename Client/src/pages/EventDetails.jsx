@@ -46,7 +46,9 @@ export default function EventDetails() {
   });
   const [newCollab, setNewCollab] = useState("");
 
-  //console.log(eventInfo);
+  console.log(eventInfo);
+  console.log(userId === eventInfo.owner);
+
   //console.log(collaborators);
   //console.log(additionalInfo);
 
@@ -153,7 +155,7 @@ export default function EventDetails() {
           {/* Additional Info */}
           {additionalInfo.length > 0 && additionalInfoPresent()}
 
-          {collaborators.length > 0 && collaboratorsPresent()}
+          {userId === eventInfo.owner && collaboratorsPresent()}
         </div>
       </div>
     );
