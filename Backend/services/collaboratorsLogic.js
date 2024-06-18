@@ -1,6 +1,5 @@
 import { getEventById } from "./eventsLogic.js";
 import eventModel from "../models/Event.js";
-import { DuplicateDataError } from "../errors/DuplicateDataError.js";
 import { DataNotFoundError } from "../errors/DataNotFoundError.js";
 import { GeneralServerError } from "../errors/GeneralServerError.js";
 import { sendCollabMail } from "../constants/email.js";

@@ -1,5 +1,8 @@
 import { validationResult, matchedData } from "express-validator";
-import { addCollaborator } from "../services/collaboratorsLogic.js";
+import {
+  addCollaborator,
+  deleteCollaborator,
+} from "../services/collaboratorsLogic.js";
 
 export const handleAddCollaborator = async (req, res) => {
   try {
@@ -7,7 +10,7 @@ export const handleAddCollaborator = async (req, res) => {
     if (!errors.isEmpty())
       return res.status(400).json({ error: errors.array() });
     const collaboratorData = matchedData(req);
-    console.log(collaboratorData);
+    //console.log(collaboratorData);
     const { userId } = req;
     const { eventId } = req.params;
     const newCollaborator = await addCollaborator(
@@ -15,11 +18,10 @@ export const handleAddCollaborator = async (req, res) => {
       eventId,
       collaboratorData
     );
-    return res
-      .status(201)
-      .json({
-        successfull: `new collaborator: ${newCollaborator.email} added!`,
-      });
+    console.log(newCollaborator);
+    return res.status(201).json({
+      newCollaborator,
+    });
   } catch (err) {
     return res.status(err.statusCode).json({ err: err.message });
   }
@@ -27,12 +29,18 @@ export const handleAddCollaborator = async (req, res) => {
 
 export const handleDeleteCollaborator = async (req, res) => {
   try {
-    const { eventId } = req.params;
     const { userId } = req;
-    const event = await deleteEvent(userId, eventId);
-    return res
-      .status(200)
-      .json({ deleted: `you successfully deleted the event: ${event.name}` });
+    const { eventId } = req.params;
+    const collaborator = req.body;
+    console.log(collaborator);
+    const deletedCollab = await deleteCollaborator(
+      userId,
+      eventId,
+      collaborator
+    );
+    return res.status(200).json({
+      deleted: `you successfully deleted the collaborator: ${collaborator.email}`,
+    });
   } catch (err) {
     return res.status(err.statusCode).json({ err: err.message });
   }

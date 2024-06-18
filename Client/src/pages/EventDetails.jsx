@@ -6,6 +6,7 @@ import {
   Label,
   ListGroup,
   Modal,
+  Spinner,
   TextInput,
 } from "flowbite-react";
 import useAxiosPrivate from "../hooks/useAxiosPrivate";
@@ -19,6 +20,8 @@ import { FaQuestionCircle, FaMoneyBillWave } from "react-icons/fa";
 import { FaLocationDot } from "react-icons/fa6";
 
 import moment from "moment-timezone";
+import { se } from "date-fns/locale";
+import { set } from "mongoose";
 
 export default function EventDetails() {
   const [eventInfo, setEventInfo] = useState([]);
@@ -45,12 +48,7 @@ export default function EventDetails() {
     date: null,
   });
   const [newCollab, setNewCollab] = useState("");
-
-  console.log(eventInfo);
-  console.log(userId === eventInfo.owner);
-
-  //console.log(collaborators);
-  //console.log(additionalInfo);
+  const [isLoading, setIsLoading] = useState(false);
 
   // Fetch event details
   const effectRun = useRef(false);
@@ -240,6 +238,7 @@ export default function EventDetails() {
   };
 
   // Present collaborators
+  console.log();
   const collaboratorsPresent = () => {
     return (
       <div className="mt-5">
@@ -251,8 +250,8 @@ export default function EventDetails() {
           gradientDuoTone={"pinkToOrange"}
         >
           {collaborators.length > 0 ? (
-            collaborators.map((c) => (
-              <Dropdown.Item key={c._id}>
+            collaborators.map((c, index) => (
+              <Dropdown.Item key={index}>
                 {c.email} {c.status && " | " + c.status}
               </Dropdown.Item>
             ))
@@ -275,11 +274,10 @@ export default function EventDetails() {
 
   // Edit collaborators functionality
   const handleAddCollaborator = async () => {
-    //TODO: Add collaborator in backend
-
     const controller = new AbortController();
     //console.log(newCollab);
     try {
+      setIsLoading(true);
       const response = await axiosPrivate.post(
         `/users/${userId}/events/${eventID}/collaborators`,
         { email: newCollab },
@@ -289,11 +287,13 @@ export default function EventDetails() {
           signal: controller.signal,
         }
       );
+      setIsLoading(false);
       toast.success("Collaborator added successfully, Email sent!");
       console.log(response);
-      setCollaborators([...collaborators, response.data.collaborator]);
+      setCollaborators([...collaborators, response.data.newCollaborator]);
       setNewCollab("");
     } catch (error) {
+      setIsLoading(false);
       console.error("Error Adding Collab:", error.response?.data);
       if (!error?.response) toast.error("Error: No response from server.");
       else toast.error("Error: " + error.response?.data.error[0].msg);
@@ -304,9 +304,30 @@ export default function EventDetails() {
 
   const handleRemoveCollaborator = (index) => {
     //TODO: Remove collaborator in backend
-    const newCollaborators = [...collaborators];
-    newCollaborators.splice(index, 1);
-    setCollaborators(newCollaborators);
+    const deleteCollab = collaborators[index];
+    const controller = new AbortController();
+    setIsLoading(true);
+    try {
+      axiosPrivate.delete(
+        `/users/${userId}/events/${eventID}/collaborators/${deleteCollab.email}`,
+        {
+          headers: { "Content-Type": "application/json" },
+          withCredentials: true,
+          signal: controller.signal,
+          data: { collaborator: deleteCollab },
+        }
+      );
+      toast.success("Collaborator removed successfully!");
+      setIsLoading(false);
+      const newCollaborators = [...collaborators];
+      newCollaborators.splice(index, 1);
+      setCollaborators(newCollaborators);
+    } catch (error) {
+      setIsLoading(false);
+      console.error("Error Removing Collab:", error.response?.data);
+      if (!error?.response) toast.error("Error: No response from server.");
+      else toast.error("Error: " + error.response?.data.error[0].msg);
+    }
   };
 
   const handleNewCollabChange = (value) => {
@@ -333,6 +354,7 @@ export default function EventDetails() {
   return (
     <div className=" h-screen flex flex-col">
       <Toaster />
+
       <h1 className=" p-4 text-xl font-bold">{eventInfo.name}</h1>
 
       {/* First area - Event Details*/}
@@ -566,14 +588,18 @@ export default function EventDetails() {
                 onChange={(e) => handleNewCollabChange(e.target.value)}
                 className="flex-grow"
               />
-              <Button
-                color="green"
-                size="sm"
-                className="ml-2"
-                onClick={() => handleAddCollaborator()}
-              >
-                Add
-              </Button>
+              {isLoading ? (
+                <Spinner size="lg" />
+              ) : (
+                <Button
+                  color="green"
+                  size="sm"
+                  className="ml-2"
+                  onClick={() => handleAddCollaborator()}
+                >
+                  Add
+                </Button>
+              )}
             </div>
           </div>
 
