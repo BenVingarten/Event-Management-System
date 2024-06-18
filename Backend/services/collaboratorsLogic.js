@@ -1,15 +1,15 @@
 import { getEventById } from "./eventsLogic.js";
-import eventModel from "../models/Event";
+import eventModel from "../models/Event.js";
 import { DuplicateDataError } from "../errors/DuplicateDataError.js";
 import { DataNotFoundError } from "../errors/DataNotFoundError.js";
 import { GeneralServerError } from "../errors/GeneralServerError.js";
 import { sendCollabMail } from "../constants/email.js";
-import { addInvite, deleteInviteByMailAndEvent } from "./invitesLogic.js";
+import { addInvite, deleteInvite } from "./invitesLogic.js";
 import { deleteUserEvent } from "./UserLogic.js";
 export const addCollaborator = async (userId, eventId, collaborator) => {
   try {
     const options = {
-      populate: { path: "Owner", select: "email" },
+      populate: { path: "owner", select: "email" },
       select: "collaborators",
     };
     const event = getEventById(userId, eventId, options);
@@ -23,7 +23,7 @@ export const addCollaborator = async (userId, eventId, collaborator) => {
     const collabratorsLength = event.collaborators.push(collaborator);
     await event.save();
     await inviteCollaborator(event, collaborator.email);
-    return await event.collaborators[collabratorsLength - 1];
+    return event.collaborators[collabratorsLength - 1];
   } catch (err) {
     if (
       err instanceof DataNotFoundError ||
@@ -51,7 +51,9 @@ export const deleteCollaborator = async (userId, eventId, collaborator) => {
     // first remove the collaborator from the collavorators array
     const removeOptions = {
       $pull: {
-        collaborators: collaborator.collaboratorId ? collaborator.collaboratorId : collaborator.email,
+        collaborators: collaborator.collaboratorId
+          ? collaborator.collaboratorId
+          : collaborator.email,
       },
     };
     const updatedEvent = eventModel

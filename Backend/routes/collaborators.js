@@ -1,12 +1,29 @@
 import { Router } from "express";
-import { verifyParamId } from "../middleware/verifyParamId";
-import { validateAddCollaborator } from "../middleware/verifyEventDetails";
-import { handleAddCollaborator, handleDeleteCollaborator  } from "../Controllers/collaboratorController";
+import { verifyParamId } from "../middleware/verifyParamId.js";
+import { validateAddCollaborator } from "../middleware/verifyEventDetails.js";
+import {
+  handleAddCollaborator,
+  handleDeleteCollaborator,
+} from "../Controllers/collaboratorController.js";
+import { verifyUserIdMatchAuthId } from "../middleware/verifyUserIdMatchAuthId.js";
 
 const router = Router();
 
-router.route("/users/:id/events/:eventId/collaborators")
-.post(verifyUserIdMatchAuthId, verifyParamId('eventId'), validateAddCollaborator, handleAddCollaborator);
+router
+  .route("/users/:id/events/:eventId/collaborators")
+  .post(
+    verifyUserIdMatchAuthId,
+    verifyParamId("eventId"),
+    validateAddCollaborator,
+    handleAddCollaborator
+  );
 
-router.route("/users/:id/events/:eventId/collaborators/:email")
-.delete(verifyUserIdMatchAuthId, verifyParamId('eventId'), handleDeleteCollaborator);
+router
+  .route("/users/:id/events/:eventId/collaborators/:email")
+  .delete(
+    verifyUserIdMatchAuthId,
+    verifyParamId("eventId"),
+    handleDeleteCollaborator
+  );
+
+export default router;

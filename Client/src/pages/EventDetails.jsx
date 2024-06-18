@@ -272,10 +272,31 @@ export default function EventDetails() {
   };
 
   // Edit collaborators functionality
-  const handleAddCollaborator = () => {
+  const handleAddCollaborator = async () => {
     //TODO: Add collaborator in backend
-    setCollaborators([...collaborators, { email: newCollab }]);
-    setNewCollab("");
+
+    const controller = new AbortController();
+    //console.log(newCollab);
+    try {
+      const response = await axiosPrivate.post(
+        `/users/${userId}/events/${eventID}/collaborators`,
+        { email: newCollab },
+        {
+          headers: { "Content-Type": "application/json" },
+          withCredentials: true,
+          signal: controller.signal,
+        }
+      );
+      toast.success("Collaborator added successfully, Email sent!");
+      console.log(response);
+      setCollaborators([...collaborators, response.data.collaborator]);
+      setNewCollab("");
+    } catch (error) {
+      console.error("Error Adding Collab:", error.response?.data);
+      if (!error?.response) toast.error("Error: No response from server.");
+      else toast.error("Error: " + error.response?.data.error[0].msg);
+    }
+
     console.log(collaborators);
   };
 
@@ -553,6 +574,13 @@ export default function EventDetails() {
               </Button>
             </div>
           </div>
+
+          <Button
+            color={"red"}
+            onClick={() => setIsCollaboratorsModalOpen(false)}
+          >
+            Cancel
+          </Button>
         </div>
       </Modal>
     </div>

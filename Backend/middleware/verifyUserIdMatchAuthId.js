@@ -13,5 +13,6 @@ export const verifyUserIdMatchAuthId = (req, res, next) => {
       .status(401)
       .json({ msg: "you dont have an access to this resource" });
   }
+
   next();
 };

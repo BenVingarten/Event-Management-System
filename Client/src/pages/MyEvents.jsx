@@ -10,6 +10,7 @@ import { FaQuestionCircle, FaMoneyBillWave } from "react-icons/fa";
 import { FaLocationDot } from "react-icons/fa6";
 import { MdDeleteForever } from "react-icons/md";
 import moment from "moment-timezone";
+import Invitations from "../components/Invitations";
 
 const MyEvents = () => {
   const [events, setEvents] = useState([]);
@@ -19,6 +20,7 @@ const MyEvents = () => {
   const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedEventId, setSelectedEventId] = useState(null);
+  const userId = jwtDecode(auth.accessToken).userInfo.id;
   //console.log(events);
 
   useEffect(() => {
@@ -27,12 +29,11 @@ const MyEvents = () => {
     // Fetch user's events from the backend
     const fetchEvents = async () => {
       try {
-        const userId = jwtDecode(auth.accessToken).userInfo.id;
         const response = await axiosPrivate.get(`/users/${userId}/events`, {
           signal: controller.signal,
         });
 
-        console.log(response.data.events);
+        //console.log(response.data.events);
         setEvents(response.data.events);
       } catch (err) {
         console.log(err.response?.data);
@@ -151,6 +152,9 @@ const MyEvents = () => {
           </div>
         )}
       </div>
+
+      <Invitations userId={userId} />
+
       {/* Delete Confirmation Modal */}
       <Modal show={isModalOpen} onClose={() => setIsModalOpen(false)}>
         <div className="p-5">
