@@ -15,8 +15,6 @@ export const getInvites = async (userId) => {
       path: "event",
       select: "name date type -_id",
     });
-
-    console.log(invites);
     if (!invites)
       throw new DataNotFoundError(
         "the invites for user with that email cant be found"
@@ -69,22 +67,24 @@ export const updateByInviteResponse = async (userId, inviteId, answer) => {
       "event email"
     );
     if (!invite) throw DataNotFoundError("couldnt find invite with this id");
-    if (answer) {
+    if (answer === true) {
       // if the user accepted the invite add the event to his event list
       const user = await userModel
-        .updateOne({ email: invite.email }, { $push: { events: invite.event } })
+        .updateOne(
+          { email: invite.email, _id: userId },
+          { $push: { events: invite.event } }
+        )
         .exec();
       if (user.matchedCount === 0)
         throw new DataNotFoundError(
           "couldnt find user with email like in the invite"
         );
-      // update the event, add the userId to the collaborators
+      // update the event, add the userId to the collaborators if not there
       const event = await eventModel
         .updateOne(
           {
             _id: invite.event,
             "collaborators.email": invite.email,
-            "collaborators.id": null,
           },
           {
             $set: {
@@ -94,21 +94,18 @@ export const updateByInviteResponse = async (userId, inviteId, answer) => {
           }
         )
         .exec();
-      if (event.matchedCount === 0)
-        throw new DataNotFoundError(
-          "couldnt find event with this eventId and collaborator email like in the invite"
-        );
     } else {
       const event = await eventModel
         .updateOne(
           { _id: invite.event },
-          { $pull: { collaborators: invite.email } }
+          { $pull: { collaborators: { email:invite.email } } }
         )
         .exec();
       if (event.matchedCount === 0)
         throw new DataNotFoundError(
           "couldnt find event with this eventId and collaborator email like in the invite"
         );
+      return answer;
     }
   } catch (err) {
     if (err instanceof DataNotFoundError) throw err;

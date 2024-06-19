@@ -7,8 +7,6 @@ import { sendCollabMail } from "../constants/email.js";
 import { addInvite, deleteInvite } from "./invitesLogic.js";
 import {
   deleteUserEvent,
-  getUserByEmail,
-  getUserWithIdbyEmail,
 } from "./UserLogic.js";
 export const addCollaborator = async (userId, eventId, collaborator) => {
   try {
@@ -25,10 +23,6 @@ export const addCollaborator = async (userId, eventId, collaborator) => {
         "there is already a collaborator with that email"
       );
     }
-    // check if there is a user with that email already in db
-    const user = await getUserWithIdbyEmail(collaborator.email);
-    if (user) collaborator.collaboratorId = user._id;
-
     const collabratorsLength = event.collaborators.push(collaborator);
     await event.save();
     await inviteCollaborator(event, collaborator.email);

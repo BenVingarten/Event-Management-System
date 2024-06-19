@@ -9,13 +9,15 @@ import InvitesModel from "../models/Invitations.js";
 
 export const getEvents = async (id) => {
   try {
-    const conditions = [{ owner: id }, { "collaborators.id": id }];
+    const conditions = [{ owner: id }, { "collaborators.collaboratorId": id }];
     const events = await eventModel.find({ $or: conditions }).exec();
     if (!events) throw new DataNotFoundError();
     return events;
   } catch (err) {
-    if(err instanceof DataNotFoundError) throw err;
-    throw new GeneralServerError(`unexpected error in getting user's events: ${err.message}`);
+    if (err instanceof DataNotFoundError) throw err;
+    throw new GeneralServerError(
+      `unexpected error in getting user's events: ${err.message}`
+    );
   }
 };
 export const createEvent = async (id, event) => {
@@ -33,16 +35,21 @@ export const createEvent = async (id, event) => {
     const user = await userModel.findByIdAndUpdate(id, {
       $push: { events: newEvent._id },
     });
-    if(!user) throw new DataNotFoundError("couldnt find user with that id");
+    if (!user) throw new DataNotFoundError("couldnt find user with that id");
     return newEvent;
   } catch (err) {
-    if(err instanceof DataNotFoundError) throw err;
-    throw new GeneralServerError(`unexpected error in creating user's event: ${err.message}`);
+    if (err instanceof DataNotFoundError) throw err;
+    throw new GeneralServerError(
+      `unexpected error in creating user's event: ${err.message}`
+    );
   }
 };
 export const getEventById = async (userId, eventId, options = {}) => {
   try {
-    const conditions = [{ owner: userId }, { "collaborators.id": userId }];
+    const conditions = [
+      { owner: userId },
+      { "collaborators.collaboratorId": userId },
+    ];
     const isPopulate =
       options.populate && Object.keys(options.populate).length > 0;
     const isSelect = options.select !== null;
@@ -57,7 +64,9 @@ export const getEventById = async (userId, eventId, options = {}) => {
     return event;
   } catch (err) {
     if (err instanceof DataNotFoundError) throw err;
-    throw new GeneralServerError(`unexpected error in getting event by Id: ${err.message}`);
+    throw new GeneralServerError(
+      `unexpected error in getting event by Id: ${err.message}`
+    );
   }
 };
 export const patchEvent = async (userId, eventId, eventDetails) => {
@@ -75,7 +84,9 @@ export const patchEvent = async (userId, eventId, eventDetails) => {
     return event;
   } catch (err) {
     if (err instanceof DataNotFoundError) throw err;
-    throw new GeneralServerError(`unexpected error in updating event's details: ${err.message}`);
+    throw new GeneralServerError(
+      `unexpected error in updating event's details: ${err.message}`
+    );
   }
 };
 export const deleteEvent = async (userId, eventId) => {
@@ -92,7 +103,9 @@ export const deleteEvent = async (userId, eventId) => {
     return deletedEvent;
   } catch (err) {
     if (err instanceof DataNotFoundError) throw err;
-    throw new GeneralServerError(`unexpected error in deleting user's event: ${err.message}`);
+    throw new GeneralServerError(
+      `unexpected error in deleting user's event: ${err.message}`
+    );
   }
 };
 export const roundedPercentagesToHundred = (results) => {

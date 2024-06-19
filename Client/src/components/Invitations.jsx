@@ -45,8 +45,9 @@ const Invitations = ({ userId }) => {
   const handleAccept = async (invitationId) => {
     const controller = new AbortController();
     try {
+      console.log(invitationId);
       await axiosPrivate.patch(
-        `/users/${userId}/invites/${invitationId}/`,
+        `/users/${userId}/invites/${invitationId}`,
         { answer: true },
         { signal: controller.signal }
       );
@@ -120,11 +121,15 @@ const Invitations = ({ userId }) => {
                       size={"sm"}
                       color={"green"}
                       className="mb-2"
-                      onClick={handleAccept}
+                      onClick={() => handleAccept(invitation._id)}
                     >
                       <FaCheck color="green" />
                     </Button>
-                    <Button size={"sm"} color={"red"} onClick={handleDecline}>
+                    <Button
+                      size={"sm"}
+                      color={"red"}
+                      onClick={() => handleDecline(invitation._id)}
+                    >
                       <IoMdClose color="red" />
                     </Button>
                   </div>

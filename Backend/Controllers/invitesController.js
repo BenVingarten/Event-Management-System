@@ -17,10 +17,9 @@ export const handleGetUserInvites = async (req, res) => {
 };
 export const handleInviteResponse = async (req, res) => {
   try {
-    if (!req?.body?.answer)
-      return res
-        .status(400)
-        .json({ failed: "The invitation response is missing" });
+  
+    if (!req?.body)
+      return res.status(400).json({ failed: "The invitation response is missing" });
     const { answer } = req.body;
     const { userId } = req;
     const { inviteId } = req.params;
@@ -29,6 +28,8 @@ export const handleInviteResponse = async (req, res) => {
       inviteId,
       answer
     );
+    const response = inviteResponse? "Accpeted" : "Declined";
+    return res.status(200).json({ msg: `the collaboration invite has been ${response}`})
   } catch (err) {
     return res.status(err.statusCode).json({ err: err.message });
   }
