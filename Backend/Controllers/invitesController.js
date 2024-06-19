@@ -9,12 +9,7 @@ import {
 export const handleGetUserInvites = async (req, res) => {
   try {
     const { userId } = req;
-    const user = await userModel.findById(userId).select("email");
-    if (!user)
-      throw new DataNotFoundError(
-        "couldnt find a user with email matching the invite email"
-      );
-    const userInvites = await getInvites(user.email);
+    const userInvites = await getInvites(userId);
     return res.status(200).json({ userInvites });
   } catch (err) {
     return res.status(err.statusCode).json({ err: err.message });

@@ -20,8 +20,6 @@ import { FaQuestionCircle, FaMoneyBillWave } from "react-icons/fa";
 import { FaLocationDot } from "react-icons/fa6";
 
 import moment from "moment-timezone";
-import { se } from "date-fns/locale";
-import { set } from "mongoose";
 
 export default function EventDetails() {
   const [eventInfo, setEventInfo] = useState([]);
@@ -303,20 +301,16 @@ export default function EventDetails() {
   };
 
   const handleRemoveCollaborator = (index) => {
-    //TODO: Remove collaborator in backend
     const deleteCollab = collaborators[index];
     const controller = new AbortController();
     setIsLoading(true);
     try {
-      axiosPrivate.delete(
-        `/users/${userId}/events/${eventID}/collaborators/`,
-        {
-          headers: { "Content-Type": "application/json" },
-          withCredentials: true,
-          signal: controller.signal,
-          data: deleteCollab ,
-        }
-      );
+      axiosPrivate.delete(`/users/${userId}/events/${eventID}/collaborators/`, {
+        headers: { "Content-Type": "application/json" },
+        withCredentials: true,
+        signal: controller.signal,
+        data: deleteCollab,
+      });
       toast.success("Collaborator removed successfully!");
       setIsLoading(false);
       const newCollaborators = [...collaborators];

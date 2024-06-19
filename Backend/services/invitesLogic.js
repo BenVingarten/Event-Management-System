@@ -4,9 +4,18 @@ import eventModel from "../models/Event.js";
 import InvitesModel from "../models/Invitations.js";
 import userModel from "../models/User.js";
 
-export const getInvites = async (userEmail) => {
+export const getInvites = async (userId) => {
   try {
-    const invites = await InvitesModel.find({ email: userEmail });
+    const user = await userModel.findById(userId).select("email");
+    if (!user)
+      throw new DataNotFoundError(
+        "couldnt find a user with email matching the invite email"
+      );
+    const invites = await InvitesModel.find({ email: user.email }).populate({
+      path: "event",
+      select: "name date type -_id",
+    });
+
     console.log(invites);
     if (!invites)
       throw new DataNotFoundError(

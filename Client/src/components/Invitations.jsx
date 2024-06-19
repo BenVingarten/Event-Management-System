@@ -2,8 +2,12 @@ import PropTypes from "prop-types";
 import { useEffect, useRef, useState } from "react";
 import useAxiosPrivate from "../hooks/useAxiosPrivate";
 import { Toaster, toast } from "react-hot-toast";
+import { Button } from "flowbite-react";
+import moment from "moment-timezone";
+import { FaCheck } from "react-icons/fa";
+import { IoMdClose } from "react-icons/io";
 
-const ChatWidget = ({ userId }) => {
+const Invitations = ({ userId }) => {
   const axiosPrivate = useAxiosPrivate();
   const [isOpen, setIsOpen] = useState(false);
   const effectRun = useRef(false);
@@ -22,7 +26,6 @@ const ChatWidget = ({ userId }) => {
           signal: controller.signal,
         });
         setInvitations(response.data.userInvites);
-        console.log(response.data);
       } catch (error) {
         console.error("Error fetching invitations:", error);
         if (!error?.response) toast.error("Error: No response from server.");
@@ -37,6 +40,45 @@ const ChatWidget = ({ userId }) => {
       effectRun.current = true;
     };
   }, []);
+  console.log(invitations);
+
+  const handleAccept = async (invitationId) => {
+    const controller = new AbortController();
+    try {
+      await axiosPrivate.patch(
+        `/users/${userId}/invites/${invitationId}/`,
+        { answer: true },
+        { signal: controller.signal }
+      );
+      setInvitations((prevInvitations) =>
+        prevInvitations.filter((invitation) => invitation._id !== invitationId)
+      );
+      toast.success("Invitation accepted");
+    } catch (error) {
+      console.error("Error accepting invitation:", error);
+      if (!error?.response) toast.error("Error: No response from server.");
+      else toast.error("Error: " + error.response?.data.error);
+    }
+  };
+
+  const handleDecline = async (invitationId) => {
+    const controller = new AbortController();
+    try {
+      await axiosPrivate.patch(
+        `/users/${userId}/invites/${invitationId}`,
+        { answer: false },
+        { signal: controller.signal }
+      );
+      setInvitations((prevInvitations) =>
+        prevInvitations.filter((invitation) => invitation._id !== invitationId)
+      );
+      toast.success("Invitation declined");
+    } catch (error) {
+      console.error("Error declining invitation:", error);
+      if (!error?.response) toast.error("Error: No response from server.");
+      else toast.error("Error: " + error.response?.data.error);
+    }
+  };
 
   return (
     <div
@@ -57,12 +99,35 @@ const ChatWidget = ({ userId }) => {
             <div className="text-center">No invitations</div>
           ) : (
             <ul className="space-y-2">
-              {invitations.map((invitation, index) => (
+              {invitations.map((invitation) => (
                 <li
-                  key={index}
-                  className="p-2 bg-gray-100 rounded-lg cursor-pointer hover:bg-gray-200"
+                  key={invitation._id}
+                  className="flex justify-between p-2 bg-gray-100 rounded-lg"
                 >
-                  {invitation}
+                  <div>
+                    <h1 className="font-bold font-serif underline">
+                      {invitation.event.name}
+                    </h1>
+                    <p>{invitation.event.type}</p>
+                    <p>
+                      {moment(new Date(invitation.event.date) * 1000)
+                        .tz("Israel")
+                        .format("DD/MM/YYYY")}
+                    </p>
+                  </div>
+                  <div>
+                    <Button
+                      size={"sm"}
+                      color={"green"}
+                      className="mb-2"
+                      onClick={handleAccept}
+                    >
+                      <FaCheck color="green" />
+                    </Button>
+                    <Button size={"sm"} color={"red"} onClick={handleDecline}>
+                      <IoMdClose color="red" />
+                    </Button>
+                  </div>
                 </li>
               ))}
             </ul>
@@ -73,9 +138,8 @@ const ChatWidget = ({ userId }) => {
   );
 };
 
-ChatWidget.propTypes = {
+Invitations.propTypes = {
   userId: PropTypes.string.isRequired,
-  eventId: PropTypes.string.isRequired,
 };
 
-export default ChatWidget;
+export default Invitations;
