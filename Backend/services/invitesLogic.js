@@ -7,6 +7,7 @@ import userModel from "../models/User.js";
 export const getInvites = async (userEmail) => {
   try {
     const invites = await InvitesModel.find({ email: userEmail });
+    console.log(invites);
     if (!invites)
       throw new DataNotFoundError(
         "the invites for user with that email cant be found"
@@ -38,12 +39,11 @@ export const addInvite = async (collaboratorEmail, event) => {
 
 export const deleteInvite = async (collaboratorEmail, eventId) => {
   try {
-    console.log(collaboratorEmail, eventId);
     const result = await InvitesModel.findOneAndDelete({
       email: collaboratorEmail,
       event: eventId,
     }).exec();
-    if(!result)
+    if (!result)
       throw new DataNotFoundError("couldnt find the invite to delete");
   } catch (err) {
     if (err instanceof GeneralServerError) throw err;
@@ -72,8 +72,17 @@ export const updateByInviteResponse = async (userId, inviteId, answer) => {
       // update the event, add the userId to the collaborators
       const event = await eventModel
         .updateOne(
-          { _id: invite.event, "collaborators.email": invite.email },
-          { $set: { "collaborators.$.collaboratorId": userId } }
+          {
+            _id: invite.event,
+            "collaborators.email": invite.email,
+            "collaborators.id": null,
+          },
+          {
+            $set: {
+              "collaborators.$.collaboratorId": userId,
+              "collaborators.$.status": "Active",
+            },
+          }
         )
         .exec();
       if (event.matchedCount === 0)

@@ -2,6 +2,7 @@ import { getEventById } from "./eventsLogic.js";
 import eventModel from "../models/Event.js";
 import { DataNotFoundError } from "../errors/DataNotFoundError.js";
 import { GeneralServerError } from "../errors/GeneralServerError.js";
+import { DuplicateDataError } from "../errors/DuplicateDataError.js";
 import { sendCollabMail } from "../constants/email.js";
 import { addInvite, deleteInvite } from "./invitesLogic.js";
 import {
@@ -17,12 +18,13 @@ export const addCollaborator = async (userId, eventId, collaborator) => {
     };
     const event = await getEventById(userId, eventId, options);
     const duplicate = event.collaborators.find(
-      (email) => email === collaborator.email
+      (collaboratorObj) => collaboratorObj.email === collaborator.email
     );
-    if (duplicate)
+    if (duplicate) {
       throw new DuplicateDataError(
         "there is already a collaborator with that email"
       );
+    }
     // check if there is a user with that email already in db
     const user = await getUserWithIdbyEmail(collaborator.email);
     if (user) collaborator.collaboratorId = user._id;
@@ -32,7 +34,6 @@ export const addCollaborator = async (userId, eventId, collaborator) => {
     await inviteCollaborator(event, collaborator.email);
     return event.collaborators[collabratorsLength - 1];
   } catch (err) {
-    console.error(err);
     if (
       err instanceof DataNotFoundError ||
       err instanceof DuplicateDataError ||
@@ -62,8 +63,8 @@ export const deleteCollaborator = async (userId, eventId, collaborator) => {
   try {
     // first remove the collaborator from the collavorators array
     const filter = collaborator.collaboratorId
-      ? { "collaborator.id": collaborator.collaboratorId }
-      : { "collaborator.email": collaborator.email };
+      ? { collaboratorId: collaborator.collaboratorId }
+      : { email: collaborator.email };
     const removeOptions = { $pull: { collaborators: filter } };
     const result = await eventModel.updateOne(
       {
@@ -72,7 +73,6 @@ export const deleteCollaborator = async (userId, eventId, collaborator) => {
       },
       removeOptions
     );
-
     if (result.modifiedCount === 0) {
       throw new DataNotFoundError("couldn't find the collaborator");
     }

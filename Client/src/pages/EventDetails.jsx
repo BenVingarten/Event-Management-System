@@ -296,7 +296,7 @@ export default function EventDetails() {
       setIsLoading(false);
       console.error("Error Adding Collab:", error.response?.data);
       if (!error?.response) toast.error("Error: No response from server.");
-      else toast.error("Error: " + error.response?.data.error[0].msg);
+      else toast.error("Error: " + error.response?.data.err);
     }
 
     console.log(collaborators);
@@ -309,12 +309,12 @@ export default function EventDetails() {
     setIsLoading(true);
     try {
       axiosPrivate.delete(
-        `/users/${userId}/events/${eventID}/collaborators/${deleteCollab.email}`,
+        `/users/${userId}/events/${eventID}/collaborators/`,
         {
           headers: { "Content-Type": "application/json" },
           withCredentials: true,
           signal: controller.signal,
-          data: { collaborator: deleteCollab },
+          data: deleteCollab ,
         }
       );
       toast.success("Collaborator removed successfully!");

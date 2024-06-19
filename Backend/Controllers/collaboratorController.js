@@ -10,7 +10,6 @@ export const handleAddCollaborator = async (req, res) => {
     if (!errors.isEmpty())
       return res.status(400).json({ error: errors.array() });
     const collaboratorData = matchedData(req);
-    //console.log(collaboratorData);
     const { userId } = req;
     const { eventId } = req.params;
     const newCollaborator = await addCollaborator(
@@ -31,6 +30,7 @@ export const handleDeleteCollaborator = async (req, res) => {
     const { userId } = req;
     const { eventId } = req.params;
     const collaborator = req.body;
+    console.log(collaborator);
     const deletedCollab = await deleteCollaborator(
       userId,
       eventId,

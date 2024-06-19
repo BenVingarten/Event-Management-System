@@ -22,7 +22,7 @@ const ChatWidget = ({ userId }) => {
           signal: controller.signal,
         });
         setInvitations(response.data.userInvites);
-        console.log(invitations);
+        console.log(response.data);
       } catch (error) {
         console.error("Error fetching invitations:", error);
         if (!error?.response) toast.error("Error: No response from server.");

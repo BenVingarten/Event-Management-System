@@ -11,7 +11,6 @@ export const verifyJWT = (req, res, next) => {
     const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
     req.userId = decoded.userInfo.id;
     req.role = decoded.userInfo.role;
-    req.userEmail = decoded.userInfo.email;
     next();
   } catch (err) {
     return res.status(401).json({ Unauthorized: "wrong or expired token" });

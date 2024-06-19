@@ -16,10 +16,7 @@ router
     verifyParamId("eventId"),
     validateAddCollaborator,
     handleAddCollaborator
-  );
-
-router
-  .route("/users/:id/events/:eventId/collaborators/:email")
+  )
   .delete(
     verifyUserIdMatchAuthId,
     verifyParamId("eventId"),
