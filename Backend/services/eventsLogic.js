@@ -4,7 +4,6 @@ import { GeneralServerError } from "../errors/GeneralServerError.js";
 import eventModel from "../models/Event.js";
 import userModel from "../models/User.js";
 import { deleteUserEvent, getUserWithIdbyEmail } from "./UserLogic.js";
-import { sendCollabMail } from "../constants/email.js";
 import InvitesModel from "../models/Invitations.js";
 
 export const getEvents = async (id) => {

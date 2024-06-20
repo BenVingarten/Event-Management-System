@@ -3,6 +3,10 @@ import { GeneralServerError } from "../errors/GeneralServerError.js";
 import eventModel from "../models/Event.js";
 import InvitesModel from "../models/Invitations.js";
 import userModel from "../models/User.js";
+import {
+  sendWebsiteEmail,
+  collabInvitationSResponseDetails,
+} from "./emailLogic.js";
 
 export const getInvites = async (userId) => {
   try {
@@ -63,11 +67,13 @@ export const deleteInvite = async (collaboratorEmail, eventId) => {
 export const updateByInviteResponse = async (userId, inviteId, answer) => {
   try {
     // first find the invitation
+    let response, ownerEmail;
     const invite = await InvitesModel.findByIdAndDelete(inviteId).select(
       "event email"
     );
-    if (!invite) throw DataNotFoundError("couldnt find invite with this id");
+    if (!invite) throw new DataNotFoundError("couldnt find invite with this id");
     if (answer === true) {
+      response = "accepted";
       // if the user accepted the invite add the event to his event list
       const user = await userModel
         .updateOne(
@@ -81,7 +87,7 @@ export const updateByInviteResponse = async (userId, inviteId, answer) => {
         );
       // update the event, add the userId to the collaborators if not there
       const event = await eventModel
-        .updateOne(
+        .findOneAndUpdate(
           {
             _id: invite.event,
             "collaborators.email": invite.email,
@@ -93,20 +99,32 @@ export const updateByInviteResponse = async (userId, inviteId, answer) => {
             },
           }
         )
+        .populate({ path: "owner", select: "email" })
         .exec();
+      if (event.matchedCount === 0)
+        throw new DataNotFoundError("couldnt find the event in the invite");
+      ownerEmail = event.owner.email;
     } else {
+      response = "declined";
       const event = await eventModel
-        .updateOne(
+        .findOneAndUpdate(
           { _id: invite.event },
-          { $pull: { collaborators: { email:invite.email } } }
+          { $pull: { collaborators: { email: invite.email } } }
         )
+        .populate({ path: "owner", select: "email" })
         .exec();
       if (event.matchedCount === 0)
         throw new DataNotFoundError(
           "couldnt find event with this eventId and collaborator email like in the invite"
         );
-      return answer;
+      ownerEmail = event.owner.email;
     }
+    const mailOptions = collabInvitationSResponseDetails(
+      ownerEmail,
+      invite.email,
+      response
+    );
+    await sendWebsiteEmail(mailOptions);
   } catch (err) {
     if (err instanceof DataNotFoundError) throw err;
     throw new GeneralServerError(

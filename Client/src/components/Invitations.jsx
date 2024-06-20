@@ -58,7 +58,7 @@ const Invitations = ({ userId }) => {
     } catch (error) {
       console.error("Error accepting invitation:", error);
       if (!error?.response) toast.error("Error: No response from server.");
-      else toast.error("Error: " + error.response?.data.error);
+      else toast.error("Error: " + error.response?.data.err);
     }
   };
 
@@ -77,7 +77,7 @@ const Invitations = ({ userId }) => {
     } catch (error) {
       console.error("Error declining invitation:", error);
       if (!error?.response) toast.error("Error: No response from server.");
-      else toast.error("Error: " + error.response?.data.error);
+      else toast.error("Error: " + error.response?.data.err);
     }
   };
 
