@@ -239,8 +239,8 @@ export const authenticateUserWithGoogle = async (email) => {
     findUser.refreshToken = refreshToken;
     await findUser.save();
 
-    const tokens = { accessToken, refreshToken };
-    return tokens;
+    const authUser = { accessToken, refreshToken, username: findUser.username};
+    return authUser;
   } catch (err) {
     if (err instanceof DataNotFoundError) throw err;
     else

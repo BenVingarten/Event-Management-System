@@ -46,6 +46,8 @@ function OAuthLogin() {
       const accessToken = res?.data?.accessToken;
       const role = jwtDecode(accessToken).userInfo.role;
       const user = jwtDecode(accessToken).userInfo.id;
+      localStorage.setItem("userName", res?.data?.userName);
+      localStorage.setItem("email", res?.data?.email);
       setAuth({ user, role, accessToken });
       // navigate to the previous page or home page
       navigate(from, { replace: true });

@@ -9,13 +9,17 @@ export const handleUserGoogleLogin = async (req, res) => {
       body: { email },
     } = req;
 
-    const tokens = await authenticateUserWithGoogle(email);
+    const authUser = await authenticateUserWithGoogle(email);
 
-    res.cookie("jwt", tokens.refreshToken, {
+    res.cookie("jwt", authUser.refreshToken, {
       httpOnly: true,
       maxAge: 24 * 60 * 60 * 1000,
     });
-    return res.status(200).json({ accessToken: tokens.accessToken });
+    return res.status(200).json({
+      accessToken: authUser.accessToken,
+      userName: authUser.username,
+      email,
+    });
   } catch (err) {
     console.error(err);
     return res.status(err.statusCode).json({ err: err.message });

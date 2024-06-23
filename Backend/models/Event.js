@@ -62,6 +62,16 @@ const eventSchema = new Schema({
       ref: "Guest",
     },
   ],
+  vendors: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      status: {
+        type: String,
+        required: true
+      }
+    }
+  ],
   createdAt: {
     type: Number,
     default: Date.now(),
