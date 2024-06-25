@@ -58,6 +58,25 @@ userSchema.add({
       return this.role === "Vendor"; // Required only if role is Vendor
     },
   },
+  upcomingEvents: [
+    {
+      name: {
+        type: String,
+        required: true,
+      },
+      date: {
+        type: Number,
+        required: true,
+      },
+      location: {
+        type: String,
+      },
+      ownerEmail: {
+        type: String,
+        required: true,
+      },
+    },
+  ],
 });
 
 userSchema.pre(

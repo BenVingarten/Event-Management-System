@@ -64,8 +64,30 @@ const eventSchema = new Schema({
   ],
   vendors: [
     {
-      type: Schema.Types.ObjectId,
-      ref: "User",
+      _id: false,
+      user: {
+        type: Schema.Types.ObjectId,
+        ref: "User",
+        default: null
+      },
+      name: {
+        type: String,
+        required: function () {
+          return !this.user;
+        }
+      },
+      email: {
+        type: String,
+        required: function () {
+          return !this.user;
+        }
+      },
+      businessType: {
+        type: String,
+        required: function () {
+          return !this.user;
+        }
+      },
       status: {
         type: String,
         required: true
