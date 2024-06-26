@@ -12,6 +12,7 @@ import tasksRoute from "./tasks.js";
 import guestsRoute from "./guests.js";
 import invitesRoute from "./invitations.js";
 import collaboratorsRoute from "./collaborators.js";
+import vendorsRoute from "./vendors.js";
 import { verifyJWT } from "../middleware/verifyJWT.js";
 
 const router = Router();
@@ -29,6 +30,7 @@ router.use(usersRoute);
 router.use(invitesRoute);
 router.use(eventsRoute);
 router.use(collaboratorsRoute);
+router.use(vendorsRoute);
 router.use(tasksRoute);
 router.use(guestsRoute);
 
