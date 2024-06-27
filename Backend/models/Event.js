@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 const { Schema } = mongoose;
-import { collabStatus } from "../constants/event.js";
+import { collabStatus, vendorStatus } from "../constants/event.js";
 const eventSchema = new Schema({
   name: {
     type: String,
@@ -65,35 +65,30 @@ const eventSchema = new Schema({
   vendors: [
     {
       _id: false,
-      user: {
+      registeredUser: {
         type: Schema.Types.ObjectId,
         ref: "User",
-        required: false,
-        default: null
       },
-      name: {
-        type: String,
-        required: function () {
-          return !this.user;
-        }
-      },
-      email: {
-        type: String,
-        required: function () {
-          return !this.user;
-        }
-      },
-      businessType: {
-        type: String,
-        required: function () {
-          return !this.user;
-        }
+      custom: {
+          name: {
+            type: String,
+            required: true
+          },
+          email: {
+            type: String,
+            required: true
+          },
+          businessType: {
+            type: String,
+            required: true
+          }
       },
       status: {
         type: String,
+        enum: vendorStatus,
         required: true
       }
-    }
+    } 
   ],
   createdAt: {
     type: Number,

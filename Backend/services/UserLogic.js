@@ -1,4 +1,5 @@
 import userModel from "../models/User.js";
+import vendorModel from "../models/Vendor.js";
 import bcrypt from "bcrypt";
 import { DuplicateDataError } from "../errors/DuplicateDataError.js";
 import { DataNotFoundError } from "../errors/DataNotFoundError.js";
@@ -6,6 +7,7 @@ import { UnauthorizedError } from "../errors/UnauthorizedError.js";
 import { GeneralServerError } from "../errors/GeneralServerError.js";
 import jwt from "jsonwebtoken";
 import "../config/loadEnv.js";
+
 
 export const getAllUsers = async () => {
   try {
@@ -116,18 +118,16 @@ export const createUser = async (userInfo) => {
     }
     const hashedPwd = await bcrypt.hash(password, 10);
     const newUserObj = {
-      username,
-      email,
-      password: hashedPwd,
-      role,
+      ...userInfo,
+      password : hashedPwd
     };
-    if (role === "Vendor") {
-      const { businessType, businessLocation, businessDescription } = userInfo;
-      newUserObj.businessType = businessType;
-      newUserObj.businessLocation = businessLocation;
-      newUserObj.businessDescription = businessDescription;
-    }
-    const newUser = await userModel.create(newUserObj);
+    
+    let newUser;
+    if (role === "Vendor") 
+      newUser = await vendorModel.create(newUserObj);
+    else
+      newUser = await userModel.create(newUserObj);
+    
     return newUser;
   } catch (err) {
     if (err instanceof DuplicateDataError) throw err;

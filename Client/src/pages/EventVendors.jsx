@@ -29,9 +29,9 @@ function EventVendors() {
     // fetch event vendors
     // fetch negotiated vendors
     // fetch suggested vendors
-    setEventVendors(DEFAULT_MY_VENDORS);
-    setNegotiatedVendors(DEFAULT_NEGOTIATED_VENDORS);
-    setSuggestedVendors(DEFAULT_SUGGESTED_VENDORS);
+    setEventVendors([])//DEFAULT_MY_VENDORS);
+    setNegotiatedVendors([])//DEFAULT_NEGOTIATED_VENDORS);
+    setSuggestedVendors([])//DEFAULT_SUGGESTED_VENDORS);
   }, []);
 
   const StartNegotiationWithVendor = (vendor) => {

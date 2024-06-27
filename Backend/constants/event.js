@@ -21,3 +21,4 @@ export const excludedFieldsInPatch = [
 ];
 export const tasksFilters = ["status", "priority", "created"]; // needs to complete
 export const collabStatus = ["Pending", "Active"];
+export const vendorStatus = ["Added", "Negotiation", "suggested"]

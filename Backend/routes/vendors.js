@@ -5,7 +5,7 @@ import { handleGetVendors } from "../Controllers/vendorsController.js";
 const router = Router();
 
 router
-  .route("/users/:userId/events/:eventId/vendors")
+  .route("/users/:id/events/:eventId/vendors")
   .get(verifyUserIdMatchAuthId, verifyParamId("eventId"), handleGetVendors);
 
 export default router;

@@ -12,11 +12,11 @@ function queryValidationSchema() {
       custom: {
         options: (values) => {
           if (!Array.isArray(values)) return false;
-          return values.every(value => validFilter.includes(value));
+          return values.every((value) => validFilter.includes(value));
         },
         errorMessage: "Filter must be included in the filter list",
       },
-    }
+    },
   };
 }
 
@@ -57,33 +57,50 @@ function createUserValidation() {
         errorMessage: "role must be Event Planner/Vendor",
       },
     },
+    businessName: {
+      custom: {
+        options: (value, { req }) => {
+          // Check if role is Vendor and businessType is provided
+          return (
+            req.body.role !== "Vendor" || (req.body.role === "Vendor" && value)
+          );
+        },
+        errorMessage: "Business Name is required for vendors",
+      },
+    },
     businessType: {
       custom: {
         options: (value, { req }) => {
           // Check if role is Vendor and businessType is provided
-          return req.body.role !== 'Vendor' || (req.body.role === 'Vendor' && value);
+          return (
+            req.body.role !== "Vendor" || (req.body.role === "Vendor" && value)
+          );
         },
-        errorMessage: "Business type is required for vendors"
-      }
+        errorMessage: "Business type is required for vendors",
+      },
     },
     businessLocation: {
       custom: {
         options: (value, { req }) => {
           // Check if role is Vendor and location is provided
-          return req.body.role !== 'Vendor' || (req.body.role === 'Vendor' && value);
+          return (
+            req.body.role !== "Vendor" || (req.body.role === "Vendor" && value)
+          );
         },
-        errorMessage: "Location is required for vendors"
-      }
+        errorMessage: "Location is required for vendors",
+      },
     },
     businessDescription: {
       custom: {
         options: (value, { req }) => {
           // Check if role is Vendor and description is provided
-          return req.body.role !== 'Vendor' || (req.body.role === 'Vendor' && value);
+          return (
+            req.body.role !== "Vendor" || (req.body.role === "Vendor" && value)
+          );
         },
-        errorMessage: "Description is required for vendors"
-      }
-    }
+        errorMessage: "Description is required for vendors",
+      },
+    },
   };
 }
 function patchUserValidation() {
@@ -102,37 +119,46 @@ function patchUserValidation() {
       notEmpty: { errorMessage: "email cant be empty" },
       isEmail: { errorMessage: "invalid email format" },
     },
+    businessName: {
+      optional: { options: { nullable: true } },
+      custom: {
+        options: (value, { req }) => {
+          // Check if role is Vendor and businessType is provided
+          return req.role !== "Vendor" || (req.role === "Vendor" && value);
+        },
+        errorMessage: "businessName is required for vendors",
+      },
+    },
     businessType: {
       optional: { options: { nullable: true } },
       custom: {
         options: (value, { req }) => {
           // Check if role is Vendor and businessType is provided
-          return req.role !== 'Vendor' || (req.role === 'Vendor' && value);
+          return req.role !== "Vendor" || (req.role === "Vendor" && value);
         },
-        errorMessage: "Business type is required for vendors"
-      }
+        errorMessage: "Business type is required for vendors",
+      },
     },
     businessLocation: {
       optional: { options: { nullable: true } },
       custom: {
         options: (value, { req }) => {
           // Check if role is Vendor and location is provided
-          return req.role !== 'Vendor' || (req.role === 'Vendor' && value);
+          return req.role !== "Vendor" || (req.role === "Vendor" && value);
         },
-        errorMessage: "Location is required for vendors"
-      }
+        errorMessage: "Location is required for vendors",
+      },
     },
     businessDescription: {
       optional: { options: { nullable: true } },
       custom: {
         options: (value, { req }) => {
           // Check if role is Vendor and description is provided
-          return req.role !== 'Vendor' || (req.role === 'Vendor' && value);
+          return req.role !== "Vendor" || (req.role === "Vendor" && value);
         },
-        errorMessage: "Description is required for vendors"
-      }
-    }
-    
+        errorMessage: "Description is required for vendors",
+      },
+    },
   };
 }
 

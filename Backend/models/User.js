@@ -1,5 +1,8 @@
 import mongoose from "mongoose";
+import { rolesEnum } from "../constants/user.js";
+
 const { Schema } = mongoose;
+const options = { discriminatorKey: 'role', collection: 'users' };
 
 const userSchema = new Schema({
   username: {
@@ -18,17 +21,16 @@ const userSchema = new Schema({
   },
   role: {
     type: String,
-    required: true,
+    enum: rolesEnum,
+    default: rolesEnum[1]
+  },
+  events: {
+    type: Schema.Types.ObjectId,
+    ref: "Event"
   },
   refreshToken: {
     type: String,
   },
-  events: [
-    {
-      type: Schema.Types.ObjectId,
-      ref: "Event",
-    },
-  ],
   createdAt: {
     type: Number,
     default: Date.now(),
@@ -37,47 +39,7 @@ const userSchema = new Schema({
   updatedAt: {
     type: Number,
   },
-});
-// Conditionally define fields based on user's role
-userSchema.add({
-  businessType: {
-    type: String,
-    required: function () {
-      return this.role === "Vendor"; // Required only if role is Vendor
-    },
-  },
-  businessLocation: {
-    type: String,
-    required: function () {
-      return this.role === "Vendor"; // Required only if role is Vendor
-    },
-  },
-  businessDescription: {
-    type: String,
-    required: function () {
-      return this.role === "Vendor"; // Required only if role is Vendor
-    },
-  },
-  upcomingEvents: [
-    {
-      name: {
-        type: String,
-        required: true,
-      },
-      date: {
-        type: Number,
-        required: true,
-      },
-      location: {
-        type: String,
-      },
-      ownerEmail: {
-        type: String,
-        required: true,
-      },
-    },
-  ],
-});
+}, options);
 
 userSchema.pre(
   ["save", "updateOne", "updateMany", "findOneAndUpdate", "findByIdAndUpdate"],

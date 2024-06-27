@@ -14,6 +14,7 @@ const SignupPage = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [role, setRole] = useState("Event Planner");
   const [businessInfo, setBusinessInfo] = useState({
+    businessName: "",
     businessType: "",
     businessLocation: "",
     businessDescription: "",
@@ -59,6 +60,7 @@ const SignupPage = () => {
 
       if (role === "Vendor") {
         //setIsModalOpen(true);
+        userInfo.businessName = businessInfo.businessName;
         userInfo.businessType = businessInfo.businessType;
         userInfo.businessLocation = businessInfo.businessLocation;
         userInfo.businessDescription = businessInfo.businessDescription;
@@ -92,8 +94,6 @@ const SignupPage = () => {
       [id]: value,
     }));
   };
-
-  
 
   return (
     <div className="flex justify-center items-center h-screen">
@@ -187,8 +187,6 @@ const SignupPage = () => {
         <OAuthSignUp role={role} />
       </form>
 
-      
-
       {/*Popup Modal*/}
       <Modal show={isModalOpen} onClose={() => setIsModalOpen(false)}>
         <div className="p-5">
@@ -197,6 +195,18 @@ const SignupPage = () => {
           </h3>
           <div className="">
             <div className="mr-5">
+              <div>
+                <div className="mb-2 block">
+                  <Label htmlFor="businessName" value="Business Name" />
+                </div>
+                <TextInput
+                  id="businessName"
+                  type="text"
+                  value={businessInfo.businessName}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
               <div>
                 <div className="mb-2 block">
                   <Label htmlFor="businessType" value="Business type" />
