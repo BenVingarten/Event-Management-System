@@ -2,8 +2,6 @@ import mongoose from "mongoose";
 import { rolesEnum } from "../constants/user.js";
 
 const { Schema } = mongoose;
-const options = { discriminatorKey: 'role', collection: 'users' };
-
 const userSchema = new Schema({
   username: {
     type: String,
@@ -22,12 +20,14 @@ const userSchema = new Schema({
   role: {
     type: String,
     enum: rolesEnum,
-    default: rolesEnum[1]
+    default: rolesEnum[1],
   },
-  events: {
-    type: Schema.Types.ObjectId,
-    ref: "Event"
-  },
+  events: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: "Event",
+    },
+  ],
   refreshToken: {
     type: String,
   },
@@ -39,7 +39,7 @@ const userSchema = new Schema({
   updatedAt: {
     type: Number,
   },
-}, options);
+});
 
 userSchema.pre(
   ["save", "updateOne", "updateMany", "findOneAndUpdate", "findByIdAndUpdate"],

@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import userModel from "./User.js";
+import { rolesEnum } from "../constants/user.js";
 const { Schema } = mongoose;
 
 const vendorSchema = new Schema({
@@ -29,5 +30,5 @@ const vendorSchema = new Schema({
 });
 
 // Define discriminator for Vendor
-const vendorModel = userModel.discriminator("Vendor", vendorSchema);
+const vendorModel = userModel.discriminator(rolesEnum[2], vendorSchema);
 export default vendorModel;

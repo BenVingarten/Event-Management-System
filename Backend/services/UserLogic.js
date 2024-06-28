@@ -7,7 +7,7 @@ import { UnauthorizedError } from "../errors/UnauthorizedError.js";
 import { GeneralServerError } from "../errors/GeneralServerError.js";
 import jwt from "jsonwebtoken";
 import "../config/loadEnv.js";
-
+import { Timestamp } from "mongodb";
 
 export const getAllUsers = async () => {
   try {
@@ -119,17 +119,16 @@ export const createUser = async (userInfo) => {
     const hashedPwd = await bcrypt.hash(password, 10);
     const newUserObj = {
       ...userInfo,
-      password : hashedPwd
+      password: hashedPwd,
     };
-    
+
     let newUser;
-    if (role === "Vendor") 
-      newUser = await vendorModel.create(newUserObj);
-    else
-      newUser = await userModel.create(newUserObj);
-    
+    if (role === "Vendor") newUser = await vendorModel.create(newUserObj);
+    else newUser = await userModel.create(newUserObj);
+
     return newUser;
   } catch (err) {
+    console.error(err);
     if (err instanceof DuplicateDataError) throw err;
     else
       throw new GeneralServerError(
@@ -239,7 +238,7 @@ export const authenticateUserWithGoogle = async (email) => {
     findUser.refreshToken = refreshToken;
     await findUser.save();
 
-    const authUser = { accessToken, refreshToken, username: findUser.username};
+    const authUser = { accessToken, refreshToken, username: findUser.username };
     return authUser;
   } catch (err) {
     if (err instanceof DataNotFoundError) throw err;

@@ -58,6 +58,7 @@ function createUserValidation() {
       },
     },
     businessName: {
+      optional: true,
       custom: {
         options: (value, { req }) => {
           // Check if role is Vendor and businessType is provided
@@ -69,6 +70,7 @@ function createUserValidation() {
       },
     },
     businessType: {
+      optional: true,
       custom: {
         options: (value, { req }) => {
           // Check if role is Vendor and businessType is provided
@@ -80,6 +82,7 @@ function createUserValidation() {
       },
     },
     businessLocation: {
+      optional: true,
       custom: {
         options: (value, { req }) => {
           // Check if role is Vendor and location is provided
@@ -91,6 +94,7 @@ function createUserValidation() {
       },
     },
     businessDescription: {
+      optional: true,
       custom: {
         options: (value, { req }) => {
           // Check if role is Vendor and description is provided
