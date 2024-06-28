@@ -14,7 +14,7 @@ export const addCollaborator = async (userId, eventId, collaborator) => {
   try {
     const options = {
       populate: { path: "owner", select: "username" },
-      select: "collaborators",
+      select: "collaborators"
     };
     const event = await getEventById(userId, eventId, options);
     const duplicate = event.collaborators.find(

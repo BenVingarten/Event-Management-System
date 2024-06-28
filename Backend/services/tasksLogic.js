@@ -12,6 +12,7 @@ export const getTasks = async (userId, eventId) => {
     const event = await eventModel
       .findOne({ _id: eventId, $or: conditions })
       .populate({ path: "cards" })
+      .lean()
       .exec();
     if (!event) throw new DataNotFoundError();
     return event.cards;
@@ -96,7 +97,8 @@ export const getTasksAnalytics = async (userId, eventId) => {
         },
       },
     ];
-    const event = getEventById(userId, eventId);
+    const options = { lean: true };
+    await getEventById(userId, eventId, options);
     const results = await taskModel.aggregate(pipeLine).exec();
     if (!results)
       throw new DataNotFoundError("No datafound for the provided criteria");
@@ -136,7 +138,11 @@ export const deleteTask = async (userId, eventId, taskId) => {
 
 export const getSuggestedTasks = async (userId, eventId) => {
   try {
-    const event = await getEventById(userId, eventId);
+    const options = {
+      select: "type",
+      lean: true
+    }
+    const event = await getEventById(userId, eventId, options);
     const { location, type } = event;
     const pipeLine = [
       {

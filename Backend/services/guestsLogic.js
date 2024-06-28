@@ -12,7 +12,9 @@ export const getGuests = async (userId, eventId) => {
     const conditions = [{ owner: userId }, { "collaborators.id": userId }];
     const event = await eventModel
       .findOne({ _id: eventId, $or: conditions })
+      .select("guestList")
       .populate({ path: "guestList" })
+      .lean()
       .exec();
     if (!event) throw new DataNotFoundError();
     return event.guestList;
@@ -26,7 +28,11 @@ export const getGuests = async (userId, eventId) => {
 
 export const addGuest = async (userId, eventId, guestData) => {
   try {
-    const event = await getEventById(userId, eventId);
+    const options = {
+      select: "guestList",
+      populate: { path: "guestList", select: "phoneNumber" },
+    };
+    const event = await getEventById(userId, eventId, options);
     const duplicate = event.guestList.find(
       (guest) => guest.phoneNumber === guestData.phoneNumber
     );
@@ -55,7 +61,8 @@ export const addGuest = async (userId, eventId, guestData) => {
 
 export const getGuestById = async (userId, eventId, guestId) => {
   try {
-    const event = await getEventById(userId, eventId);
+    const options = { lean: true };
+    await getEventById(userId, eventId, options);
     const guest = await guestModel
       .findOne({ _id: guestId, event: eventId })
       .exec();
@@ -71,7 +78,11 @@ export const getGuestById = async (userId, eventId, guestId) => {
 
 export const patchGuest = async (userId, eventId, guestId, updatedGuest) => {
   try {
-    const event = await getEventById(userId, eventId);
+    const options = {
+      select: "guestList",
+      populate: { path: "guestList", select: "phoneNumber" },
+    };
+    const event = await getEventById(userId, eventId, options);
     if (updatedGuest.phoneNumber) {
       const duplicate = event.guestList.find(
         (guest) => guest.phoneNumber === updatedGuest.phoneNumber
@@ -158,7 +169,8 @@ export const getGuestsAnalytics = async (userId, eventId) => {
         },
       },
     ];
-    const event = getEventById(userId, eventId);
+    const options = { lean: true };
+    await getEventById(userId, eventId, options);
     const results = await guestModel.aggregate(pipeLine).exec();
     if (!results)
       throw new DataNotFoundError("No datafound for the provided criteria");

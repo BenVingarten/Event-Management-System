@@ -9,7 +9,7 @@ import InvitesModel from "../models/Invitations.js";
 export const getEvents = async (id) => {
   try {
     const conditions = [{ owner: id }, { "collaborators.collaboratorId": id }];
-    const events = await eventModel.find({ $or: conditions }).exec();
+    const events = await eventModel.find({ $or: conditions }).lean().exec();
     if (!events) throw new DataNotFoundError();
     return events;
   } catch (err) {
@@ -52,11 +52,13 @@ export const getEventById = async (userId, eventId, options = {}) => {
     const isPopulate =
       options.populate && Object.keys(options.populate).length > 0;
     const isSelect = options.select !== null;
+    const isLean = options.lean
 
     const query = eventModel.findOne({ _id: eventId, $or: conditions });
 
     if (isPopulate) query.populate(options.populate);
     if (isSelect) query.select(options.select);
+    if (isLean) query.lean();
 
     const event = await query.exec();
     if (!event) throw new DataNotFoundError();
