@@ -83,6 +83,7 @@ function createUserValidation() {
     },
     businessLocation: {
       optional: true,
+      isArray: { errorMessage: "locations needs to be sent as an array" },
       custom: {
         options: (value, { req }) => {
           // Check if role is Vendor and location is provided
@@ -145,6 +146,7 @@ function patchUserValidation() {
     },
     businessLocation: {
       optional: { options: { nullable: true } },
+      isArray: { errorMessage: "locations needs to be sent as an array" },
       custom: {
         options: (value, { req }) => {
           // Check if role is Vendor and location is provided

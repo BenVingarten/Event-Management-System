@@ -20,6 +20,10 @@ const vendorSchema = new Schema({
     type: String,
     required: true,
   },
+  bookedCount: {
+    type: Number,
+    defaulr: 0
+  },
   upcomingEvents: [
     {
       type: Schema.Types.ObjectId,

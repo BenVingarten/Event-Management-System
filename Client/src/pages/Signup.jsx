@@ -16,9 +16,10 @@ const SignupPage = () => {
   const [businessInfo, setBusinessInfo] = useState({
     businessName: "",
     businessType: "",
-    businessLocation: "",
+    businessLocation: [],
     businessDescription: "",
   });
+
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const navigate = useNavigate();
@@ -87,12 +88,13 @@ const SignupPage = () => {
   }
 
   const handleInputChange = (e) => {
-    const { id, value } = e.target;
-    //console.log(businessInfo);
-    setBusinessInfo((prevState) => ({
-      ...prevState,
-      [id]: value,
-    }));
+    const { id, value, selectedOptions } = e.target;
+    let valueArray = Array.from(selectedOptions, (option) => option.value);
+
+    setBusinessInfo({
+      ...businessInfo,
+      [id]: valueArray,
+    });
   };
 
   return (
@@ -221,15 +223,25 @@ const SignupPage = () => {
               </div>
               <div>
                 <div className="mb-2 block">
-                  <Label htmlFor="businessLocation" value="Business location" />
+                  <Label
+                    htmlFor="businessLocation"
+                    value="Select the areas you provide service at"
+                  />
                 </div>
-                <TextInput
+                <Select
                   id="businessLocation"
-                  type="text"
-                  value={businessInfo.businessLocation}
-                  onChange={handleInputChange}
                   required
-                />
+                  multiple
+                  onChange={handleInputChange}
+                >
+                  <option>All</option>
+                  <option>Haifa And North</option>
+                  <option>Hasharon</option>
+                  <option>Gush Dan</option>
+                  <option>Shfela</option>
+                  <option>Jerusalem</option>
+                  <option>South(Negev And Eilat)</option>
+                </Select>
               </div>
               <div>
                 <div className="mb-2 block">

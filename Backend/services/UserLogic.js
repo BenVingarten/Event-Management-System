@@ -7,7 +7,6 @@ import { UnauthorizedError } from "../errors/UnauthorizedError.js";
 import { GeneralServerError } from "../errors/GeneralServerError.js";
 import jwt from "jsonwebtoken";
 import "../config/loadEnv.js";
-import { Timestamp } from "mongodb";
 
 export const getAllUsers = async () => {
   try {
