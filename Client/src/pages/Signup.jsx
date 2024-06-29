@@ -17,6 +17,7 @@ const SignupPage = () => {
     businessName: "",
     businessType: "",
     businessLocation: [],
+    businessEventTypes: [],
     businessDescription: "",
   });
 
@@ -64,6 +65,7 @@ const SignupPage = () => {
         userInfo.businessName = businessInfo.businessName;
         userInfo.businessType = businessInfo.businessType;
         userInfo.businessLocation = businessInfo.businessLocation;
+        userInfo.businessEventTypes = businessInfo.businessEventTypes;
         userInfo.businessDescription = businessInfo.businessDescription;
       }
 
@@ -241,6 +243,27 @@ const SignupPage = () => {
                   <option>Shfela</option>
                   <option>Jerusalem</option>
                   <option>South(Negev And Eilat)</option>
+                </Select>
+              </div>
+              <div>
+                <div className="mb-2 block">
+                  <Label
+                    htmlFor="businessEventTypes"
+                    value="Select the event types you provide service to"
+                  />
+                </div>
+                <Select
+                  id="businessEventTypes"
+                  required
+                  multiple
+                  onChange={handleInputChange}
+                >
+                  <option>All</option>
+                  <option>Wedding</option>
+                  <option>Birthday</option>
+                  <option>Bar/Bat Mitzva</option>
+                  <option>Company Event</option>
+                  <option>Conference</option>
                 </Select>
               </div>
               <div>

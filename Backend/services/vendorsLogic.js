@@ -65,7 +65,9 @@ export const addCustomVendor = async (userId, eventId, verifiedCustomVendor) => 
 
 export const getSuggestedVendors = async (userId, eventId) => {
     try {
-
+        const pipeLine = [
+            
+        ]
     } catch(err) {
 
     }
