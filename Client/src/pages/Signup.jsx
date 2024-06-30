@@ -25,12 +25,14 @@ const SignupPage = () => {
     businessName: "",
     businessType: "",
     businessDescription: "",
+    businessMinPrice: 0,
+    businessMaxPrice: 0,
   });
   const [businessLocation, setBusinessLocation] = useState([]);
   const [businessEventTypes, setBusinessEventTypes] = useState([]);
 
   const locations = [
-    { label: "Haifa And North", value: "haifaAndNorth" },
+    { label: "Haifa & North", value: "haifaAndNorth" },
     { label: "Hasharon", value: "hasharon" },
     { label: "Gush Dan", value: "gushDan" },
     { label: "Shfela", value: "shfela" },
@@ -90,6 +92,8 @@ const SignupPage = () => {
         userInfo.businessType = businessInfo.businessType;
         userInfo.businessLocation = businessLocation;
         userInfo.businessEventTypes = businessEventTypes;
+        userInfo.businessMinPrice = businessInfo.businessMinPrice;
+        userInfo.businessMaxPrice = businessInfo.businessMaxPrice;
         userInfo.businessDescription = businessInfo.businessDescription;
       }
 
@@ -261,6 +265,36 @@ const SignupPage = () => {
                   id="businessType"
                   type="text"
                   value={businessInfo.businessType}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
+              <div>
+                <div className="mb-2 block">
+                  <Label
+                    htmlFor="businessMinPrice"
+                    value="What is your avg minimun price for the service"
+                  />
+                </div>
+                <TextInput
+                  id="businessMinPrice"
+                  type="text"
+                  value={businessInfo.businessMinPrice}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
+              <div>
+                <div className="mb-2 block">
+                  <Label
+                    htmlFor="businessMaxPrice"
+                    value="What is your avg maximum price for the service"
+                  />
+                </div>
+                <TextInput
+                  id="businessMaxPrice"
+                  type="text"
+                  value={businessInfo.businessMaxPrice}
                   onChange={handleInputChange}
                   required
                 />

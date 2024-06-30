@@ -27,8 +27,19 @@ export const handleAddCustomVendor = async (req, res) => {
       eventId,
       verifiedCustomVendor
     );
-    return res.status(200).json({ newCustomVendor });
+    return res.status(200).json({ msg: `success, added ${newCustomVendor.name} to your vendors!` });
   } catch (err) {
     return res.status(err.statusCode).json({ err: err.message });
   }
-}
+};
+
+export const handleAddRegisteredVendor = async (req, res) => {
+  try {
+    const { userId } = req;
+    const { eventId, vendorId } = req.params;
+    const newRegisteredVendor = await addRegisteredVendor(userId, eventId, vendorId);
+    return res.status(200).json({msg: `success, added ${newRegisteredVendor.businessName} to your negotiated vendors!`});
+  } catch(err) {
+    return res.status(err.statusCode).json({ err: err.message });
+  }
+};
