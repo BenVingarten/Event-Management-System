@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button, Card, Modal, TextInput } from "flowbite-react";
 import { CiCircleRemove } from "react-icons/ci";
 import { IoIosAddCircleOutline } from "react-icons/io";
@@ -12,9 +12,10 @@ function EventVendors() {
   const axiosPrivate = useAxiosPrivate();
   const { auth } = useAuth();
   const location = useLocation();
+  const [modalOpen, setModalOpen] = useState(false);
   const eventID = location.state.eventId;
   const userId = jwtDecode(auth.accessToken).userInfo.id;
-  const [modalOpen, setModalOpen] = useState(false);
+  const effectRun = useRef(false);
 
   const [eventVendors, setEventVendors] = useState([]);
   const [negotiatiatedVendors, setNegotiatedVendors] = useState([]);
@@ -29,9 +30,29 @@ function EventVendors() {
     // fetch event vendors
     // fetch negotiated vendors
     // fetch suggested vendors
-    setEventVendors(DEFAULT_MY_VENDORS);
-    setNegotiatedVendors(DEFAULT_NEGOTIATED_VENDORS);
-    setSuggestedVendors(DEFAULT_SUGGESTED_VENDORS);
+
+    const fetchVendors = async () => {
+      try {
+        const res = await axiosPrivate.get(
+          `users/${userId}/events/${eventID}/vendors`
+        );
+        console.log(res.data);
+        toast.success("Vendors Fetched!");
+        //setEventVendors(res.data);
+      } catch (err) {
+        console.log(err.response.data.err);
+        toast.error("Failed to Fetch Vendors!");
+      }
+    };
+
+    if (effectRun.current) fetchVendors();
+
+    return () => {
+      effectRun.current = true;
+      setEventVendors(DEFAULT_MY_VENDORS);
+      setNegotiatedVendors(DEFAULT_NEGOTIATED_VENDORS);
+      setSuggestedVendors(DEFAULT_SUGGESTED_VENDORS);
+    };
   }, []);
 
   const StartNegotiationWithVendor = (vendor) => {

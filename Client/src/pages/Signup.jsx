@@ -1,5 +1,13 @@
-import { Button, Label, Modal, Select, TextInput } from "flowbite-react";
-import { useEffect, useState } from "react";
+import {
+  Button,
+  Label,
+  Modal,
+  Checkbox,
+  Select,
+  TextInput,
+  ListGroup,
+} from "flowbite-react";
+import { useState } from "react";
 import { Toaster, toast } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import OAuthSignUp from "../components/OAuthSignUp";
@@ -16,10 +24,26 @@ const SignupPage = () => {
   const [businessInfo, setBusinessInfo] = useState({
     businessName: "",
     businessType: "",
-    businessLocation: [],
-    businessEventTypes: [],
     businessDescription: "",
   });
+  const [businessLocation, setBusinessLocation] = useState([]);
+  const [businessEventTypes, setBusinessEventTypes] = useState([]);
+
+  const locations = [
+    { label: "Haifa And North", value: "haifaAndNorth" },
+    { label: "Hasharon", value: "hasharon" },
+    { label: "Gush Dan", value: "gushDan" },
+    { label: "Shfela", value: "shfela" },
+    { label: "Jerusalem", value: "jerusalem" },
+    { label: "South(Negev And Eilat)", value: "south" },
+  ];
+  const eventTypes = [
+    { label: "Wedding", value: "wedding" },
+    { label: "Birthday", value: "birthday" },
+    { label: "Bar/Bat Mitzva", value: "barMitzva" },
+    { label: "Company Event", value: "companyEvent" },
+    { label: "Conference", value: "conference" },
+  ];
 
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -64,8 +88,8 @@ const SignupPage = () => {
         //setIsModalOpen(true);
         userInfo.businessName = businessInfo.businessName;
         userInfo.businessType = businessInfo.businessType;
-        userInfo.businessLocation = businessInfo.businessLocation;
-        userInfo.businessEventTypes = businessInfo.businessEventTypes;
+        userInfo.businessLocation = businessLocation;
+        userInfo.businessEventTypes = businessEventTypes;
         userInfo.businessDescription = businessInfo.businessDescription;
       }
 
@@ -97,6 +121,22 @@ const SignupPage = () => {
       ...businessInfo,
       [id]: valueArray,
     });
+  };
+
+  const handleBusinessLoactionChange = (value) => {
+    if (businessLocation.includes(value)) {
+      setBusinessLocation(businessLocation.filter((v) => v !== value));
+    } else {
+      setBusinessLocation([...businessLocation, value]);
+    }
+  };
+
+  const handleEventTypesChange = (value) => {
+    if (businessEventTypes.includes(value)) {
+      setBusinessEventTypes(businessEventTypes.filter((v) => v !== value));
+    } else {
+      setBusinessEventTypes([...businessEventTypes, value]);
+    }
   };
 
   return (
@@ -193,12 +233,13 @@ const SignupPage = () => {
 
       {/*Popup Modal*/}
       <Modal show={isModalOpen} onClose={() => setIsModalOpen(false)}>
-        <div className="p-5">
+        <div className="p-5 overflow-auto">
           <h3 className="text-lg font-bold mb-3">
             Tell us about your business!
           </h3>
           <div className="">
             <div className="mr-5">
+              {/* Business Name */}
               <div>
                 <div className="mb-2 block">
                   <Label htmlFor="businessName" value="Business Name" />
@@ -211,6 +252,7 @@ const SignupPage = () => {
                   required
                 />
               </div>
+              {/* Business Type */}
               <div>
                 <div className="mb-2 block">
                   <Label htmlFor="businessType" value="Business type" />
@@ -223,6 +265,7 @@ const SignupPage = () => {
                   required
                 />
               </div>
+              {/* Business Service Location */}
               <div>
                 <div className="mb-2 block">
                   <Label
@@ -230,21 +273,26 @@ const SignupPage = () => {
                     value="Select the areas you provide service at"
                   />
                 </div>
-                <Select
-                  id="businessLocation"
-                  required
-                  multiple
-                  onChange={handleInputChange}
-                >
-                  <option>All</option>
-                  <option>Haifa And North</option>
-                  <option>Hasharon</option>
-                  <option>Gush Dan</option>
-                  <option>Shfela</option>
-                  <option>Jerusalem</option>
-                  <option>South(Negev And Eilat)</option>
-                </Select>
+                <ListGroup>
+                  {locations.map((location) => (
+                    <ListGroup.Item
+                      key={location.value}
+                      className="flex items-center"
+                    >
+                      <Checkbox
+                        id={location.value}
+                        checked={businessLocation.includes(location.value)}
+                        onChange={() =>
+                          handleBusinessLoactionChange(location.value)
+                        }
+                        className="mr-2"
+                      />
+                      <label htmlFor={location.value}>{location.label}</label>
+                    </ListGroup.Item>
+                  ))}
+                </ListGroup>
               </div>
+              {/* Business Event Types */}
               <div>
                 <div className="mb-2 block">
                   <Label
@@ -252,20 +300,24 @@ const SignupPage = () => {
                     value="Select the event types you provide service to"
                   />
                 </div>
-                <Select
-                  id="businessEventTypes"
-                  required
-                  multiple
-                  onChange={handleInputChange}
-                >
-                  <option>All</option>
-                  <option>Wedding</option>
-                  <option>Birthday</option>
-                  <option>Bar/Bat Mitzva</option>
-                  <option>Company Event</option>
-                  <option>Conference</option>
-                </Select>
+                <ListGroup>
+                  {eventTypes.map((event) => (
+                    <ListGroup.Item
+                      key={event.value}
+                      className="flex items-center"
+                    >
+                      <Checkbox
+                        id={event.value}
+                        checked={businessEventTypes.includes(event.value)}
+                        onChange={() => handleEventTypesChange(event.value)}
+                        className="mr-2"
+                      />
+                      <label htmlFor={event.value}>{event.label}</label>
+                    </ListGroup.Item>
+                  ))}
+                </ListGroup>
               </div>
+              {/* Business Description */}
               <div>
                 <div className="mb-2 block">
                   <Label

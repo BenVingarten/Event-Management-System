@@ -4,6 +4,7 @@ import { Toaster, toast } from "react-hot-toast";
 import { jwtDecode } from "jwt-decode";
 import useAuth from "../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
+import { Button, ListGroup, Radio } from "flowbite-react";
 
 const CreateEventPage = () => {
   const axiosPrivate = useAxiosPrivate();
@@ -18,12 +19,17 @@ const CreateEventPage = () => {
   const [additionalInfo, setAdditionalInfo] = useState([]);
   const [additionalInfoInput, setAdditionalInfoInput] = useState("");
 
+  const locations = [
+    { label: "Haifa And North", value: "haifaAndNorth" },
+    { label: "Hasharon", value: "hasharon" },
+    { label: "Gush Dan", value: "gushDan" },
+    { label: "Shfela", value: "shfela" },
+    { label: "Jerusalem", value: "jerusalem" },
+    { label: "South(Negev And Eilat)", value: "south" },
+  ];
+
   const handleBudgetChange = (e) => {
     setBudget(e.target.value);
-  };
-
-  const handleLocationChange = (e) => {
-    setLocation(e.target.value);
   };
 
   const handleEventTypeChange = (e) => {
@@ -87,11 +93,16 @@ const CreateEventPage = () => {
     }
   };
 
+  const handleLocationChange = (value) => {
+    setLocation(value);
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
       <Toaster />
       <h2 className="text-2xl font-bold mb-4">Create Event</h2>
       <form onSubmit={handleSubmit}>
+        {/* Event Name */}
         <div className="mb-4">
           <div className="mb-4">
             <label
@@ -110,6 +121,7 @@ const CreateEventPage = () => {
             />
           </div>
         </div>
+        {/* Event Date */}
         <div className="mb-4">
           <label
             htmlFor="eventDate"
@@ -126,6 +138,7 @@ const CreateEventPage = () => {
             required
           />
         </div>
+        {/* Event Type */}
         <div className="mb-4">
           <label
             htmlFor="eventType"
@@ -155,6 +168,7 @@ const CreateEventPage = () => {
           </select>
         </div>
 
+        {/* Budget */}
         <div className="mb-4">
           <label
             htmlFor="budget"
@@ -171,6 +185,8 @@ const CreateEventPage = () => {
             required
           />
         </div>
+
+        {/* Location */}
         <div className="mb-4">
           <label
             htmlFor="location"
@@ -178,16 +194,27 @@ const CreateEventPage = () => {
           >
             Location
           </label>
-          <input
-            type="text"
-            id="location"
-            value={location}
-            onChange={handleLocationChange}
-            className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-500"
-            required
-          />
+          <ListGroup>
+            {locations.map((curLocation) => (
+              <ListGroup.Item
+                key={curLocation.value}
+                className="flex items-center"
+              >
+                <Radio
+                  id={curLocation.value}
+                  name="location"
+                  value={curLocation.value}
+                  checked={location === curLocation.value}
+                  onChange={() => handleLocationChange(curLocation.value)}
+                  className="mr-2"
+                />
+                <label htmlFor={curLocation.value}>{curLocation.label}</label>
+              </ListGroup.Item>
+            ))}
+          </ListGroup>
         </div>
 
+        {/* Additional Information */}
         <div className="mb-4">
           <label
             htmlFor="additionalInfo"
@@ -213,15 +240,27 @@ const CreateEventPage = () => {
             </button>
           </div>
         </div>
+
+        {/* Additional Information List */}
         <div>
           {additionalInfo.map((info, index) => (
-            <div key={index} className="mb-2">
+            <div key={index} className="mb-2 flex">
               <input
                 type="text"
                 value={info}
                 readOnly
                 className="w-full px-3 py-2 border rounded-lg focus:outline-none"
               />
+              <Button
+                color={"red"}
+                onClick={() =>
+                  setAdditionalInfo(
+                    additionalInfo.filter((_, i) => i !== index)
+                  )
+                }
+              >
+                Remove
+              </Button>
             </div>
           ))}
         </div>

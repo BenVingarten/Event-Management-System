@@ -14,15 +14,20 @@ export const handleGetVendors = async (req, res) => {
 
 export const handleAddCustomVendor = async (req, res) => {
   try {
-      const errors = validationResult(req);
-      if(!errors.isEmpty()) return res.status(400).json({error: errors.array()});
+    const errors = validationResult(req);
+    if (!errors.isEmpty())
+      return res.status(400).json({ error: errors.array() });
 
-      const verifiedCustomVendor = matchedData(req);
-      const { userId } = req;
-      const { eventId } = req.params;
-      const newCustomVendor = await addCustomVendor(userId, eventId, verifiedCustomVendor);
-      return res.status(200).json({newCustomVendor });
+    const verifiedCustomVendor = matchedData(req);
+    const { userId } = req;
+    const { eventId } = req.params;
+    const newCustomVendor = await addCustomVendor(
+      userId,
+      eventId,
+      verifiedCustomVendor
+    );
+    return res.status(200).json({ newCustomVendor });
   } catch (err) {
     return res.status(err.statusCode).json({ err: err.message });
   }
-}
+};
