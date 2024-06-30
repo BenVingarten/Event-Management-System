@@ -1,11 +1,12 @@
 import { matchedData, validationResult } from "express-validator";
-import { getVendors } from "../services/vendorsLogic.js";
+import { getVendors, addCustomVendor, addRegisteredVendor } from "../services/vendorsLogic.js";
 
 export const handleGetVendors = async (req, res) => {
   try {
     const { userId } = req;
     const { eventId } = req.params;
-    const vendors = await getVendors(userId, eventId);
+    const { sortBy } = req.body;
+    const vendors = await getVendors(userId, eventId, sortBy);
     return res.status(200).json({ vendors });
   } catch (err) {
     return res.status(err.statusCode).json({ err: err.message });
@@ -30,4 +31,4 @@ export const handleAddCustomVendor = async (req, res) => {
   } catch (err) {
     return res.status(err.statusCode).json({ err: err.message });
   }
-};
+}

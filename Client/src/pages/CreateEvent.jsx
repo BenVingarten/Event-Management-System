@@ -158,13 +158,14 @@ const CreateEventPage = () => {
             <option value="Wedding">Wedding</option>
             <option value="Conference">Conference</option>
             <option value="Company Event">Company Event</option>
-            <option value="Graduation">Graduation</option>
+            <option value="Bar/Bat Mitzva">Bar/Bat Mitzva</option>
+            {/* <option value="Graduation">Graduation</option>
             <option value="Holiday">Holiday</option>
             <option value="Trade Show">Trade Show</option>
             <option value="Meetings">Meetings</option>
             <option value="Workshops">Workshops</option>
             <option value="Festival">Festival</option>
-            <option value="Other">Other</option>
+            <option value="Other">Other</option> */}
           </select>
         </div>
 
