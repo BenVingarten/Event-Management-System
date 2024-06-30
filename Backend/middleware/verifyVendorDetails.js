@@ -1,4 +1,5 @@
 import { checkSchema } from "express-validator";
+import validator from "validator";
 function createVendorValidation() {
   return {
     name: {
@@ -10,7 +11,7 @@ function createVendorValidation() {
         options: (value) => {
           return validator.isEmail(value);
         },
-        errorMessage: "Invalid email format for collaborator",
+        errorMessage: "Invalid email format for vendor",
       },
     },
     businessType: {
