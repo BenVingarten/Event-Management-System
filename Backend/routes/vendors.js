@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { verifyParamId } from "../middleware/verifyParamId.js";
 import { verifyUserIdMatchAuthId } from "../middleware/verifyUserIdMatchAuthId.js";
-import { handleGetVendors, handleAddCustomVendor, handleAddRegisteredVendor } from "../Controllers/vendorsController.js";
+import { handleGetVendors, handleAddCustomVendor } from "../Controllers/vendorsController.js";
 import { validateCreateVendor } from "../middleware/verifyVendorDetails.js";
 const router = Router();
 
@@ -12,5 +12,6 @@ router
 
 router
   .route("/users/:id/events/:eventId/vendors/:vendorId")
-  .post(verifyUserIdMatchAuthId, verifyParamId("eventId"), verifyParamId("vendorId"), handleAddRegisteredVendor)
+  .post(verifyUserIdMatchAuthId, verifyParamId("eventId"), verifyParamId("vendorId") )
+  .patch(verifyUserIdMatchAuthId, verifyParamId("eventId"), verifyParamId("vendorId") );
 export default router;

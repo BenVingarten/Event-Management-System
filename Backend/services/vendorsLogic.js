@@ -1,97 +1,103 @@
 import { DataNotFoundError } from "../errors/DataNotFoundError.js";
 import { DuplicateDataError } from "../errors/DuplicateDataError.js";
 import { GeneralServerError } from "../errors/GeneralServerError.js";
+import eventModel from "../models/Event.js";
 import userModel from "../models/User.js";
+import { getUserById } from "./UserLogic.js";
 import { getEventById } from "./eventsLogic.js";
 
-export const getVendors = async (userId, eventId, sortBy = "bookedCount") => {
-    try {
-      const options = {
-        select: "vendors type location",
-        populate: {
-          path: "vendors.registeredUser",
-          select: "businessName email businessType",
-          options: { strictPopulate: false }
-        },
-        lean: true,
-      };
-        const event = await getEventById(userId, eventId, options);
-        const { vendors, type, location } = event;
-        const suggestedVendors = await getSuggestedVendors(type, location, sortBy);
-        const negotiatedVendors = [];
-        const acceptedVendors = [];
-
-        for(const vendor of vendors) {
-            const vendorData = vendor.registeredVendor?  vendor.registeredVendor : vendor.custom;
-            if(vendor.status === "Added") acceptedVendors.push(vendorData);
-            else if(vendor.status === "Negotiated") negotiatedVendors.push(vendorData);
-        }
-        const allVendors = {
-            suggestedVendors,
-            negotiatedVendors,
-            acceptedVendors
-        };
-       return allVendors;
-    } catch (err) {
-        if(err instanceof DataNotFoundError) throw err;
-        throw new GeneralServerError(`unexpected error getting user's vendors: ${err.message}`);
-
-    }
-};
-
-export const addCustomVendor = async (userId, eventId, verifiedCustomVendor) => {
-    try {
-      const options = {
-        select: "vendors",
-        populate: { 
-          path: "vendors.registeredUser",
-          select: "email",
-          options: { strictPopulate: false } 
-        },
-      };
-      const event = await getEventById(userId, eventId, options);
-      const duplicate = event.vendors.find((vendor) => {
-        const vendorData = vendor.registeredUser?  vendor.registeredUser : vendor.custom;
-        return vendorData.email === verifiedCustomVendor.email;
-      });
-        if(duplicate) throw new DuplicateDataError("there is already a vendor with that email");
-        const newVendor = {
-            custom: {
-                name: verifiedCustomVendor.name,
-                email: verifiedCustomVendor.email,
-                businessType: verifiedCustomVendor.businessType
-            }
-        };
-        event.vendors.push(newVendor);
-        await event.save();
-        return newVendor;
-    } catch (err) {
-        if(err instanceof DataNotFoundError || err instanceof DuplicateDataError) throw err;
-        throw new GeneralServerError(`unexpected error in adding a new custom vendor: ${err.message}`);
-    }
-};
-
-export const addRegisteredVendor = async (userId, eventId, vendorId) => {
+export const getVendors = async (userId, eventId) => {
   try {
-      const event = await getEventById(userId, eventId);
-  } catch(err) {
+    const options = {
+      select: "vendors type location",
+      populate: {
+        path: "vendors.registeredUser",
+        select: "businessName email businessType",
+        options: { strictPopulate: false },
+      },
+      lean: true,
+    };
+    const event = await getEventById(userId, eventId, options);
+    const { vendors, type, location } = event;
+    const suggestedVendors = await getSuggestedVendors(type, location);
+    const negotiatedVendors = [];
+    const addedVendors = [];
 
+    for (const vendor of vendors) {
+      const vendorData = vendor.registeredUser
+        ? vendor.registeredUser
+        : vendor.custom;
+      if (vendor.status === "Added") addedVendors.push(vendorData);
+      else if (vendor.status === "Negotiated")
+        negotiatedVendors.push(vendorData);
+    }
+    const allVendors = {
+      suggestedVendors,
+      negotiatedVendors,
+      addedVendors,
+    };
+    console.log(allVendors);
+    return allVendors;
+  } catch (err) {
+    if (err instanceof DataNotFoundError) throw err;
+    throw new GeneralServerError(
+      `unexpected error getting user's vendors: ${err.message}`
+    );
   }
 };
 
-export const getSuggestedVendors = async (type, location, sortBy) => {
+export const addCustomVendor = async (
+  userId,
+  eventId,
+  verifiedCustomVendor
+) => {
   try {
-    let sortDirection;
-    if (sortBy === "bookedCount") sortDirection = -1;
-    else if (sortBy === "avgPrice") sortDirection = 1;
-    
+    const options = {
+      select: "vendors budget",
+      populate: {
+        path: "vendors.registeredUser",
+        select: "email",
+        options: { strictPopulate: false },
+      },
+    };
+    const event = await getEventById(userId, eventId, options);
+    const duplicate = event.vendors.find((vendor) => {
+      const vendorData = vendor.registeredUser
+        ? vendor.registeredUser
+        : vendor.custom;
+      return vendorData.email === verifiedCustomVendor.email;
+    });
+    if (duplicate)
+      throw new DuplicateDataError("there is already a vendor with that email");
+    const newVendor = {
+      custom: {
+        businessName: verifiedCustomVendor.businessName,
+        email: verifiedCustomVendor.email,
+        businessType: verifiedCustomVendor.businessType,
+      },
+      priceForService: verifiedCustomVendor.priceForService,
+    };
+    event.vendors.push(newVendor);
+    event.budget -= verifiedCustomVendor.priceForService;
+    await event.save();
+    return newVendor;
+  } catch (err) {
+    if (err instanceof DataNotFoundError || err instanceof DuplicateDataError)
+      throw err;
+    throw new GeneralServerError(
+      `unexpected error in adding a new custom vendor: ${err.message}`
+    );
+  }
+};
 
+export const getSuggestedVendors = async (type, location) => {
+  try {
     const pipeLine = [
       {
         $match: {
           role: "Vendor",
-          businessLocation: { $in: ["All", location] },
-          eventTypes: { $in: ["All", type] },
+          businessLocation: location,
+          eventTypes: type,
         },
       },
       {
@@ -99,11 +105,11 @@ export const getSuggestedVendors = async (type, location, sortBy) => {
           _id: "$businessType",
           vendors: {
             $push: {
+              vendorId: "$_id",
               businessName: "$businessName",
               email: "$email",
-              businessDescription: "$businessDescription",
-              bookedCount: "$bookedCount",
-              avgPrice: { $avg: ["$minPrice", "$maxPrice"] },
+              businessType: "$businessType",
+              leadCount: "$leadCount",
             },
           },
         },
@@ -112,19 +118,16 @@ export const getSuggestedVendors = async (type, location, sortBy) => {
         $project: {
           _id: 0,
           type: "$_id",
-          vendors: sortBy
-            ? {
-                $sortArray: {
-                  input: "$vendors",
-                  sortBy: { sortBy: sortDirection },
-                },
-              }
-            : "$vendors",
+          vendors: {
+            $sortArray: {
+              input: "$vendors",
+              sortBy: { leadCount: -1 },
+            },
+          },
         },
       },
     ];
     const suggestedVendors = await userModel.aggregate(pipeLine);
-    console.log(suggestedVendors);
     if (!suggestedVendors)
       throw new DataNotFoundError(
         "No suggested vendors matched the event criteria"
@@ -135,5 +138,23 @@ export const getSuggestedVendors = async (type, location, sortBy) => {
     throw new GeneralServerError(
       "unexpected error in getting suggested Vendors"
     );
+  }
+};
+
+export const addRegisteredVendor = async (userId, eventId, vendorId) => {
+  try {
+    const options = {
+      select: "vendors budget",
+      populate: {
+        path: "vendors.registeredUser",
+        select: "email",
+        options: { strictPopulate: false },
+      },
+    };
+    const vendor = await getUserById(vendorId);
+
+  } catch(err) {
+    if(err instanceof DataNotFoundError) throw err;
+    throw new GeneralServerError(`unexpected error in adding vendor to negotiated vendors: ${err. message}`);
   }
 };

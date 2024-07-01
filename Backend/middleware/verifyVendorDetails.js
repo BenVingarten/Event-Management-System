@@ -2,8 +2,8 @@ import { checkSchema } from "express-validator";
 import validator from "validator";
 function createVendorValidation() {
   return {
-    name: {
-      notEmpty: { errorMessage: "vendor name cant be empty" },
+    businnessName: {
+      notEmpty: { errorMessage: "vendor buinessName cant be empty" },
     },
     email: {
       notEmpty: { errorMessage: "vendor email cant be empty" },
@@ -15,8 +15,17 @@ function createVendorValidation() {
       },
     },
     businessType: {
-      notEmpty: { errorMessage: "vendor name cant be empty" },
+      notEmpty: { errorMessage: "vendor businessType cant be empty" },
     },
+    priceForService: {
+      notEmpty: { errorMessage: "vendor businessType cant be empty" },
+      custom: {
+        options: (value) => {
+          return value && value > 0;
+        },
+        errorMessage: "price cant be negative"
+      }
+    }
   };
 }
 export const validateCreateVendor = checkSchema(createVendorValidation());

@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import userModel from "./User.js";
 import { rolesEnum } from "../constants/user.js";
+import { locations, eventType } from "../constants/event.js";
 const { Schema } = mongoose;
 
 const vendorSchema = new Schema({
@@ -13,14 +14,20 @@ const vendorSchema = new Schema({
     required: true,
   },
   businessLocation: {
-    type: String,
-    required: true,
+    type: [String],
+    enum: locations,
+    required: true
   },
   businessDescription: {
     type: String,
     required: true,
   },
-  bookedCount: {
+  eventTypes: {
+    type: [String],
+    enum: eventType,
+    required: true
+  },
+  leadCount: {
     type: Number,
     defaulr: 0
   },

@@ -70,7 +70,7 @@ const eventSchema = new Schema({
         ref: "User",
       },
       custom: {
-          name: {
+          businessName: {
             type: String,
             required: true
           },
@@ -81,11 +81,15 @@ const eventSchema = new Schema({
           businessType: {
             type: String,
             required: true
-          }
+          },
       },
       status: {
         type: String,
         enum: vendorStatus,
+        required: true
+      },
+      priceForService: {
+        type: Number,
         required: true
       }
     } 

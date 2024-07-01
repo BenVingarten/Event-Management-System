@@ -4,11 +4,7 @@ export const eventType = [
   "Wedding",
   "Conference",
   "Company Event",
-  "Graduation",
-  "Holiday",
-  "Trade Show",
-  "Meetings",
-  "Workshops",
+  "Bar/Bat Mitzva"
 ];
 export const guestStatus = ["Message Sent", "Coming", "Not Coming", "Maybe"];
 export const excludedFieldsInPatch = [
@@ -22,3 +18,4 @@ export const excludedFieldsInPatch = [
 export const tasksFilters = ["status", "priority", "created"]; // needs to complete
 export const collabStatus = ["Pending", "Active"];
 export const vendorStatus = ["Added", "Negotiation", "suggested"]
+export const locations = ["Haifa & North", "Hasharon", "Gush Dan", "Shfela", "Jerusalem", "South(Negev And Eilat)"];

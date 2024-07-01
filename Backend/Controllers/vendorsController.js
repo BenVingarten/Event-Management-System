@@ -5,8 +5,8 @@ export const handleGetVendors = async (req, res) => {
   try {
     const { userId } = req;
     const { eventId } = req.params;
-    const { sortBy } = req.body;
-    const vendors = await getVendors(userId, eventId, sortBy);
+    const vendors = await getVendors(userId, eventId);
+    console.log(vendors);
     return res.status(200).json({ vendors });
   } catch (err) {
     return res.status(err.statusCode).json({ err: err.message });
@@ -36,10 +36,14 @@ export const handleAddCustomVendor = async (req, res) => {
 export const handleAddRegisteredVendor = async (req, res) => {
   try {
     const { userId } = req;
-    const { eventId, vendorId } = req.params;
-    const newRegisteredVendor = await addRegisteredVendor(userId, eventId, vendorId);
-    return res.status(200).json({msg: `success, added ${newRegisteredVendor.businessName} to your negotiated vendors!`});
-  } catch(err) {
+    const { eventId, vendorId} = req.params;
+    const newCustomVendor = await addRegisteredVendor(
+      userId,
+      eventId,
+      vendorId
+    );
+    return res.status(200).json({ msg: `success, added ${newCustomVendor.businessName} to your  negotiated vendors!` });
+  } catch (err) {
     return res.status(err.statusCode).json({ err: err.message });
   }
-};
+}
