@@ -4,6 +4,7 @@ import { GeneralServerError } from "../errors/GeneralServerError.js";
 import eventModel from "../models/Event.js";
 import userModel from "../models/User.js";
 import { getUserById } from "./UserLogic.js";
+import { vendorInvetationDetails } from "./emailLogic.js";
 import { getEventById } from "./eventsLogic.js";
 
 export const getVendors = async (userId, eventId) => {
@@ -36,8 +37,7 @@ export const getVendors = async (userId, eventId) => {
       negotiatedVendors,
       addedVendors,
     };
-    console.log(allVendors);
-    return { suggestedVendors, negotiatedVendors, addedVendors };
+    return allVendors;
   } catch (err) {
     if (err instanceof DataNotFoundError) throw err;
     throw new GeneralServerError(
@@ -101,29 +101,18 @@ export const getSuggestedVendors = async (type, location) => {
         },
       },
       {
-        $group: {
-          _id: "$businessType",
-          typeVendors: {
-            $push: {
-              vendorId: "$_id",
-              businessName: "$businessName",
-              email: "$email",
-              businessType: "$businessType",
-              leadCount: "$leadCount",
-            },
-          },
+        $project: {
+          _id: 0,
+          vendorId: "$_id",
+          businessName: "$businessName",
+          email: "$email",
+          type: "$businessType",
+          leadCount: "$leadCount",
         },
       },
       {
-        $project: {
-          _id: 0,
-          type: "$_id",
-          typeVendors: {
-            $sortArray: {
-              input: "$typeVendors",
-              sortBy: { leadCount: -1 },
-            },
-          },
+        $sort: {
+          leadCount: -1,
         },
       },
     ];
@@ -143,19 +132,86 @@ export const getSuggestedVendors = async (type, location) => {
 
 export const addRegisteredVendor = async (userId, eventId, vendorId) => {
   try {
-    const options = {
-      select: "vendors budget",
-      populate: {
-        path: "vendors.registeredUser",
-        select: "email",
-        options: { strictPopulate: false },
-      },
+    const vendorOptions = {
+      select: "email businessName",
     };
-    const vendor = await getUserById(vendorId);
+    const plannerOptions = {
+      select: "username email",
+    };
+    const eventOptions = {
+      select: "vendors type location date",
+    };
+    const vendor = await getUserById(vendorId, vendorOptions); // check for the existence of user with vendorId
+    const eventPlanner = await getUserById(userId, plannerOptions);
+    const event = await getEventById(userId, eventId, eventOptions);
+
+    const newRegisteredVendor = {
+      registeredUser: vendorId,
+      status: "Negotiated",
+    };
+    event.vendors.push(newRegisteredVendor);
+    // send email to vendor
+    const ownerdetails = {
+      ownerName: eventPlanner.username,
+      ownerEmail: eventPlanner.email,
+    };
+    const vendorDetails = {
+      businessName: vendor.businessName,
+      email: vendor.email,
+    };
+    const eventDetails = {
+      name: event.name,
+      location: event.location,
+      type: event.type,
+      date: event.date,
+    };
+    const mailOptions = vendorInvetationDetails(
+      ownerdetails,
+      vendorDetails,
+      eventDetails
+    );
+    await sendWebsiteEmail(mailOptions);
+    return newRegisteredVendor;
   } catch (err) {
     if (err instanceof DataNotFoundError) throw err;
     throw new GeneralServerError(
       `unexpected error in adding vendor to negotiated vendors: ${err.message}`
     );
   }
+};
+
+export const updateRegisteredVendor = async (
+  userId,
+  eventId,
+  vendorId,
+  verifiedVendor
+) => {
+  try {
+    const vendorOptions = {
+      select: "upcomingEvents",
+    };
+    const eventOptions = {
+      select: "vendors budget",
+    };
+    const vendor = await getUserById(vendorId, vendorOptions); // check for the existence of user with vendorId
+    const event = getEventById(userId, eventId, eventOptions); //check access control
+
+    if (verifiedVendor.priceForService) event.budget -= verifiedVendor.price;
+
+    await event.save();
+
+    if (verifiedVendor.vendorStatus === "Negotiated") {
+      // first update that vendor in the array
+      const findVendor = event.vendors.find(
+        (vendor) => vendor.registeredUser === vendorId
+      );
+      if (!findVendor)
+        throw new DataNotFoundError("couldnt find vendor with that ID");
+      findVendor.status = "Added";
+      // second we want to add to the vendor the current event
+      vendor.upcomingEvents.push(eventId);
+      await vendor.save();
+      return findVendor;
+    }
+  } catch (err) {}
 };

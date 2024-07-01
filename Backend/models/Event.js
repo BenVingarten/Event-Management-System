@@ -29,7 +29,7 @@ const eventSchema = new Schema({
   owner: {
     type: Schema.Types.ObjectId,
     ref: "User",
-    required: true
+    required: true,
   },
   collaborators: [
     {
@@ -70,29 +70,29 @@ const eventSchema = new Schema({
         ref: "User",
       },
       custom: {
-          businessName: {
-            type: String,
-            required: true
-          },
-          email: {
-            type: String,
-            required: true
-          },
-          businessType: {
-            type: String,
-            required: true
-          },
+        businessName: {
+          type: String,
+          required: true,
+        },
+        email: {
+          type: String,
+          required: true,
+        },
+        businessType: {
+          type: String,
+          required: true,
+        },
       },
       status: {
         type: String,
         enum: vendorStatus,
-        required: true
+        default: vendorStatus[0],
       },
       priceForService: {
         type: Number,
-        required: true
-      }
-    } 
+        required: true,
+      },
+    },
   ],
   createdAt: {
     type: Number,

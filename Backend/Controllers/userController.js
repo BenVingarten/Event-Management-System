@@ -18,7 +18,11 @@ export const handleGetUsers = async (req, res) => {
 export const handleGetUserById = async (req, res) => {
   try {
     const { userId } = req;
-    const user = await getUserById(userId);
+    const options = {
+      select:
+        "-_id username email businessType businessLocation businessDescription",
+    };
+    const user = await getUserById(userId, options);
     return res.status(200).json({ user });
   } catch (err) {
     return res.status(err.statusCode).json({ err: err.message });

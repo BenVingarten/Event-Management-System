@@ -43,7 +43,10 @@ export const createTask = async (userId, eventId, taskData, suggested) => {
 
 export const updateTasks = async (userId, eventId, cards) => {
   try {
-    const event = await getEventById(userId, eventId);
+    const options = {
+      select: "cards"
+    };
+    const event = await getEventById(userId, eventId, options);
     for (const card of cards) {
       const task = await taskModel.updateOne(
         { _id: card._id, event: card.event },
@@ -51,6 +54,8 @@ export const updateTasks = async (userId, eventId, cards) => {
       );
       if (!task) throw new DataNotFoundError();
     }
+    event.cards = cards.map(card => card._id);
+    await event.save();
   } catch (err) {
     if (err instanceof DataNotFoundError) throw err;
     throw new GeneralServerError(

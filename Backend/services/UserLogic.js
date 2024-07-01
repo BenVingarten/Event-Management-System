@@ -136,15 +136,19 @@ export const createUser = async (userInfo) => {
   }
 };
 
-export const getUserById = async (id) => {
+export const getUserById = async (id, options) => {
   try {
-    const selectOptions =
-      "-_id username email businessType businessLocation businessDescription";
+    const isPopulate =
+      options.populate && Object.keys(options.populate).length > 0;
+    const isSelect = options.select !== null;
+    const isLean = options.lean;
+    const query = userModel.findOne({ _id: id });
 
-    const user = await userModel
-      .findOne({ _id: id })
-      .select(selectOptions)
-      .exec();
+    if (isPopulate) query.populate(options.populate);
+    if (isSelect) query.select(options.select);
+    if (isLean) query.lean();
+    
+    const user = await query.exec();
     if (!user) throw new DataNotFoundError("User with that ID is not found");
     return user;
   } catch (err) {
@@ -209,7 +213,7 @@ export const authenticateUser = async (user) => {
 
     const isPasswordMatch = await bcrypt.compare(password, findUser.password);
     if (!isPasswordMatch) throw new UnauthorizedError("incorrect credentials");
-
+    
     const accessToken = issueAccessToken(findUser);
     const refreshToken = issueRefreshToken(findUser);
 
