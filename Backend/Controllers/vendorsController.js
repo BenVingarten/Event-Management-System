@@ -1,5 +1,9 @@
 import { matchedData, validationResult } from "express-validator";
-import { getVendors, addCustomVendor, addRegisteredVendor } from "../services/vendorsLogic.js";
+import {
+  getVendors,
+  addCustomVendor,
+  addRegisteredVendor,
+} from "../services/vendorsLogic.js";
 
 export const handleGetVendors = async (req, res) => {
   try {
@@ -7,7 +11,7 @@ export const handleGetVendors = async (req, res) => {
     const { eventId } = req.params;
     const vendors = await getVendors(userId, eventId);
     console.log(vendors);
-    return res.status(200).json({ vendors });
+    return res.status(200).json(vendors);
   } catch (err) {
     return res.status(err.statusCode).json({ err: err.message });
   }
@@ -27,7 +31,9 @@ export const handleAddCustomVendor = async (req, res) => {
       eventId,
       verifiedCustomVendor
     );
-    return res.status(200).json({ msg: `success, added ${newCustomVendor.name} to your vendors!` });
+    return res
+      .status(200)
+      .json({ msg: `success, added ${newCustomVendor.name} to your vendors!` });
   } catch (err) {
     return res.status(err.statusCode).json({ err: err.message });
   }
@@ -36,14 +42,18 @@ export const handleAddCustomVendor = async (req, res) => {
 export const handleAddRegisteredVendor = async (req, res) => {
   try {
     const { userId } = req;
-    const { eventId, vendorId} = req.params;
+    const { eventId, vendorId } = req.params;
     const newCustomVendor = await addRegisteredVendor(
       userId,
       eventId,
       vendorId
     );
-    return res.status(200).json({ msg: `success, added ${newCustomVendor.businessName} to your  negotiated vendors!` });
+    return res
+      .status(200)
+      .json({
+        msg: `success, added ${newCustomVendor.businessName} to your  negotiated vendors!`,
+      });
   } catch (err) {
     return res.status(err.statusCode).json({ err: err.message });
   }
-}
+};

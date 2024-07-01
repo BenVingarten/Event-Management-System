@@ -37,7 +37,7 @@ export const getVendors = async (userId, eventId) => {
       addedVendors,
     };
     console.log(allVendors);
-    return allVendors;
+    return { suggestedVendors, negotiatedVendors, addedVendors };
   } catch (err) {
     if (err instanceof DataNotFoundError) throw err;
     throw new GeneralServerError(
@@ -103,7 +103,7 @@ export const getSuggestedVendors = async (type, location) => {
       {
         $group: {
           _id: "$businessType",
-          vendors: {
+          typeVendors: {
             $push: {
               vendorId: "$_id",
               businessName: "$businessName",
@@ -118,9 +118,9 @@ export const getSuggestedVendors = async (type, location) => {
         $project: {
           _id: 0,
           type: "$_id",
-          vendors: {
+          typeVendors: {
             $sortArray: {
-              input: "$vendors",
+              input: "$typeVendors",
               sortBy: { leadCount: -1 },
             },
           },
@@ -152,9 +152,10 @@ export const addRegisteredVendor = async (userId, eventId, vendorId) => {
       },
     };
     const vendor = await getUserById(vendorId);
-
-  } catch(err) {
-    if(err instanceof DataNotFoundError) throw err;
-    throw new GeneralServerError(`unexpected error in adding vendor to negotiated vendors: ${err. message}`);
+  } catch (err) {
+    if (err instanceof DataNotFoundError) throw err;
+    throw new GeneralServerError(
+      `unexpected error in adding vendor to negotiated vendors: ${err.message}`
+    );
   }
 };
