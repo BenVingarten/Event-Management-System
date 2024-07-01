@@ -7,7 +7,7 @@ import moment from "moment-timezone";
 import { FaCheck } from "react-icons/fa";
 import { IoMdClose } from "react-icons/io";
 
-const Invitations = ({ userId }) => {
+const Invitations = ({ userId, setInvitationsRefresh }) => {
   const axiosPrivate = useAxiosPrivate();
   const [isOpen, setIsOpen] = useState(false);
   const effectRun = useRef(false);
@@ -40,7 +40,7 @@ const Invitations = ({ userId }) => {
       effectRun.current = true;
     };
   }, []);
-  console.log(invitations);
+  //console.log(invitations);
 
   const handleAccept = async (invitationId) => {
     const controller = new AbortController();
@@ -54,6 +54,7 @@ const Invitations = ({ userId }) => {
       setInvitations((prevInvitations) =>
         prevInvitations.filter((invitation) => invitation._id !== invitationId)
       );
+      setInvitationsRefresh((prev) => prev + 1);
       toast.success("Invitation accepted");
     } catch (error) {
       console.error("Error accepting invitation:", error);
@@ -145,6 +146,7 @@ const Invitations = ({ userId }) => {
 
 Invitations.propTypes = {
   userId: PropTypes.string.isRequired,
+  setInvitationsRefresh: PropTypes.func.isRequired,
 };
 
 export default Invitations;

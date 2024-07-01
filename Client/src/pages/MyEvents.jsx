@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { IoMdCalendar } from "react-icons/io";
-import { Button, Card, Modal } from "flowbite-react";
+import { Button, Card, Modal, Spinner } from "flowbite-react";
 import useAxiosPrivate from "../hooks/useAxiosPrivate";
 import useAuth from "../hooks/useAuth";
 import { jwtDecode } from "jwt-decode";
@@ -21,6 +21,8 @@ const MyEvents = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedEventId, setSelectedEventId] = useState(null);
   const userId = jwtDecode(auth.accessToken).userInfo.id;
+  const [invitationsRefresh, setInvitationsRefresh] = useState(0);
+  const [loading, setLoading] = useState(false);
   //console.log(events);
 
   useEffect(() => {
@@ -28,12 +30,13 @@ const MyEvents = () => {
 
     // Fetch user's events from the backend
     const fetchEvents = async () => {
+      setLoading(true);
       try {
         const response = await axiosPrivate.get(`/users/${userId}/events`, {
           signal: controller.signal,
         });
-
-        //console.log(response.data.events);
+        setLoading(false);
+        console.log(response.data);
         setEvents(response.data.events);
       } catch (err) {
         console.log(err.response?.data);
@@ -48,7 +51,7 @@ const MyEvents = () => {
       controller.abort();
       effectRun.current = true;
     };
-  }, []);
+  }, [invitationsRefresh]);
 
   const handleDeleteConfirmation = (eventId) => {
     setSelectedEventId(eventId);
@@ -78,6 +81,9 @@ const MyEvents = () => {
     <div className="container ml-5 w-full">
       <Toaster />
       <h2 className="mt-8 mb-4 text-2xl font-bold ">My Events</h2>
+
+      {loading && <Spinner className="mt-8" />}
+
       <div className="grid gap-4 lg:grid-cols-3">
         {events.length > 0 ? (
           events.map((event) => {
@@ -153,7 +159,10 @@ const MyEvents = () => {
         )}
       </div>
 
-      <Invitations userId={userId} />
+      <Invitations
+        userId={userId}
+        setInvitationsRefresh={setInvitationsRefresh}
+      />
 
       {/* Delete Confirmation Modal */}
       <Modal show={isModalOpen} onClose={() => setIsModalOpen(false)}>

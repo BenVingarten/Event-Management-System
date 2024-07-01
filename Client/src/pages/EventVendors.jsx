@@ -37,6 +37,9 @@ function EventVendors() {
           `users/${userId}/events/${eventID}/vendors`
         );
         console.log(res.data);
+        setEventVendors(res.data.vendors.acceptedVendors);
+        setNegotiatedVendors(res.data.vendors.negotiatedVendors);
+        setSuggestedVendors(res.data.vendors.suggestedVendors);
         toast.success("Vendors Fetched!");
         //setEventVendors(res.data);
       } catch (err) {
@@ -120,10 +123,10 @@ function EventVendors() {
       <div className="overflow-y-auto">
         <h1 className="text-2xl font-bold mb-2">Event Vendors</h1>
         {eventVendors.map((vendor) => (
-          <Card key={vendor.username} className="mb-4 mr-5">
+          <Card key={vendor.name} className="mb-4 mr-5">
             <div className="grid grid-cols-2">
               <div className="sm:overflow-x-scroll md:overflow-auto">
-                <p className="text-lg font-bold">{vendor.username}</p>
+                <p className="text-lg font-bold">{vendor.name}</p>
                 <p>{vendor.email}</p>
                 <p>{vendor.businessType}</p>
               </div>
@@ -193,10 +196,10 @@ function EventVendors() {
       <div className="overflow-y-auto">
         <h1 className="text-2xl font-bold mb-2">Negotiated Vendors</h1>
         {negotiatiatedVendors.map((vendor) => (
-          <Card key={vendor.username} className="mb-4 mr-5">
+          <Card key={vendor.name} className="mb-4 mr-5">
             <div className="grid grid-cols-2">
               <div className="sm:overflow-x-scroll md:overflow-auto">
-                <p className="text-lg font-bold">{vendor.username}</p>
+                <p className="text-lg font-bold">{vendor.name}</p>
                 <p>{vendor.email}</p>
                 <p>{vendor.businessType}</p>
               </div>
@@ -226,10 +229,10 @@ function EventVendors() {
       <div className="overflow-y-auto">
         <h1 className="text-2xl font-bold mb-2 ">Suggested Vendors</h1>
         {suggestedVendors.map((vendor) => (
-          <Card key={vendor.username} className="mb-4 mr-5">
+          <Card key={vendor.name} className="mb-4 mr-5">
             <div className="grid grid-cols-2">
               <div className="sm:overflow-x-scroll md:overflow-auto">
-                <p className="text-lg font-bold">{vendor.username}</p>
+                <p className="text-lg font-bold">{vendor.name}</p>
                 <p>{vendor.email}</p>
                 <p>{vendor.businessType}</p>
               </div>

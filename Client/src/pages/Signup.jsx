@@ -118,12 +118,11 @@ const SignupPage = () => {
   }
 
   const handleInputChange = (e) => {
-    const { id, value, selectedOptions } = e.target;
-    let valueArray = Array.from(selectedOptions, (option) => option.value);
+    const { id, value } = e.target;
 
     setBusinessInfo({
       ...businessInfo,
-      [id]: valueArray,
+      [id]: value,
     });
   };
 
