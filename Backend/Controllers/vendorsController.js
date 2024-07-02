@@ -5,6 +5,8 @@ import {
   addRegisteredVendor,
   updateRegisteredVendor,
   updateCustomVendor,
+  deleteVendor,
+  deleteVendorUpcoingEvent
 } from "../services/vendorsLogic.js";
 
 export const handleGetVendors = async (req, res) => {
@@ -82,10 +84,41 @@ export const handleUpdateCustomVendor = async (req, res) => {
     const {eventId, vendorEmail } = req.params;
     if(!validator.isEmail(vendorEmail))
       return res.status(400).json({ msg: `invalid email: ${vendorEmail}`});
-    
+
     const newUpdatedVendor = await updateCustomVendor(userId, eventId, vendorEmail, verifiedCustomVendor);
     return res.status(200).json(newUpdatedVendor);
   } catch (err) {
+    return res.status(err.statusCode).json({ err: err.message });
+  }
+}
+
+export const handleDeleteVendor = async (req, res) => {
+  try {
+    const { userId } = req;
+    const { eventId, vendorId } = req.params;
+    const { vendorObj } = req.body;
+    if(!vendorObj) 
+      return res.status(400).json({ msg: "no vendor specified for deleting" });
+    const deletedVendor = await deleteVendor(
+      userId,
+      eventId,
+      vendorObj
+    );
+    return res.status(200).json({
+      msg: `success, ${deletedVendor.businessName} has been deleted!`,
+    });
+  } catch (err) {
+    return res.status(err.statusCode).json({ err: err.message });
+  }
+};
+
+export const handleDeleteVendorEvent = async (req, res) => {
+  try {
+    const { userId } = req;
+    const { eventId } = req.params;
+    await deleteVendorUpcoingEvent(userId, eventId);
+    return res.status(200).json({ smg: "deleted event successfully"})
+  } catch(err) {
     return res.status(err.statusCode).json({ err: err.message });
   }
 }

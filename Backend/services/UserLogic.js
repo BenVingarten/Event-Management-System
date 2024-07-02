@@ -136,7 +136,7 @@ export const createUser = async (userInfo) => {
   }
 };
 
-export const getUserById = async (id, options) => {
+export const getUserById = async (id, options = {}) => {
   try {
     const isPopulate =
       options.populate && Object.keys(options.populate).length > 0;

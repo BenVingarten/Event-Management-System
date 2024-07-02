@@ -1,24 +1,37 @@
 import { Router } from "express";
 import { verifyParamId } from "../middleware/verifyParamId.js";
 import { verifyUserIdMatchAuthId } from "../middleware/verifyUserIdMatchAuthId.js";
-import { handleGetVendors, handleAddRegisteredVendor, handleAddCustomVendor, handleUpdateRegisteredVendor, handleUpdateCustomVendor } from "../Controllers/vendorsController.js";
+import { 
+  handleGetVendors,
+  handleAddRegisteredVendor,
+  handleAddCustomVendor,
+  handleUpdateRegisteredVendor,
+  handleUpdateCustomVendor,
+  handleDeleteVendor,
+  handleDeleteVendorEvent
+ } from "../Controllers/vendorsController.js";
 import { validateCreateCustomVendor, validateUpdateRegisteredVendor, validateUpdateCustomVendor } from "../middleware/verifyVendorDetails.js";
 
 
 const router = Router();
 
-router
+router // All Vendors
   .route("/users/:id/events/:eventId/vendors")
   .get(verifyUserIdMatchAuthId, verifyParamId("eventId"), handleGetVendors)
-  .post(verifyUserIdMatchAuthId, verifyParamId("eventId"), validateCreateCustomVendor, handleAddCustomVendor);
+  .post(verifyUserIdMatchAuthId, verifyParamId("eventId"), validateCreateCustomVendor, handleAddCustomVendor)
+  .delete(verifyUserIdMatchAuthId, verifyParamId("eventId"), handleDeleteVendor);
 
-router
+router // For registeredVendors
   .route("/users/:id/events/:eventId/vendors/:vendorId")
   .post(verifyUserIdMatchAuthId, verifyParamId("eventId"), verifyParamId("vendorId"), handleAddRegisteredVendor)
-  .patch(verifyUserIdMatchAuthId, verifyParamId("eventId"), verifyParamId("vendorId"), validateUpdateRegisteredVendor, handleUpdateRegisteredVendor);
+  .patch(verifyUserIdMatchAuthId, verifyParamId("eventId"), verifyParamId("vendorId"), validateUpdateRegisteredVendor, handleUpdateRegisteredVendor)
 
-router
+router // For customVendors
   .route("/users/:id/events/:eventId/vendors/:vendorEmail")
   .patch(verifyUserIdMatchAuthId, verifyParamId("eventId"), validateUpdateCustomVendor, handleUpdateCustomVendor);
+
+router // For users how are vendors
+.route("/users/:id/upcomingEvents/:eventId")
+.delete(verifyUserIdMatchAuthId, verifyParamId("eventId"), handleDeleteVendorEvent);
   
 export default router;

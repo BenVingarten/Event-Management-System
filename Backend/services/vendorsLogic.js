@@ -4,7 +4,7 @@ import { GeneralServerError } from "../errors/GeneralServerError.js";
 import eventModel from "../models/Event.js";
 import userModel from "../models/User.js";
 import { getUserById } from "./UserLogic.js";
-import { vendorInvetationDetails } from "./emailLogic.js";
+import { removeVendorDetails, vendorInvetationDetails } from "./emailLogic.js";
 import { getEventById } from "./eventsLogic.js";
 
 export const getVendors = async (userId, eventId) => {
@@ -188,13 +188,13 @@ export const updateRegisteredVendor = async (
 ) => {
   try {
     const vendorOptions = {
-      select: "upcomingEvents",
+      select: "upcomingEvents leadCount",
     };
     const eventOptions = {
       select: "vendors budget",
     };
     const vendor = await getUserById(vendorId, vendorOptions); // check for the existence of user with vendorId
-    const event = getEventById(userId, eventId, eventOptions); //check access control
+    const event = await getEventById(userId, eventId, eventOptions); //check access control
 
     //update event's budget
     if (verifiedVendor.priceForService) event.budget -= verifiedVendor.price;
@@ -213,33 +213,136 @@ export const updateRegisteredVendor = async (
       findVendor.status = "Added";
       // second we want to add to the vendor the current event
       vendor.upcomingEvents.push(eventId);
+      // lastly update the leadcount
+      vendor.leadCount++;
       await vendor.save();
     }
     return findVendor;
   } catch (err) {
-     if(err instanceof DataNotFoundError || err instanceof DuplicateDataError) throw err;
-     throw new GeneralServerError(`unexpected error in updating vendor: ${err. message}`);
+    if (err instanceof DataNotFoundError || err instanceof DuplicateDataError)
+      throw err;
+    throw new GeneralServerError(
+      `unexpected error in updating vendor: ${err.message}`
+    );
   }
 };
 
-export const updateCustomVendor = async (userId, eventId, vendorEmail, verifiedCustomVendor) => {
+export const updateCustomVendor = async (
+  userId,
+  eventId,
+  vendorEmail,
+  verifiedCustomVendor
+) => {
   try {
-    if(verifiedCustomVendor.email && verifiedCustomVendor.email === vendorEmail) // check for duplicate 
-      throw new DuplicateDataError("there is already a custom vendor with that email");
-    
+    if (
+      verifiedCustomVendor.email &&
+      verifiedCustomVendor.email === vendorEmail
+    )
+      // check for duplicate
+      throw new DuplicateDataError(
+        "there is already a custom vendor with that email"
+      );
+
     const eventOptions = {
-      select: "vendors"
+      select: "vendors",
     };
-    const event = getEventById(userId, eventId, eventOptions); // check access control
-    const findVendor = event.vendors.custom.find(vendor => vendor.email === vendorEmail);
-    if(!findVendor) throw new DataNotFoundError("there is no vendor with that email");
-    for(const key in verifiedCustomVendor)
-        findVendor[key] = verifiedCustomVendor[key];
-    
+    const event = await getEventById(userId, eventId, eventOptions); // check access control
+    const findVendor = event.vendors.custom.find(
+      (vendor) => vendor.email === vendorEmail
+    );
+    if (!findVendor)
+      throw new DataNotFoundError("there is no vendor with that email");
+    for (const key in verifiedCustomVendor)
+      findVendor[key] = verifiedCustomVendor[key];
+
     await event.save();
     return findVendor;
-  } catch(err) {
-    if(err instanceof DataNotFoundError || err instanceof DuplicateDataError) throw err;
-    throw new GeneralServerError(`unexpected error in updating Registered vendor: ${err. message}`);
+  } catch (err) {
+    if (err instanceof DataNotFoundError || err instanceof DuplicateDataError)
+      throw err;
+    throw new GeneralServerError(
+      `unexpected error in updating Registered vendor: ${err.message}`
+    );
   }
-}
+};
+
+export const deleteVendor = async (userId, eventId, vendorObj) => {
+  try {
+    const eventOptions = {
+      select: "vendors budget name type location date",
+      populate: { path: "owner", select: "username email" },
+    };
+    const event = await getEventById(userId, eventId, eventOptions);
+    event.vendors.pull(vendorObj);
+    event.budget += vendorObj.priceForService;
+    await event.save();
+    // if the vendor is registered we need to remove his event and decrament his lead count
+
+    if (vendorObj.registeredUser) {
+      const vendor = await userModel
+        .findOneAndUpdate(
+          { _id: vendorObj.registeredUser },
+          {
+            $pull: { upcomingEvents: eventId },
+            $inc: { leadCount: -1 },
+          }
+        )
+        .select("email")
+        .exec();
+      if (!vendor)
+        throw new DataNotFoundError("could not find Vendor with that Id");
+      //send email to notify the vendor
+      const ownerdetails = {
+        ownerName: event.owner.username,
+        ownerEmail: event.owner.email,
+      };
+      const vendorDetails = {
+        businessName: vendorObj.businessName,
+        email: vendor.email,
+      };
+      const eventDetails = {
+        name: event.name,
+        location: event.location,
+        type: event.type,
+        date: event.date,
+      };
+      const mailOptions = removeVendorDetails(
+        ownerdetails,
+        vendorDetails,
+        eventDetails
+      );
+      await sendWebsiteEmail(mailOptions);
+    }
+    return vendorObj;
+  } catch (err) {}
+};
+
+export const deleteVendorUpcoingEvent = async (userId, eventId) => {
+  try {
+    const vendor = await userModel
+      .updateOne(
+        { _id: userId, upcomingEvents: eventId },
+        {
+          $pull: { upcomingEvents: eventId },
+          $inc: { leadCount: -1 },
+        }
+      )
+      .exec();
+    if (vendor.matchedCount === 0)
+      throw new DataNotFoundError("couldnt find a bendor with that ID");
+    const eventOptions = {
+      select: "vendors budget name type location date",
+      populate: { path: "owner", select: "username email" },
+    };
+    const event = await getEventById(userId, eventId, eventOptions);
+    event.vendors.pull(userId); // remove vendor from the event
+    event.budget += vendor.priceForService; // add the price back to the budget
+    await event.save();
+    //send mail to notify event planner
+  } catch (err) {
+    if (err instanceof DataNotFoundError) throw err;
+    throw new GeneralServerError(
+      `unexpected error in deleting vendor's upcoming event: ${err.message}`
+    );
+  }
+};

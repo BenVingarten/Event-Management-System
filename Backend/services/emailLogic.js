@@ -65,6 +65,25 @@ export const vendorInvetationDetails = (ownerdetails, vendorDetails, eventDetail
   }
   return mailOptions;
 };
+export const removeVendorDetails = (ownerdetails, vendorDetails, eventDetails) => {
+  const { businessName, email } = vendorDetails;
+  const { ownerName, ownerEmail } = ownerdetails;
+  const { name, location, type, date } = eventDetails;
+  const eventDate = new Date(date);
+    const formattedDate = moment(eventDate * 1000)
+      .tz("Israel")
+      .format("DD-MM-YYYY");
+  const subject = `Cancel Of Service`;
+  const text = `Hello ${businessName},\nthe event planner: ${ownerName} is no longer interested in your services for his event and thus removed you.\nHere are some details on the event:\n
+  name: ${name}\ntype: ${type}\nlocation: ${location}\ndate: ${formattedDate}\n\nYou can contact the event planner through his email: ${ownerEmail} for more details.\nBest regards, CelebrightEMS Team`
+  const mailOptions = {
+    from: process.env.EMAIL_USER,
+    to: email,
+    subject,
+    text,
+  }
+  return mailOptions;
+};
 export const sendWebsiteEmail = async (mailOptions) => {
   try {
     const transporter = nodemailer.createTransport({
