@@ -74,11 +74,8 @@ export default function Account() {
           signal: controller.signal,
         });
 
+        console.log(response.data.user);
         setUser(response.data.user);
-        //setUpdatedDetails(response.data.user);
-        //console.log(response.data);
-        //console.log("User details fetched");
-        //console.log(user);
       } catch (err) {
         console.log("Error: " + err.response);
         console.log(err);

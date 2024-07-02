@@ -1,11 +1,11 @@
 import { DataNotFoundError } from "../errors/DataNotFoundError.js";
 import { DuplicateDataError } from "../errors/DuplicateDataError.js";
 import { GeneralServerError } from "../errors/GeneralServerError.js";
-import eventModel from "../models/Event.js";
 import userModel from "../models/User.js";
 import { getUserById } from "./UserLogic.js";
 import { removeVendorDetails, vendorInvetationDetails } from "./emailLogic.js";
 import { getEventById } from "./eventsLogic.js";
+import { sendWebsiteEmail } from "./emailLogic.js";
 
 export const getVendors = async (userId, eventId) => {
   try {
@@ -29,7 +29,7 @@ export const getVendors = async (userId, eventId) => {
         ? vendor.registeredUser
         : vendor.custom;
       if (vendor.status === "Added") addedVendors.push(vendorData);
-      else if (vendor.status === "Negotiated")
+      else if (vendor.status === "Negotiation")
         negotiatedVendors.push(vendorData);
     }
     const allVendors = {
@@ -106,7 +106,7 @@ export const getSuggestedVendors = async (type, location) => {
           vendorId: "$_id",
           businessName: "$businessName",
           email: "$email",
-          type: "$businessType",
+          businessType: "$businessType",
           leadCount: "$leadCount",
         },
       },
@@ -147,9 +147,10 @@ export const addRegisteredVendor = async (userId, eventId, vendorId) => {
 
     const newRegisteredVendor = {
       registeredUser: vendorId,
-      status: "Negotiated",
+      status: "Negotiation",
     };
     event.vendors.push(newRegisteredVendor);
+    await event.save();
     // send email to vendor
     const ownerdetails = {
       ownerName: eventPlanner.username,
@@ -198,7 +199,6 @@ export const updateRegisteredVendor = async (
 
     //update event's budget
     if (verifiedVendor.priceForService) event.budget -= verifiedVendor.price;
-    await event.save();
 
     // update the vendor's price in the array
     const findVendor = event.vendors.find(
@@ -208,15 +208,16 @@ export const updateRegisteredVendor = async (
       throw new DataNotFoundError("couldnt find vendor with that ID");
     findVendor.priceForService = verifiedVendor.priceForService;
 
-    if (verifiedVendor.vendorStatus === "Negotiated") {
-      // update the vendor's status first
-      findVendor.status = "Added";
-      // second we want to add to the vendor the current event
-      vendor.upcomingEvents.push(eventId);
-      // lastly update the leadcount
-      vendor.leadCount++;
-      await vendor.save();
-    }
+    // update the vendor's status first
+    findVendor.status = "Added";
+    // second we want to add to the vendor the current event
+    vendor.upcomingEvents.push(eventId);
+    // lastly update the leadcount
+    vendor.leadCount++;
+
+    await vendor.save();
+    await event.save();
+
     return findVendor;
   } catch (err) {
     if (err instanceof DataNotFoundError || err instanceof DuplicateDataError)

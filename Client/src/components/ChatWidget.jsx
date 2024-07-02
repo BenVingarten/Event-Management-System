@@ -1,14 +1,13 @@
 import PropTypes from "prop-types";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import useAxiosPrivate from "../hooks/useAxiosPrivate";
 import { Toaster, toast } from "react-hot-toast";
 
 const ChatWidget = ({ suggestions, setCards, userId, eventId }) => {
   const axiosPrivate = useAxiosPrivate();
   const [isOpen, setIsOpen] = useState(false);
-
-  //TODO: change the suggestions to be fetched from the server
-  // (from an AI model or a database)
+  const [expandedCategory, setExpandedCategory] = useState(null);
+  const containerRef = useRef(null);
 
   const toggleChat = () => {
     setIsOpen(!isOpen);
@@ -22,9 +21,6 @@ const ChatWidget = ({ suggestions, setCards, userId, eventId }) => {
 
     const controller = new AbortController();
     try {
-      //console.log("User ID:", userId);
-      //console.log(cards);
-
       const response = await axiosPrivate.post(
         `/users/${userId}/events/${eventId}/tasks`,
         { newCard, suggested: true },
@@ -35,21 +31,42 @@ const ChatWidget = ({ suggestions, setCards, userId, eventId }) => {
         }
       );
       toast.success("Task added successfully");
-      setCards((pv) => [...pv, response.data.newTask]);
-      //console.log);
-      //console.log("tasks saved successfully:", response.data);
+      setCards((prev) => [...prev, response.data.newTask]);
+      suggestions.forEach((category) => {
+        category.tasks = category.tasks.filter((t) => t !== task);
+      });
     } catch (error) {
       console.error("Error adding task:", error);
       if (!error?.response) toast.error("Error: No response from server.");
       else toast.error("Error: " + error.response?.data.error);
     }
   };
-  console.log(suggestions[0]);
+
+  const handleCategoryClick = (category) => {
+    if (expandedCategory === category) {
+      setExpandedCategory(null);
+    } else {
+      setExpandedCategory(category);
+    }
+  };
+
+  useEffect(() => {
+    if (containerRef.current) {
+      if (expandedCategory) {
+        containerRef.current.style.height = `${containerRef.current.scrollHeight}px`;
+      } else {
+        containerRef.current.style.height = isOpen ? "256px" : "48px"; // Adjust this to the closed height
+      }
+    }
+  }, [expandedCategory, isOpen]);
+
   return (
     <div
+      ref={containerRef}
       className={`fixed bottom-4 right-4 w-64 bg-white shadow-lg rounded-lg overflow-hidden transition-all duration-300 ${
-        isOpen ? "h-64" : "h-12"
+        isOpen ? "h-auto" : "h-12"
       }`}
+      style={{ transition: "height 0.3s ease" }}
     >
       <Toaster />
       <div
@@ -61,13 +78,27 @@ const ChatWidget = ({ suggestions, setCards, userId, eventId }) => {
       {isOpen && (
         <div className="p-3 overflow-y-auto">
           <ul className="space-y-2">
-            {suggestions[0].tasks.map((suggestion, index) => (
-              <li
-                key={index}
-                className="p-2 bg-gray-100 rounded-lg cursor-pointer hover:bg-gray-200"
-                onClick={() => handleAddTask(suggestion)}
-              >
-                {suggestion}
+            {suggestions.map((category, index) => (
+              <li key={index}>
+                <div
+                  className="bg-gray-100 rounded-lg p-2 cursor-pointer hover:bg-gray-200"
+                  onClick={() => handleCategoryClick(category.category)}
+                >
+                  {category.category}
+                </div>
+                {expandedCategory === category.category && (
+                  <ul className="mt-2 space-y-1">
+                    {category.tasks.map((task, taskIndex) => (
+                      <li
+                        key={taskIndex}
+                        className="p-2 cursor-pointer hover:bg-gray-200"
+                        onClick={() => handleAddTask(task)}
+                      >
+                        {task}
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </li>
             ))}
           </ul>
@@ -78,7 +109,12 @@ const ChatWidget = ({ suggestions, setCards, userId, eventId }) => {
 };
 
 ChatWidget.propTypes = {
-  suggestions: PropTypes.arrayOf(PropTypes.string).isRequired,
+  suggestions: PropTypes.arrayOf(
+    PropTypes.shape({
+      category: PropTypes.string.isRequired,
+      tasks: PropTypes.arrayOf(PropTypes.string).isRequired,
+    })
+  ).isRequired,
   setCards: PropTypes.func.isRequired,
   userId: PropTypes.string.isRequired,
   eventId: PropTypes.string.isRequired,

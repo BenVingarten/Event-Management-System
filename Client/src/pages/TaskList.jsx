@@ -12,13 +12,6 @@ import { useLocation, useNavigate } from "react-router-dom";
 import ChatWidget from "../components/ChatWidget";
 
 const taskStatus = ["Backlog", "TODO", "In progress", "Complete"];
-const taskSuggestions = [
-  "Buy groceries",
-  "Schedule meeting",
-  "Write report",
-  "Plan event",
-  "Book tickets",
-];
 
 export default function TaskList() {
   return (
@@ -53,7 +46,7 @@ const Board = () => {
           }
         );
 
-        //console.log(response.data.tasks);
+        
         setCards(response.data.tasks);
         setSuggestedTasks(response.data.suggestedTasks);
       } catch (err) {

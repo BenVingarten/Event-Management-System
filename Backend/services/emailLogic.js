@@ -1,11 +1,9 @@
 import nodemailer from "nodemailer";
 import "../config/loadEnv.js";
 import { GeneralServerError } from "../errors/GeneralServerError.js";
+import moment from "moment-timezone";
 
-export const collabAddingInvitationDetails = (
-  ownerUsername,
-  collabEmail
-) => {
+export const collabAddingInvitationDetails = (ownerUsername, collabEmail) => {
   const collabName = collabEmail.split("@")[0];
   const subject = "Invitation To Collaborate";
   const text = `Hello ${collabName},\nYou have been invited by the user: ${ownerUsername} to collaborate on his event!\nfor more information on the event you can navigate to CelebrightEMS.com and view the invitation details.\ngood luck and happy planning!\nBest regards, CelebrightEMS Team`;
@@ -46,42 +44,51 @@ export const collabRemovalDetails = (ownerUsername, collabEmail, eventName) => {
   };
   return mailOptions;
 };
-export const vendorInvetationDetails = (ownerdetails, vendorDetails, eventDetails) => {
+export const vendorInvetationDetails = (
+  ownerdetails,
+  vendorDetails,
+  eventDetails
+) => {
   const { businessName, email } = vendorDetails;
   const { ownerName, ownerEmail } = ownerdetails;
   const { name, location, type, date } = eventDetails;
   const eventDate = new Date(date);
-    const formattedDate = moment(eventDate * 1000)
-      .tz("Israel")
-      .format("DD-MM-YYYY");
+  const formattedDate = moment(eventDate * 1000)
+    .tz("Israel")
+    .format("DD-MM-YYYY");
+
   const subject = `request to hire your services at an event`;
   const text = `Hello ${businessName},\nthe event planner: ${ownerName} is interested in your services for his event,\nand would like to negotiate with you\n
-  here are some details on the event:\nname: ${name}\ntype: ${type}\nlocation: ${location}\ndate: ${formattedDate}\n\nYou can contact the event planner through his email: ${ownerEmail}\nBest regards, CelebrightEMS Team`
+  here are some details on the event:\nname: ${name}\ntype: ${type}\nlocation: ${location}\ndate: ${formattedDate}\n\nYou can contact the event planner through his email: ${ownerEmail}\nBest regards, CelebrightEMS Team`;
   const mailOptions = {
     from: process.env.EMAIL_USER,
     to: email,
     subject,
     text,
-  }
+  };
   return mailOptions;
 };
-export const removeVendorDetails = (ownerdetails, vendorDetails, eventDetails) => {
+export const removeVendorDetails = (
+  ownerdetails,
+  vendorDetails,
+  eventDetails
+) => {
   const { businessName, email } = vendorDetails;
   const { ownerName, ownerEmail } = ownerdetails;
   const { name, location, type, date } = eventDetails;
   const eventDate = new Date(date);
-    const formattedDate = moment(eventDate * 1000)
-      .tz("Israel")
-      .format("DD-MM-YYYY");
+  const formattedDate = moment(eventDate * 1000)
+    .tz("Israel")
+    .format("DD-MM-YYYY");
   const subject = `Cancel Of Service`;
   const text = `Hello ${businessName},\nthe event planner: ${ownerName} is no longer interested in your services for his event and thus removed you.\nHere are some details on the event:\n
-  name: ${name}\ntype: ${type}\nlocation: ${location}\ndate: ${formattedDate}\n\nYou can contact the event planner through his email: ${ownerEmail} for more details.\nBest regards, CelebrightEMS Team`
+  name: ${name}\ntype: ${type}\nlocation: ${location}\ndate: ${formattedDate}\n\nYou can contact the event planner through his email: ${ownerEmail} for more details.\nBest regards, CelebrightEMS Team`;
   const mailOptions = {
     from: process.env.EMAIL_USER,
     to: email,
     subject,
     text,
-  }
+  };
   return mailOptions;
 };
 export const sendWebsiteEmail = async (mailOptions) => {

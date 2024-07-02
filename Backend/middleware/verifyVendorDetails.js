@@ -24,11 +24,11 @@ function createCustomVendorValidation() {
         options: (value) => {
           return value && value > 0;
         },
-        errorMessage: "price cant be negative"
-      }
-    }
+        errorMessage: "price cant be negative",
+      },
+    },
   };
-};
+}
 
 function updateCustomVendorValidation() {
   return {
@@ -57,38 +57,30 @@ function updateCustomVendorValidation() {
         options: (value) => {
           return value && value > 0;
         },
-        errorMessage: "price cant be negative"
-      }
-    }
+        errorMessage: "price cant be negative",
+      },
+    },
   };
-};
+}
 
 function updateRegisteredVendorValidation() {
   return {
-    vendorStatus: {
-      notEmpty: { errorMessage: "vendor status cant be empty" },
-      custom: {
-        options: (value) => {
-          return value && vendorStatus.some(status => status === value) > 0;
-        },
-        errorMessage: "status must be Added/Negotiated"
-      }
-    },
     priceForService: {
       custom: {
         options: (value, { req }) => {
-          // If vendorStatus is "Negotiated", priceForService must be provided and greater than 0
-          if (req.body.vendorStatus === "Negotiated") {
-            return value && value > 0;
-          }
-          // If vendorStatus is not "Negotiated", ensure priceForService is either not provided or greater than 0
-          return value === undefined || value === null || value > 0;
+          return value && value > 0;
         },
-        errorMessage: "Price must be greater than 0 if provided, and can't be empty if status is 'Negotiated'"
-      }
-    }
+        errorMessage: "Price must be greater than 0",
+      },
+    },
   };
-};
-export const validateCreateCustomVendor = checkSchema(createCustomVendorValidation());
-export const validateUpdateCustomVendor = checkSchema(updateCustomVendorValidation());
-export const validateUpdateRegisteredVendor = checkSchema(updateRegisteredVendorValidation());
+}
+export const validateCreateCustomVendor = checkSchema(
+  createCustomVendorValidation()
+);
+export const validateUpdateCustomVendor = checkSchema(
+  updateCustomVendorValidation()
+);
+export const validateUpdateRegisteredVendor = checkSchema(
+  updateRegisteredVendorValidation()
+);

@@ -72,15 +72,21 @@ const eventSchema = new Schema({
       custom: {
         businessName: {
           type: String,
-          required: true,
+          required: function () {
+            return !this.registeredUser;
+          },
         },
         email: {
           type: String,
-          required: true,
+          required: function () {
+            return !this.registeredUser;
+          },
         },
         businessType: {
           type: String,
-          required: true,
+          required: function () {
+            return !this.registeredUser;
+          },
         },
       },
       status: {
@@ -90,7 +96,6 @@ const eventSchema = new Schema({
       },
       priceForService: {
         type: Number,
-        required: true,
       },
     },
   ],

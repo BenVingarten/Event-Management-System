@@ -21,10 +21,14 @@ function EventVendors() {
   const [negotiatiatedVendors, setNegotiatedVendors] = useState([]);
   const [suggestedVendors, setSuggestedVendors] = useState([]);
   const [newVendor, setNewVendor] = useState({
-    username: "",
+    businessName: "",
     email: "",
     businessType: "",
+    price: 0,
   });
+
+  const [priceModalOpen, setPriceModalOpen] = useState(false);
+  const [selectedVendor, setSelectedVendor] = useState(null);
 
   useEffect(() => {
     // fetch event vendors
@@ -54,36 +58,54 @@ function EventVendors() {
 
     return () => {
       effectRun.current = true;
-      setEventVendors(DEFAULT_MY_VENDORS);
-      setNegotiatedVendors(DEFAULT_NEGOTIATED_VENDORS);
-      setSuggestedVendors(DEFAULT_SUGGESTED_VENDORS);
     };
   }, []);
 
-  const StartNegotiationWithVendor = (vendor) => {
-    console.log("Start Negotiation with Vendor");
-    toast.success("Email Sent to Vendor!");
-    console.log(vendor);
-    // Add to Negotiated Vendors
-    setNegotiatedVendors((pv) => [...pv, vendor]);
-    // Remove from Suggested Vendors
-    setSuggestedVendors((pv) =>
-      pv.filter((v) => v.username !== vendor.username)
+  const StartNegotiationWithVendor = async (vendor) => {
+    toast.loading(
+      "It might take a few seconds to send the email to the vendor...",
+      {
+        duration: 1500,
+      }
     );
-    // Send Email
+    try {
+      const res = await axiosPrivate.post(
+        `users/${userId}/events/${eventID}/vendors/${vendor.vendorId}`
+      );
+      console.log(res.data);
+      toast.success("Email Sent to Vendor!");
+      console.log(vendor);
+      // Add to Negotiated Vendors
+      setNegotiatedVendors((pv) => [...pv, vendor]);
+      // Remove from Suggested Vendors
+      setSuggestedVendors((pv) =>
+        pv.filter((v) => v.businessName !== vendor.businessName)
+      );
+      // Send Email
+    } catch (err) {
+      console.log(err.response.data.err);
+      toast.error("Failed to Send Email to Vendor!");
+    }
   };
 
-  const AddVendorToMyVendors = (vendor) => {
-    console.log("Add Vendor to My Vendors");
-    toast.success("Vendor Added to Event Vendors!");
-    console.log(vendor);
-    // Add to Event Vendors
-    setEventVendors((pv) => [...pv, vendor]);
-    // Remove from Negotiated Vendors
-    setNegotiatedVendors((pv) =>
-      pv.filter((v) => v.username !== vendor.username)
-    );
-    //
+  const AddVendorToMyVendors = async (vendor) => {
+    try {
+      console.log(vendor);
+      const res = await axiosPrivate.patch(
+        `users/${userId}/events/${eventID}/vendors/${vendor.vendorId}`,
+        { priceForService: vendor.price }
+      );
+      console.log(res.data);
+      toast.success("Vendor Added to Event Vendors!");
+      console.log(vendor);
+      setEventVendors((pv) => [...pv, vendor]);
+      setNegotiatedVendors((pv) =>
+        pv.filter((v) => v.businessName !== vendor.businessName)
+      );
+    } catch (err) {
+      console.log(err.response.data);
+      toast.error("Failed to Add Vendor to Event Vendors!");
+    }
   };
 
   const RemoveVendorFromNegotiatedVendors = (vendor) => {
@@ -118,6 +140,14 @@ function EventVendors() {
     setNewVendor({ ...newVendor, [e.target.id]: e.target.value });
   };
 
+  const handleAddVendorToMyVendors = () => {
+    if (selectedVendor) {
+      AddVendorToMyVendors(selectedVendor);
+      setPriceModalOpen(false);
+      setSelectedVendor(null);
+    }
+  };
+
   return (
     <div className="grid sm:grid-rows-3 md:grid-cols-3 pl-5">
       <Toaster />
@@ -131,6 +161,7 @@ function EventVendors() {
                 <p className="text-lg font-bold">{vendor.businessName}</p>
                 <p>{vendor.email}</p>
                 <p>{vendor.businessType}</p>
+                {vendor.leadCount && <p>Leads: {vendor.leadCount}</p>}
               </div>
               <div className="flex justify-end items-center h-full">
                 <Button
@@ -175,6 +206,16 @@ function EventVendors() {
               onChange={handleInputChange}
               required
             />
+
+            <TextInput
+              id="price"
+              type="number"
+              className="p-2"
+              placeholder="Vendor Price"
+              onChange={handleInputChange}
+              required
+            />
+
             <Button
               color={"green"}
               className="m-2"
@@ -204,16 +245,21 @@ function EventVendors() {
                 <p className="text-lg font-bold">{vendor.businessName}</p>
                 <p>{vendor.email}</p>
                 <p>{vendor.businessType}</p>
+                {vendor.leadCount && <p>Leads: {vendor.leadCount}</p>}
               </div>
               <div className="flex justify-end items-center h-full">
                 <Button
                   outline
                   gradientDuoTone="greenToBlue"
                   className="mr-2"
-                  onClick={() => AddVendorToMyVendors(vendor)}
+                  onClick={() => {
+                    setSelectedVendor(vendor);
+                    setPriceModalOpen(true);
+                  }}
                 >
                   <IoIosAddCircleOutline size={25} />
                 </Button>
+
                 <Button
                   outline
                   gradientDuoTone="pinkToOrange"
@@ -227,6 +273,40 @@ function EventVendors() {
         ))}
       </div>
 
+      <Modal show={priceModalOpen} onClose={() => setPriceModalOpen(false)}>
+        <form className="p-5" onSubmit={(e) => e.preventDefault()}>
+          <h1 className="text-2xl font-bold mb-2">Add Price for Vendor</h1>
+          <TextInput
+            id="price"
+            type="number"
+            className="p-2"
+            placeholder="Vendor Price"
+            onChange={(e) =>
+              setSelectedVendor((prev) => ({
+                ...prev,
+                price: e.target.value,
+              }))
+            }
+            required
+          />
+          <Button
+            color={"green"}
+            className="m-2"
+            type="button"
+            onClick={handleAddVendorToMyVendors}
+          >
+            Add Vendor
+          </Button>
+          <Button
+            color={"red"}
+            className="m-2"
+            onClick={() => setPriceModalOpen(false)}
+          >
+            Cancel
+          </Button>
+        </form>
+      </Modal>
+
       {/* Suggested Vendors */}
       <div className="overflow-y-auto">
         <h1 className="text-2xl font-bold mb-2 ">Suggested Vendors</h1>
@@ -238,6 +318,7 @@ function EventVendors() {
                 <p className="text-lg font-bold">{vendor.businessName}</p>
                 <p>{vendor.email}</p>
                 <p>{vendor.businessType}</p>
+                {vendor.leadCount && <p>Leads: {vendor.leadCount}</p>}
               </div>
               <div className="flex justify-end items-center h-full">
                 <Button
@@ -255,65 +336,5 @@ function EventVendors() {
     </div>
   );
 }
-
-// Default Data
-const DEFAULT_MY_VENDORS = [
-  {
-    username: "vendor1",
-    email: "vednor1@gmail.com",
-    businessType: "Photographer",
-  },
-  {
-    username: "vendor2",
-    email: "vendor2@gmail.com",
-    businessType: "Caterer",
-  },
-];
-
-const DEFAULT_NEGOTIATED_VENDORS = [
-  {
-    username: "vendor3",
-    email: "vendor3@gmail.com",
-    businessType: "Florist",
-  },
-  {
-    username: "vendor4",
-    email: "vendor4@gmail.com",
-    businessType: "Baker",
-  },
-  {
-    username: "vendor5",
-    email: "vendor5@gmail.com",
-    businessType: "Musician",
-  },
-];
-
-const DEFAULT_SUGGESTED_VENDORS = [
-  {
-    username: "vendor6",
-    email: "vendor6@gmail.com",
-    businessType: "Decorator",
-  },
-  {
-    username: "vendor7",
-    email: "vendor7@gmail.com",
-    businessType: "Hair Stylist",
-  },
-  {
-    username: "vendor8",
-    email: "vendor8@gmail.com",
-    businessType: "Makeup Artist",
-  },
-  {
-    username: "vendor9",
-    email: "vendor9@gmail.com",
-    businessType: "Videographer",
-  },
-  {
-    username: "vendor10",
-    email: "vendor10@gmail.com",
-    businessType: "Transportation",
-  },
-];
 
 export default EventVendors;
