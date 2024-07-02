@@ -196,22 +196,50 @@ export const updateRegisteredVendor = async (
     const vendor = await getUserById(vendorId, vendorOptions); // check for the existence of user with vendorId
     const event = getEventById(userId, eventId, eventOptions); //check access control
 
+    //update event's budget
     if (verifiedVendor.priceForService) event.budget -= verifiedVendor.price;
-
     await event.save();
 
+    // update the vendor's price in the array
+    const findVendor = event.vendors.find(
+      (vendor) => vendor.registeredUser === vendorId
+    );
+    if (!findVendor)
+      throw new DataNotFoundError("couldnt find vendor with that ID");
+    findVendor.priceForService = verifiedVendor.priceForService;
+
     if (verifiedVendor.vendorStatus === "Negotiated") {
-      // first update that vendor in the array
-      const findVendor = event.vendors.find(
-        (vendor) => vendor.registeredUser === vendorId
-      );
-      if (!findVendor)
-        throw new DataNotFoundError("couldnt find vendor with that ID");
+      // update the vendor's status first
       findVendor.status = "Added";
       // second we want to add to the vendor the current event
       vendor.upcomingEvents.push(eventId);
       await vendor.save();
-      return findVendor;
     }
-  } catch (err) {}
+    return findVendor;
+  } catch (err) {
+     if(err instanceof DataNotFoundError || err instanceof DuplicateDataError) throw err;
+     throw new GeneralServerError(`unexpected error in updating vendor: ${err. message}`);
+  }
 };
+
+export const updateCustomVendor = async (userId, eventId, vendorEmail, verifiedCustomVendor) => {
+  try {
+    if(verifiedCustomVendor.email && verifiedCustomVendor.email === vendorEmail) // check for duplicate 
+      throw new DuplicateDataError("there is already a custom vendor with that email");
+    
+    const eventOptions = {
+      select: "vendors"
+    };
+    const event = getEventById(userId, eventId, eventOptions); // check access control
+    const findVendor = event.vendors.custom.find(vendor => vendor.email === vendorEmail);
+    if(!findVendor) throw new DataNotFoundError("there is no vendor with that email");
+    for(const key in verifiedCustomVendor)
+        findVendor[key] = verifiedCustomVendor[key];
+    
+    await event.save();
+    return findVendor;
+  } catch(err) {
+    if(err instanceof DataNotFoundError || err instanceof DuplicateDataError) throw err;
+    throw new GeneralServerError(`unexpected error in updating Registered vendor: ${err. message}`);
+  }
+}

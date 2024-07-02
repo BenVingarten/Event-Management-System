@@ -4,6 +4,7 @@ import {
   addCustomVendor,
   addRegisteredVendor,
   updateRegisteredVendor,
+  updateCustomVendor,
 } from "../services/vendorsLogic.js";
 
 export const handleGetVendors = async (req, res) => {
@@ -67,6 +68,23 @@ export const handleUpdateRegisteredVendor = async (req, res) => {
     const { eventId, vendorId } = req.params;
     const newAddedRegisteredVendor = await updateRegisteredVendor(userId, eventId, vendorId, verifiedRegisteredVendor)
     return res.status(200).json({ success: `updated vendor: ${newAddedRegisteredVendor.businessName} successfully` });
+  } catch (err) {
+    return res.status(err.statusCode).json({ err: err.message });
+  }
+};
+
+export const handleUpdateCustomVendor = async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if(!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+    const verifiedCustomVendor = matchedData(req);
+    const { userId } = req;
+    const {eventId, vendorEmail } = req.params;
+    if(!validator.isEmail(vendorEmail))
+      return res.status(400).json({ msg: `invalid email: ${vendorEmail}`});
+    
+    const newUpdatedVendor = await updateCustomVendor(userId, eventId, vendorEmail, verifiedCustomVendor);
+    return res.status(200).json(newUpdatedVendor);
   } catch (err) {
     return res.status(err.statusCode).json({ err: err.message });
   }
