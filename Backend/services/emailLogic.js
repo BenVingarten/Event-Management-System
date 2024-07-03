@@ -32,6 +32,39 @@ export const collabInvitationSResponseDetails = (
   };
   return mailOptions;
 };
+export const deletingEventlDetails = (
+  ownerUsername,
+  collabEmail,
+  eventName
+) => {
+  const collabName = collabEmail.split("@")[0];
+  const subject = `"${eventName}" Event no longer exists`;
+  const text = `Hello ${collabName},\nthe owner: ${ownerUsername} of the event: "${eventName}" has decided to delete the event. thus the event is no longer exists\nBest regards, CelebrightEMS Team`;
+  const mailOptions = {
+    from: process.env.EMAIL_USER,
+    to: collabEmail,
+    subject,
+    text,
+  };
+  return mailOptions;
+};
+export const collabExitEventDetails = (
+  ownerDetails,
+  collabDetails,
+  eventName
+) => {
+  const { collabName, collabEmail } = collabDetails;
+  const { ownerName, ownerEmail } = ownerDetails;
+  const subject = `Exiting From "${eventName}" Event `;
+  const text = `Hello ${ownerName},\nYour collaborator: "${collabName}", of the event: "${eventName}" has decided to remove himself from collaborating with you.\nYou can contact the collaborator in ${collabEmail}.\nBest regards, CelebrightEMS Team`;
+  const mailOptions = {
+    from: process.env.EMAIL_USER,
+    to: ownerEmail,
+    subject,
+    text,
+  };
+  return mailOptions;
+};
 export const collabRemovalDetails = (ownerUsername, collabEmail, eventName) => {
   const collabName = collabEmail.split("@")[0];
   const subject = `Removal From "${eventName}" Event `;

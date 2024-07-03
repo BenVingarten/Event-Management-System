@@ -1,13 +1,12 @@
-import { ObjectId } from "mongodb";
 import { DataNotFoundError } from "../errors/DataNotFoundError.js";
 import { GeneralServerError } from "../errors/GeneralServerError.js";
 import eventModel from "../models/Event.js";
 import userModel from "../models/User.js";
-import { deleteUserEvent, getUserWithIdbyEmail } from "./UserLogic.js";
-import InvitesModel from "../models/Invitations.js";
-import { UnauthorizedError } from "../errors/UnauthorizedError.js";
+import { deleteUserEvent } from "./UserLogic.js";
 import taskModel from "../models/Task.js";
 import guestModel from "../models/Guest.js";
+import { deletingEventlDetails, sendWebsiteEmail } from "./emailLogic.js";
+import { collaboratorEventExit } from "./collaboratorsLogic.js";
 
 export const getEvents = async (id) => {
   try {
@@ -55,7 +54,7 @@ export const getEventById = async (userId, eventId, options = {}) => {
     const isPopulate =
       options.populate && Object.keys(options.populate).length > 0;
     const isSelect = options.select !== null;
-    const isLean = options.lean
+    const isLean = options.lean;
 
     const query = eventModel.findOne({ _id: eventId, $or: conditions });
 
@@ -96,16 +95,33 @@ export const patchEvent = async (userId, eventId, eventDetails) => {
 export const deleteEventByOwner = async (userId, eventId) => {
   try {
     // first we want to delete its tasks and guests
-    const event = await eventModel.findOne({ _id: eventId, owner: userId }).select("collaborators").exec();
-    if(!event) throw new DataNotFoundError("couldnot find an event with that ID / user is not owner");
+    const event = await eventModel
+      .findOne({ _id: eventId, owner: userId })
+      .select("collaborators name")
+      .populate({ path: "owner", select: "username" })
+      .exec();
+    if (!event)
+      throw new DataNotFoundError(
+        "couldnot find an event with that ID / user is not owner"
+      );
 
     await taskModel.deleteMany({ event: eventId });
     await guestModel.deleteMany({ event: eventId });
 
-    // now we will delete the evvent from all the collaborators:
-    for(const collaborator of event.collaborators) {}
-
-    
+    // now we will delete the event from all the collaborators:
+    for (const collaborator of event.collaborators) {
+      await deleteUserEvent(collaborator.collaboratorId, eventId);
+      const mailOptions = deletingEventlDetails(
+        event.owner.username,
+        collaborator.email,
+        event.name
+      );
+      await sendWebsiteEmail(mailOptions);
+    }
+    // delete the event itself:
+    const deletedEvent = await eventModel.deleteOne({ _id: eventId });
+    if (deletedEvent.deletedCount === 0)
+      throw new DataNotFoundError("could not find the event with that ID");
   } catch (err) {
     if (err instanceof DataNotFoundError) throw err;
     throw new GeneralServerError(
@@ -144,10 +160,23 @@ export const roundedPercentagesToHundred = (results) => {
 
   return results;
 };
-// export const getNewCollaboratorsArray = async (userId, collaborators) => {
-//   try {
-//   } catch (err) {
-//     if (err instanceof DataNotFoundError) throw err;
-//     else throw new GeneralServerError();
-//   }
-// };
+export const deleteEvent = async (userId, eventId) => {
+  try {
+    const eventOptions = {
+      select: "owner",
+    };
+    const event = await getEventById(userId, eventId, eventOptions);
+    if (event.owner.toString() === userId) {
+      await deleteEventByOwner(userId, eventId);
+    } 
+    else {
+      console.log('here');
+      await collaboratorEventExit(userId, eventId);
+    }
+  } catch (err) {
+    if (err instanceof DataNotFoundError) throw err;
+    throw new GeneralServerError(
+      `unexpected error in deleting event: ${err.message}`
+    );
+  }
+};

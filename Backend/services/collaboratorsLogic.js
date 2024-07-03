@@ -7,14 +7,16 @@ import {
   sendWebsiteEmail,
   collabAddingInvitationDetails,
   collabRemovalDetails,
+  collabExitEventDetails,
 } from "../services/emailLogic.js";
 import { addInvite, deleteInvite } from "./invitesLogic.js";
 import { deleteUserEvent } from "./UserLogic.js";
+import userModel from "../models/User.js";
 export const addCollaborator = async (userId, eventId, collaborator) => {
   try {
     const options = {
       populate: { path: "owner", select: "username" },
-      select: "collaborators"
+      select: "collaborators",
     };
     const event = await getEventById(userId, eventId, options);
     const duplicate = event.collaborators.find(
@@ -77,7 +79,7 @@ export const deleteCollaborator = async (userId, eventId, collaborator) => {
       .populate({ path: "owner", select: "username" })
       .select("name")
       .exec();
-    
+
     if (!event) {
       throw new DataNotFoundError("couldn't find the collaborator");
     }
@@ -102,33 +104,47 @@ export const deleteCollaborator = async (userId, eventId, collaborator) => {
   }
 };
 
-
 export const collaboratorEventExit = async (userId, eventId) => {
   try {
-
     //first remove the event from the events array
-    const collaborator = await userModel.updateOne(
-      {_id: userId },
-      { $pull: { events: eventId } }
-    ).exec();
-    if(collaborator.matchedCount === 0)
+    const collaborator = await userModel
+      .findOneAndUpdate({ _id: userId }, { $pull: { events: eventId } })
+      .select("username email")
+      .exec();
+    if (!collaborator)
       throw new DataNotFoundError("couldnt find a user with that ID");
 
     // second remove the collaborator from the collavorators array
-    const event = await eventModel.
-      updateOne(
+    const event = await eventModel
+      .findOneAndUpdate(
         {
           _id: eventId,
           "collaborators.collaboratorId": userId,
         },
-        { $pull: { collaborators: { collaboratorId : userId } } }
-      ).exec();
-      if(event.matchedCount === 0)
-        throw new DataNotFoundError("couldnt find an event with that ID");
-  
+        { $pull: { collaborators: { collaboratorId: userId } } }
+      )
+      .select("name")
+      .populate({ path: "owner", select: "username email" })
+      .exec();
+    if (!eventId)
+      throw new DataNotFoundError("couldnt find an event with that ID");
+
+    const ownerDetails = {
+      ownerName: event.owner.username,
+      ownerEmail: event.owner.email,
+    };
+    const collaboratorDetails = {
+      collabName: collaborator.username,
+      collabEmail: collaborator.email,
+    };
+    const mailOptions = collabExitEventDetails(
+      ownerDetails,
+      collaboratorDetails,
+      event.name
+    );
+    await sendWebsiteEmail(mailOptions);
   } catch (err) {
-    if (err instanceof DataNotFoundError)
-      throw err;
+    if (err instanceof DataNotFoundError) throw err;
     throw new GeneralServerError(
       `unexpected error in deleting collaborator: ${err.message}`
     );

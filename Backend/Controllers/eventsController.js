@@ -1,5 +1,5 @@
 import {
-  deleteEventByOwner,
+  deleteEvent,
   getEventById,
   getEvents,
 } from "../services/eventsLogic.js";
@@ -42,7 +42,7 @@ export const handleGetEventById = async (req, res) => {
     const { eventId } = req.params;
     const options = {
       poupulate: { path: "collaborators.id", select: "username email" },
-      select: null
+      select: null,
     };
     const event = await getEventById(userId, eventId, options);
     const taskAnalytics = await getTasksAnalytics(userId, eventId);
@@ -79,11 +79,12 @@ export const handleDeleteEvent = async (req, res) => {
   try {
     const { eventId } = req.params;
     const { userId } = req;
-    const event = await deleteEvent(userId, eventId);
+    await deleteEvent(userId, eventId);
     return res
       .status(200)
-      .json({ deleted: `you successfully deleted the event: ${event.name}` });
+      .json({ deleted: `you successfully deleted the event` });
   } catch (err) {
+    console.error(err);
     return res.status(err.statusCode).json({ err: err.message });
   }
 };
