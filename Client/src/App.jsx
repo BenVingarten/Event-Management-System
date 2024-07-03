@@ -15,6 +15,7 @@ import Layout from "./components/Layout";
 import Admin from "./pages/Admin";
 import Account from "./pages/Account";
 import EventVendors from "./pages/EventVendors";
+import { roles } from "./constants";
 
 function App() {
   return (
@@ -31,13 +32,7 @@ function App() {
           {/* private routes - Event Planner, Vendor & Admin */}
           <Route element={<PersistLogin />}>
             {/* All */}
-            <Route
-              element={
-                <RequireAuth
-                  allowedRoles={["Admin", "Event Planner", "Vendor"]}
-                />
-              }
-            >
+            <Route element={<RequireAuth allowedRoles={roles} />}>
               <Route path="createEvent" element={<CreateEvent />} />
               <Route path="account" element={<Account />} />
               <Route path="eventDetails" element={<EventDetails />} />
@@ -48,12 +43,12 @@ function App() {
             </Route>
             {/* Vendors */}
             {/* will be added later */}
-            <Route element={<RequireAuth allowedRoles={["Vendor"]} />}>
+            <Route element={<RequireAuth allowedRoles={roles[2]} />}>
               <Route path="vendors" element={<h1>Only Vendors</h1>} />
             </Route>
 
             {/* Admin */}
-            <Route element={<RequireAuth allowedRoles={["Admin"]} />}>
+            <Route element={<RequireAuth allowedRoles={roles[0]} />}>
               <Route path="admin" element={<Admin />} />
             </Route>
           </Route>

@@ -11,7 +11,7 @@ import { Toaster, toast } from "react-hot-toast";
 import { useLocation, useNavigate } from "react-router-dom";
 import ChatWidget from "../components/ChatWidget";
 
-const taskStatus = ["Backlog", "TODO", "In progress", "Complete"];
+import { taskStatus } from "../constants.js";
 
 export default function TaskList() {
   return (

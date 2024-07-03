@@ -6,7 +6,7 @@ import OAuthLogin from "../components/OAuthLogIn";
 
 import axios from "../api/axios.js";
 import useAuth from "../hooks/useAuth.js";
-const LOGIN_URL = "http://localhost:4000/login";
+import { LOGIN_URL } from "../constants.js";
 
 import { jwtDecode } from "jwt-decode";
 

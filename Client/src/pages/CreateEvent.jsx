@@ -5,6 +5,7 @@ import { jwtDecode } from "jwt-decode";
 import useAuth from "../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { Button, ListGroup, Radio } from "flowbite-react";
+import { locations, eventTypes } from "../constants";
 
 const CreateEventPage = () => {
   const axiosPrivate = useAxiosPrivate();
@@ -18,15 +19,6 @@ const CreateEventPage = () => {
   const [location, setLocation] = useState("");
   const [additionalInfo, setAdditionalInfo] = useState([]);
   const [additionalInfoInput, setAdditionalInfoInput] = useState("");
-
-  const locations = [
-    { label: "Haifa & North", value: "Haifa & North" },
-    { label: "Hasharon", value: "Hasharon" },
-    { label: "Gush Dan", value: "Gush Dan" },
-    { label: "Shfela", value: "Shfela" },
-    { label: "Jerusalem", value: "Jerusalem" },
-    { label: "South(Negev And Eilat)", value: "South(Negev And Eilat)" },
-  ];
 
   const handleBudgetChange = (e) => {
     setBudget(e.target.value);
@@ -153,19 +145,11 @@ const CreateEventPage = () => {
             className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-500"
             required
           >
-            <option value="">Select event type</option>
-            <option value="Birthday">Birthday</option>
-            <option value="Wedding">Wedding</option>
-            <option value="Conference">Conference</option>
-            <option value="Company Event">Company Event</option>
-            <option value="Bar/Bat Mitzva">Bar/Bat Mitzva</option>
-            {/* <option value="Graduation">Graduation</option>
-            <option value="Holiday">Holiday</option>
-            <option value="Trade Show">Trade Show</option>
-            <option value="Meetings">Meetings</option>
-            <option value="Workshops">Workshops</option>
-            <option value="Festival">Festival</option>
-            <option value="Other">Other</option> */}
+            {eventTypes.map((curType) => (
+              <option key={curType.value} value={curType.value}>
+                {curType.label}
+              </option>
+            ))}
           </select>
         </div>
 

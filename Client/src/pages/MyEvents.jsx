@@ -11,6 +11,7 @@ import { FaLocationDot } from "react-icons/fa6";
 import { MdDeleteForever } from "react-icons/md";
 import moment from "moment-timezone";
 import Invitations from "../components/Invitations";
+import UpcomingEvents from "../components/UpcomingEvents";
 
 const MyEvents = () => {
   const [events, setEvents] = useState([]);
@@ -21,6 +22,7 @@ const MyEvents = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedEventId, setSelectedEventId] = useState(null);
   const userId = jwtDecode(auth.accessToken).userInfo.id;
+  const userRole = jwtDecode(auth.accessToken).userInfo.role;
   const [invitationsRefresh, setInvitationsRefresh] = useState(0);
   const [loading, setLoading] = useState(false);
   //console.log(events);
@@ -59,8 +61,8 @@ const MyEvents = () => {
   };
 
   const handleDelete = async () => {
-    console.log("Deleting event");
     const controller = new AbortController();
+    toast.loading("Deleting event...", { duration: 2000 });
     try {
       const userId = jwtDecode(auth.accessToken).userInfo.id;
       const response = await axiosPrivate.delete(
@@ -70,6 +72,7 @@ const MyEvents = () => {
         }
       );
       console.log(response.data.events);
+      toast.success("Event deleted successfully");
     } catch (err) {
       console.log("Error: " + err.response?.data.err);
       toast.error("No Events Found!");
@@ -84,79 +87,84 @@ const MyEvents = () => {
 
       {loading && <Spinner className="mt-8" />}
 
-      <div className="grid gap-4 lg:grid-cols-3">
-        {events.length > 0 ? (
-          events.map((event) => {
-            // Parse the date string into a Date object
-            const eventDate = new Date(event.date);
-            // Format the date as dd-mm-yyyy
-            const formattedDate = moment(eventDate * 1000)
-              .tz("Israel")
-              .format("DD-MM-YYYY");
+      <div className="grid gap-4 grid-rows-2">
+        <div className="grid gap-4 lg:grid-cols-3">
+          {events.length > 0 ? (
+            events.map((event) => {
+              // Parse the date string into a Date object
+              const eventDate = new Date(event.date);
+              // Format the date as dd-mm-yyyy
+              const formattedDate = moment(eventDate * 1000)
+                .tz("Israel")
+                .format("DD-MM-YYYY");
 
-            return (
-              <Card key={event._id} className="flex flex-col">
-                <h3
-                  className="text-2xl text-white rounded-md text-center font-mono font-bold bg-gradient-to-r from-indigo-500 from-10% via-sky-500 via-30% to-emerald-500 to-90% cursor-pointer underline hover:text-blue-500"
-                  onClick={() =>
-                    navigate(`/eventDetails`, {
-                      state: { eventId: event._id },
-                    })
-                  }
-                >
-                  {event.name}
-                </h3>
-                <div className="grid grid-cols-2">
-                  <span className="flex mb-5 ">
-                    <IoMdCalendar className="mr-2 text-3xl text-blue-500" />
-                    <p className="font-sans font-semibold">{formattedDate}</p>
-                  </span>
+              return (
+                <Card key={event._id} className="flex flex-col">
+                  <h3
+                    className="text-2xl text-white rounded-md text-center font-mono font-bold bg-gradient-to-r from-indigo-500 from-10% via-sky-500 via-30% to-emerald-500 to-90% cursor-pointer underline hover:text-blue-500"
+                    onClick={() =>
+                      navigate(`/eventDetails`, {
+                        state: { eventId: event._id },
+                      })
+                    }
+                  >
+                    {event.name}
+                  </h3>
+                  <div className="grid grid-cols-2">
+                    <span className="flex mb-5 ">
+                      <IoMdCalendar className="mr-2 text-3xl text-blue-500" />
+                      <p className="font-sans font-semibold">{formattedDate}</p>
+                    </span>
 
-                  <span className="flex ">
-                    <FaQuestionCircle className="mr-2 text-3xl text-blue-500" />
-                    <p className="font-sans font-semibold">{event.type}</p>
-                  </span>
+                    <span className="flex ">
+                      <FaQuestionCircle className="mr-2 text-3xl text-blue-500" />
+                      <p className="font-sans font-semibold">{event.type}</p>
+                    </span>
 
-                  <span className="flex ">
-                    <FaMoneyBillWave className="mr-2 text-3xl text-blue-500" />
-                    <p className="font-sans font-semibold">{event.budget}</p>
-                  </span>
+                    <span className="flex ">
+                      <FaMoneyBillWave className="mr-2 text-3xl text-blue-500" />
+                      <p className="font-sans font-semibold">{event.budget}</p>
+                    </span>
 
-                  <span className="flex ">
-                    <FaLocationDot className="mr-2 text-3xl text-blue-500" />
-                    <p className="font-sans font-semibold">{event.location}</p>
-                  </span>
-                </div>
-                <Button
-                  outline
-                  color={"red"}
-                  size="lg"
-                  onClick={() => handleDeleteConfirmation(event._id)}
-                >
-                  <MdDeleteForever
-                    size={25}
-                    className="mr-2 text-3xl text-red-500"
-                  />
-                  Delete Event
-                </Button>
-              </Card>
-            );
-          })
-        ) : (
-          <div>
-            <p className="text-lg font-semibold">
-              You have no events yet. Go ahead and create one!
-            </p>
-            <Button
-              outline
-              gradientDuoTone="pinkToOrange"
-              size="lg"
-              onClick={() => navigate("/createEvent")}
-            >
-              Go ahead and create one!
-            </Button>
-          </div>
-        )}
+                    <span className="flex ">
+                      <FaLocationDot className="mr-2 text-3xl text-blue-500" />
+                      <p className="font-sans font-semibold">
+                        {event.location}
+                      </p>
+                    </span>
+                  </div>
+                  <Button
+                    outline
+                    color={"red"}
+                    size="lg"
+                    onClick={() => handleDeleteConfirmation(event._id)}
+                  >
+                    <MdDeleteForever
+                      size={25}
+                      className="mr-2 text-3xl text-red-500"
+                    />
+                    Delete Event
+                  </Button>
+                </Card>
+              );
+            })
+          ) : (
+            <div>
+              <p className="text-lg font-semibold">
+                You have no events yet. Go ahead and create one!
+              </p>
+              <Button
+                outline
+                gradientDuoTone="pinkToOrange"
+                size="lg"
+                onClick={() => navigate("/createEvent")}
+              >
+                Go ahead and create one!
+              </Button>
+            </div>
+          )}
+        </div>
+        {userRole === "Vendor" && <UpcomingEvents userId={userId} />}
       </div>
 
       <Invitations

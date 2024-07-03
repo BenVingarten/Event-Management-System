@@ -6,6 +6,7 @@ import {
   Label,
   ListGroup,
   Modal,
+  Radio,
   Spinner,
   TextInput,
 } from "flowbite-react";
@@ -20,6 +21,8 @@ import { FaQuestionCircle, FaMoneyBillWave } from "react-icons/fa";
 import { FaLocationDot } from "react-icons/fa6";
 
 import moment from "moment-timezone";
+
+import { locations, eventTypes } from "../constants";
 
 export default function EventDetails() {
   const [eventInfo, setEventInfo] = useState([]);
@@ -40,14 +43,16 @@ export default function EventDetails() {
   const [isCollaboratorsModalOpen, setIsCollaboratorsModalOpen] =
     useState(false);
   const [updatedDetails, setUpdatedDetails] = useState({
-    name: null,
-    budget: null,
-    location: null,
-    date: null,
+    name: "",
+    budget: "",
+    location: "",
+    date: "",
+    type: "",
   });
   const [newCollab, setNewCollab] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
+  //console.log(eventInfo);
   // Fetch event details
   const effectRun = useRef(false);
   useEffect(() => {
@@ -159,10 +164,10 @@ export default function EventDetails() {
 
   // Handle input change
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value, type } = e.target;
     setUpdatedDetails((prevDetails) => ({
       ...prevDetails,
-      [name]: value,
+      [name]: type === "radio" ? value : value,
     }));
   };
 
@@ -188,6 +193,7 @@ export default function EventDetails() {
       budget: null,
       location: null,
       date: null,
+      type: null,
     });
 
     const controller = new AbortController();
@@ -236,7 +242,6 @@ export default function EventDetails() {
   };
 
   // Present collaborators
-  console.log();
   const collaboratorsPresent = () => {
     return (
       <div className="mt-5">
@@ -345,6 +350,20 @@ export default function EventDetails() {
     setAdditionalInfo(newAdditionalInfo);
   };
 
+  useEffect(() => {
+    if (isDetailsModalOpen) {
+      setUpdatedDetails({
+        name: eventInfo.name || "",
+        budget: eventInfo.budget || "",
+        location: eventInfo.location || "",
+        date: eventInfo.date
+          ? moment(eventInfo.date * 1000).format("YYYY-MM-DD")
+          : "",
+        type: eventInfo.type || "",
+      });
+    }
+  }, [isDetailsModalOpen, eventInfo]);
+
   return (
     <div className=" h-screen flex flex-col">
       <Toaster />
@@ -441,7 +460,7 @@ export default function EventDetails() {
         show={isDetailsModalOpen}
         onClose={() => setIsDetailsModalOpen(false)}
       >
-        <div className="p-5">
+        <div className="p-5 overflow-auto">
           <form>
             <h3 className="text-lg font-bold mb-3">Edit your event details</h3>
 
@@ -478,13 +497,49 @@ export default function EventDetails() {
               <div className="m-2 block">
                 <Label htmlFor="location" value="Event Location" />
               </div>
-              <TextInput
-                id="location"
-                type="text"
-                placeholder={eventInfo.location}
-                name={"location"}
-                onChange={handleInputChange}
-              />
+              <ListGroup>
+                {locations.map((location) => (
+                  <ListGroup.Item
+                    key={location.value}
+                    className="flex items-center"
+                  >
+                    <Radio
+                      id={location.value}
+                      name="location"
+                      value={location.value}
+                      checked={updatedDetails.location === location.value}
+                      onChange={handleInputChange}
+                      className="mr-2"
+                    />
+                    <label htmlFor={location.value}>{location.label}</label>
+                  </ListGroup.Item>
+                ))}
+              </ListGroup>
+            </div>
+
+            {/* Event Type */}
+            <div>
+              <div className="m-2 block">
+                <Label htmlFor="type" value="Event Type" />
+              </div>
+              <ListGroup>
+                {eventTypes.map((event) => (
+                  <ListGroup.Item
+                    key={event.value}
+                    className="flex items-center"
+                  >
+                    <Radio
+                      id={event.value}
+                      name="type"
+                      value={event.value}
+                      checked={updatedDetails.type === event.value}
+                      onChange={handleInputChange}
+                      className="mr-2"
+                    />
+                    <label htmlFor={event.value}>{event.label}</label>
+                  </ListGroup.Item>
+                ))}
+              </ListGroup>
             </div>
 
             {/* Event Date */}

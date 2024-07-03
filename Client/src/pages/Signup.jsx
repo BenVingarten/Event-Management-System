@@ -13,7 +13,9 @@ import { useNavigate } from "react-router-dom";
 import OAuthSignUp from "../components/OAuthSignUp";
 
 import axios from "../api/axios";
-const SIGNUP_URL = "http://localhost:4000/register";
+import { SIGNUP_URL } from "../constants.js";
+
+import { locations, eventTypes } from "../constants.js"; // Importing the constants
 
 const SignupPage = () => {
   const [email, setEmail] = useState("");
@@ -25,27 +27,9 @@ const SignupPage = () => {
     businessName: "",
     businessType: "",
     businessDescription: "",
-    businessMinPrice: 0,
-    businessMaxPrice: 0,
   });
   const [businessLocation, setBusinessLocation] = useState([]);
   const [businessEventTypes, setBusinessEventTypes] = useState([]);
-
-  const locations = [
-    { label: "Haifa & North", value: "Haifa & North" },
-    { label: "Hasharon", value: "Hasharon" },
-    { label: "Gush Dan", value: "Gush Dan" },
-    { label: "Shfela", value: "Shfela" },
-    { label: "Jerusalem", value: "Jerusalem" },
-    { label: "South(Negev And Eilat)", value: "South(Negev And Eilat)" },
-  ];
-  const eventTypes = [
-    { label: "Wedding", value: "Wedding" },
-    { label: "Birthday", value: "Birthday" },
-    { label: "Bar/Bat Mitzva", value: "Bar/Bat Mitzva" },
-    { label: "Company Event", value: "Company Event" },
-    { label: "Conference", value: "Conference" },
-  ];
 
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -91,7 +75,7 @@ const SignupPage = () => {
         userInfo.businessName = businessInfo.businessName;
         userInfo.businessType = businessInfo.businessType;
         userInfo.businessLocation = businessLocation;
-        userInfo.businessEventTypes = businessEventTypes;
+        userInfo.eventTypes = businessEventTypes;
         userInfo.businessDescription = businessInfo.businessDescription;
       }
       console.log(userInfo);
@@ -342,7 +326,7 @@ const SignupPage = () => {
                 onClick={() => setIsModalOpen(false)}
                 gradientDuoTone="greenToBlue"
               >
-                That's it!
+                That&apos;s it!
               </Button>
             </div>
           </div>

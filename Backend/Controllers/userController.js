@@ -20,7 +20,7 @@ export const handleGetUserById = async (req, res) => {
     const { userId } = req;
     const options = {
       select:
-        "-_id username email businessType businessLocation businessDescription",
+        "-_id username email businessType eventTypes businessLocation businessDescription",
     };
     const user = await getUserById(userId, options);
     return res.status(200).json({ user });
