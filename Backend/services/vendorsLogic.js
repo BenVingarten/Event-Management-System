@@ -7,6 +7,7 @@ import { getUserById } from "./UserLogic.js";
 import { removeVendorDetails, vendorInvetationDetails } from "./emailLogic.js";
 import { getEventById } from "./eventsLogic.js";
 import { sendWebsiteEmail } from "./emailLogic.js";
+import { populate } from "dotenv";
 
 export const getVendors = async (userId, eventId) => {
   try {
@@ -14,25 +15,30 @@ export const getVendors = async (userId, eventId) => {
       select: "vendors type location",
       populate: {
         path: "vendors.registeredUser",
-        select: "businessName email businessType",
+        select: "businessName email businessType leadCount",
         options: { strictPopulate: false },
       },
       lean: true,
     };
     const event = await getEventById(userId, eventId, options);
     const { vendors, type, location } = event;
-    const suggestedVendors = await getSuggestedVendors(type, location);
     const negotiatedVendors = [];
     const addedVendors = [];
-
+    
     for (const vendor of vendors) {
       const vendorData = vendor.registeredUser
-        ? vendor.registeredUser
-        : vendor.custom;
+      ? vendor.registeredUser
+      : vendor.custom;
       if (vendor.status === "Added") addedVendors.push(vendorData);
       else if (vendor.status === "Negotiation")
         negotiatedVendors.push(vendorData);
     }
+    const avoidVendors = vendors.map(vendorObj => {
+      if(vendorObj.registeredUser)
+        return vendorObj.registeredUser._id;
+    });
+    console.log(avoidVendors);
+    const suggestedVendors = await getSuggestedVendors(type, location, avoidVendors);
     const allVendors = {
       suggestedVendors,
       negotiatedVendors,
@@ -91,14 +97,16 @@ export const addCustomVendor = async (
   }
 };
 
-export const getSuggestedVendors = async (type, location) => {
+export const getSuggestedVendors = async (type, location, avoidVendors) => {
   try {
+
     const pipeLine = [
       {
         $match: {
           role: "Vendor",
           businessLocation: location,
           eventTypes: type,
+          _id: { $nin: avoidVendors }
         },
       },
       {
@@ -319,7 +327,7 @@ export const deleteVendor = async (userId, eventId, vendorObj) => {
   } catch (err) {}
 };
 
-export const deleteVendorUpcoingEvent = async (userId, eventId) => {
+export const deleteVendorUpcomingEvent = async (userId, eventId) => {
   try {
     const vendor = await userModel
       .updateOne(
@@ -348,3 +356,16 @@ export const deleteVendorUpcoingEvent = async (userId, eventId) => {
     );
   }
 };
+
+export const getUpcomingEvents = async (userId) => {
+  try {
+    const vendorOption = {
+      populate: { path: "upcomingEvents", select: "_id date name type location", populate: { path: "owner", select: "-_id email"}}
+    }
+    const user = await getUserById(userId, vendorOption);
+    return user.upcomingEvents;
+  } catch(err) {
+    if(err instanceof DataNotFoundError) throw err;
+    throw new GeneralServerError(`unexpected error in getting upcoming events: ${err.message}`);
+  }
+}

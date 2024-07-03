@@ -6,7 +6,8 @@ import {
   updateRegisteredVendor,
   updateCustomVendor,
   deleteVendor,
-  deleteVendorUpcoingEvent
+  deleteVendorUpcomingEvent,
+  getUpcomingEvents
 } from "../services/vendorsLogic.js";
 
 export const handleGetVendors = async (req, res) => {
@@ -120,5 +121,15 @@ export const handleDeleteVendorEvent = async (req, res) => {
     return res.status(200).json({ smg: "deleted event successfully"})
   } catch(err) {
     return res.status(err.statusCode).json({ err: err.message });
+  }
+};
+
+export const handleGetUpcomingEvents = async(req, res) => {
+  try {
+    const { userId } = req;
+    const upcomingEvents = await getUpcomingEvents(userId);
+    return res.status(200).json(upcomingEvents);
+  } catch(err){
+    return res.status(err.statusCode).json({err: err.message});
   }
 }

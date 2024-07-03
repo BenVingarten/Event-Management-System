@@ -20,12 +20,12 @@ const CreateEventPage = () => {
   const [additionalInfoInput, setAdditionalInfoInput] = useState("");
 
   const locations = [
-    { label: "Haifa And North", value: "haifaAndNorth" },
-    { label: "Hasharon", value: "hasharon" },
-    { label: "Gush Dan", value: "gushDan" },
-    { label: "Shfela", value: "shfela" },
-    { label: "Jerusalem", value: "jerusalem" },
-    { label: "South(Negev And Eilat)", value: "south" },
+    { label: "Haifa & North", value: "Haifa & North" },
+    { label: "Hasharon", value: "Hasharon" },
+    { label: "Gush Dan", value: "Gush Dan" },
+    { label: "Shfela", value: "Shfela" },
+    { label: "Jerusalem", value: "Jerusalem" },
+    { label: "South(Negev And Eilat)", value: "South(Negev And Eilat)" },
   ];
 
   const handleBudgetChange = (e) => {

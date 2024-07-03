@@ -1,6 +1,7 @@
 import { eventType } from "../constants/event.js";
 import { checkSchema } from "express-validator";
 import validator from "validator";
+import { locations } from "../constants/event.js";
 
 function createEventValidation() {
   return {
@@ -25,6 +26,12 @@ function createEventValidation() {
     },
     location: {
       notEmpty: { errorMessage: "event must have a location" },
+      custom: {
+        options: (value, req) => {
+          return locations.some((location) => location === value);
+        },
+        errorMessage: "location is invalid",
+      },
     },
   };
 }
@@ -57,6 +64,12 @@ function patchEventValidation() {
     location: {
       optional: { options: { nullable: true } },
       notEmpty: { errorMessage: "event must have a location" },
+      custom: {
+        options: (value, req) => {
+          return locations.some((location) => location === value);
+        },
+        errorMessage: "location is invalid",
+      },
     },
     additionalInfo: {
       optional: { options: { nullable: true } },

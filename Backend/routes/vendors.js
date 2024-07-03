@@ -8,7 +8,8 @@ import {
   handleUpdateRegisteredVendor,
   handleUpdateCustomVendor,
   handleDeleteVendor,
-  handleDeleteVendorEvent
+  handleDeleteVendorEvent,
+  handleGetUpcomingEvents
  } from "../Controllers/vendorsController.js";
 import { validateCreateCustomVendor, validateUpdateRegisteredVendor, validateUpdateCustomVendor } from "../middleware/verifyVendorDetails.js";
 
@@ -30,8 +31,12 @@ router // For customVendors
   .route("/users/:id/events/:eventId/vendors/:vendorEmail")
   .patch(verifyUserIdMatchAuthId, verifyParamId("eventId"), validateUpdateCustomVendor, handleUpdateCustomVendor);
 
-router // For users how are vendors
+router // For users who are vendors
 .route("/users/:id/upcomingEvents/:eventId")
 .delete(verifyUserIdMatchAuthId, verifyParamId("eventId"), handleDeleteVendorEvent);
+
+router 
+.route("/users/:id/upcomingEvents")
+.get(verifyUserIdMatchAuthId, handleGetUpcomingEvents);
   
 export default router;
