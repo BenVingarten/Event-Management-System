@@ -2,6 +2,7 @@ import { DataNotFoundError } from "../errors/DataNotFoundError.js";
 import { DuplicateDataError } from "../errors/DuplicateDataError.js";
 import { GeneralServerError } from "../errors/GeneralServerError.js";
 import userModel from "../models/User.js";
+import vendorModel from "../models/Vendor.js";
 import { getUserById } from "./UserLogic.js";
 import { removeVendorDetails, vendorInvetationDetails } from "./emailLogic.js";
 import { getEventById } from "./eventsLogic.js";
@@ -139,7 +140,7 @@ export const addRegisteredVendor = async (userId, eventId, vendorId) => {
       select: "username email",
     };
     const eventOptions = {
-      select: "vendors type location date",
+      select: "vendors name type location date",
     };
     const vendor = await getUserById(vendorId, vendorOptions); // check for the existence of user with vendorId
     const eventPlanner = await getUserById(userId, plannerOptions);
@@ -188,21 +189,16 @@ export const updateRegisteredVendor = async (
   verifiedVendor
 ) => {
   try {
-    const vendorOptions = {
-      select: "upcomingEvents leadCount",
-    };
     const eventOptions = {
-      select: "vendors budget",
+      select: "_id vendors budget",
     };
-    const vendor = await getUserById(vendorId, vendorOptions); // check for the existence of user with vendorId
+
     const event = await getEventById(userId, eventId, eventOptions); //check access control
-
     //update event's budget
-    if (verifiedVendor.priceForService) event.budget -= verifiedVendor.price;
-
+    event.budget -= verifiedVendor.priceForService;
     // update the vendor's price in the array
     const findVendor = event.vendors.find(
-      (vendor) => vendor.registeredUser === vendorId
+      (ven) => ven.registeredUser.toString() === vendorId
     );
     if (!findVendor)
       throw new DataNotFoundError("couldnt find vendor with that ID");
@@ -210,13 +206,18 @@ export const updateRegisteredVendor = async (
 
     // update the vendor's status first
     findVendor.status = "Added";
-    // second we want to add to the vendor the current event
-    vendor.upcomingEvents.push(eventId);
-    // lastly update the leadcount
-    vendor.leadCount++;
-
-    await vendor.save();
     await event.save();
+
+    const vendorOptions = {
+      select: "upcomingEvents leadCount",
+    };
+    const vendor = await getUserById(vendorId, vendorOptions);
+    console.log(vendor);
+    console.log(vendor.upcomingEvents);
+
+    vendor.upcomingEvents.push(event._id);
+    vendor.leadCount++;
+    await vendor.save();
 
     return findVendor;
   } catch (err) {

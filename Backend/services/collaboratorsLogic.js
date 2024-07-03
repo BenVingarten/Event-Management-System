@@ -101,3 +101,36 @@ export const deleteCollaborator = async (userId, eventId, collaborator) => {
     );
   }
 };
+
+
+export const collaboratorEventExit = async (userId, eventId) => {
+  try {
+
+    //first remove the event from the events array
+    const collaborator = await userModel.updateOne(
+      {_id: userId },
+      { $pull: { events: eventId } }
+    ).exec();
+    if(collaborator.matchedCount === 0)
+      throw new DataNotFoundError("couldnt find a user with that ID");
+
+    // second remove the collaborator from the collavorators array
+    const event = await eventModel.
+      updateOne(
+        {
+          _id: eventId,
+          "collaborators.collaboratorId": userId,
+        },
+        { $pull: { collaborators: { collaboratorId : userId } } }
+      ).exec();
+      if(event.matchedCount === 0)
+        throw new DataNotFoundError("couldnt find an event with that ID");
+  
+  } catch (err) {
+    if (err instanceof DataNotFoundError)
+      throw err;
+    throw new GeneralServerError(
+      `unexpected error in deleting collaborator: ${err.message}`
+    );
+  }
+};

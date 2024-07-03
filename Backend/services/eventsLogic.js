@@ -5,6 +5,9 @@ import eventModel from "../models/Event.js";
 import userModel from "../models/User.js";
 import { deleteUserEvent, getUserWithIdbyEmail } from "./UserLogic.js";
 import InvitesModel from "../models/Invitations.js";
+import { UnauthorizedError } from "../errors/UnauthorizedError.js";
+import taskModel from "../models/Task.js";
+import guestModel from "../models/Guest.js";
 
 export const getEvents = async (id) => {
   try {
@@ -90,18 +93,19 @@ export const patchEvent = async (userId, eventId, eventDetails) => {
     );
   }
 };
-export const deleteEvent = async (userId, eventId) => {
+export const deleteEventByOwner = async (userId, eventId) => {
   try {
-    const deletedEvent = await eventModel.findOneAndDelete({
-      _id: eventId,
-      owner: userId,
-    });
-    if (!deletedEvent)
-      throw new DataNotFoundError(
-        "couldnt find the event or user is not the event owner"
-      );
-    await deleteUserEvent(userId, eventId);
-    return deletedEvent;
+    // first we want to delete its tasks and guests
+    const event = await eventModel.findOne({ _id: eventId, owner: userId }).select("collaborators").exec();
+    if(!event) throw new DataNotFoundError("couldnot find an event with that ID / user is not owner");
+
+    await taskModel.deleteMany({ event: eventId });
+    await guestModel.deleteMany({ event: eventId });
+
+    // now we will delete the evvent from all the collaborators:
+    for(const collaborator of event.collaborators) {}
+
+    
   } catch (err) {
     if (err instanceof DataNotFoundError) throw err;
     throw new GeneralServerError(

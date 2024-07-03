@@ -32,19 +32,19 @@ const SignupPage = () => {
   const [businessEventTypes, setBusinessEventTypes] = useState([]);
 
   const locations = [
-    { label: "Haifa & North", value: "haifaAndNorth" },
-    { label: "Hasharon", value: "hasharon" },
-    { label: "Gush Dan", value: "gushDan" },
-    { label: "Shfela", value: "shfela" },
-    { label: "Jerusalem", value: "jerusalem" },
-    { label: "South(Negev And Eilat)", value: "south" },
+    { label: "Haifa & North", value: "Haifa & North" },
+    { label: "Hasharon", value: "Hasharon" },
+    { label: "Gush Dan", value: "Gush Dan" },
+    { label: "Shfela", value: "Shfela" },
+    { label: "Jerusalem", value: "Jerusalem" },
+    { label: "South(Negev And Eilat)", value: "South(Negev And Eilat)" },
   ];
   const eventTypes = [
-    { label: "Wedding", value: "wedding" },
-    { label: "Birthday", value: "birthday" },
-    { label: "Bar/Bat Mitzva", value: "barMitzva" },
-    { label: "Company Event", value: "companyEvent" },
-    { label: "Conference", value: "conference" },
+    { label: "Wedding", value: "Wedding" },
+    { label: "Birthday", value: "Birthday" },
+    { label: "Bar/Bat Mitzva", value: "Bar/Bat Mitzva" },
+    { label: "Company Event", value: "Company Event" },
+    { label: "Conference", value: "Conference" },
   ];
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -92,11 +92,9 @@ const SignupPage = () => {
         userInfo.businessType = businessInfo.businessType;
         userInfo.businessLocation = businessLocation;
         userInfo.businessEventTypes = businessEventTypes;
-        userInfo.businessMinPrice = businessInfo.businessMinPrice;
-        userInfo.businessMaxPrice = businessInfo.businessMaxPrice;
         userInfo.businessDescription = businessInfo.businessDescription;
       }
-
+      console.log(userInfo);
       const response = await axios.post(
         SIGNUP_URL,
         JSON.stringify({
@@ -264,36 +262,6 @@ const SignupPage = () => {
                   id="businessType"
                   type="text"
                   value={businessInfo.businessType}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-              <div>
-                <div className="mb-2 block">
-                  <Label
-                    htmlFor="businessMinPrice"
-                    value="What is your avg minimun price for the service"
-                  />
-                </div>
-                <TextInput
-                  id="businessMinPrice"
-                  type="text"
-                  value={businessInfo.businessMinPrice}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-              <div>
-                <div className="mb-2 block">
-                  <Label
-                    htmlFor="businessMaxPrice"
-                    value="What is your avg maximum price for the service"
-                  />
-                </div>
-                <TextInput
-                  id="businessMaxPrice"
-                  type="text"
-                  value={businessInfo.businessMaxPrice}
                   onChange={handleInputChange}
                   required
                 />

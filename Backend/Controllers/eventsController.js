@@ -1,5 +1,5 @@
 import {
-  deleteEvent,
+  deleteEventByOwner,
   getEventById,
   getEvents,
 } from "../services/eventsLogic.js";

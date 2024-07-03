@@ -50,6 +50,7 @@ export const vendorInvetationDetails = (
   eventDetails
 ) => {
   const { businessName, email } = vendorDetails;
+  console.log(businessName);
   const { ownerName, ownerEmail } = ownerdetails;
   const { name, location, type, date } = eventDetails;
   const eventDate = new Date(date);

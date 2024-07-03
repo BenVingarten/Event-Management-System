@@ -16,7 +16,7 @@ const vendorSchema = new Schema({
   businessLocation: {
     type: [String],
     enum: locations,
-    required: true
+    required: true,
   },
   businessDescription: {
     type: String,
@@ -25,17 +25,16 @@ const vendorSchema = new Schema({
   eventTypes: {
     type: [String],
     enum: eventType,
-    required: true
+    required: true,
   },
   leadCount: {
     type: Number,
-    defaulr: 0
+    default: 0,
   },
   upcomingEvents: [
     {
       type: Schema.Types.ObjectId,
       ref: "Event",
-      required: false,
     },
   ],
 });
