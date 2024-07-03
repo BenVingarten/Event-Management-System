@@ -3,7 +3,31 @@ import useAxiosPrivate from "../hooks/useAxiosPrivate";
 import useAuth from "../hooks/useAuth";
 import { jwtDecode } from "jwt-decode";
 import { Toaster, toast } from "react-hot-toast";
-import { Button, Label, TextInput } from "flowbite-react";
+import {
+  Button,
+  Label,
+  TextInput,
+  Checkbox,
+  ListGroup,
+  Textarea,
+} from "flowbite-react";
+
+const locations = [
+  { label: "Haifa & North", value: "Haifa & North" },
+  { label: "Hasharon", value: "Hasharon" },
+  { label: "Gush Dan", value: "Gush Dan" },
+  { label: "Shfela", value: "Shfela" },
+  { label: "Jerusalem", value: "Jerusalem" },
+  { label: "South(Negev And Eilat)", value: "South(Negev And Eilat)" },
+];
+
+const eventTypes = [
+  { label: "Wedding", value: "Wedding" },
+  { label: "Birthday", value: "Birthday" },
+  { label: "Bar/Bat Mitzva", value: "Bar/Bat Mitzva" },
+  { label: "Company Event", value: "Company Event" },
+  { label: "Conference", value: "Conference" },
+];
 
 export default function Account() {
   const axiosPrivate = useAxiosPrivate();
@@ -13,33 +37,41 @@ export default function Account() {
   const userRole = jwtDecode(auth.accessToken).userInfo.role;
   const userId = jwtDecode(auth.accessToken).userInfo.id;
 
-  //console.log(userRole);
-
   const [user, setUser] = useState({
     username: "example_user",
     email: "example@example.com",
-    businessType: "example_business",
-    businessLocation: "example_location",
+    businessType: [],
+    businessLocation: [],
     businessDescription: "example_description",
   });
-  const [updatedDetails, setUpdatedDetails] = useState({});
+
+  const [updatedDetails, setUpdatedDetails] = useState({
+    businessType: [],
+    businessLocation: [],
+  });
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setUpdatedDetails((prevDetails) => ({
-      ...prevDetails,
-      [name]: value,
-    }));
+    const { name, value, checked } = e.target;
+    if (name === "businessLocation" || name === "businessType") {
+      setUpdatedDetails((prevDetails) => ({
+        ...prevDetails,
+        [name]: checked
+          ? [...prevDetails[name], value]
+          : prevDetails[name].filter((item) => item !== value),
+      }));
+    } else {
+      setUpdatedDetails((prevDetails) => ({
+        ...prevDetails,
+        [name]: value,
+      }));
+    }
   };
-  //console.log(updatedDetails);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const { name, value } = e.target;
 
     const controller = new AbortController();
     try {
-      //console.log(updatedDetails);
       const response = await axiosPrivate.patch(
         `/users/${userId}`,
         updatedDetails,
@@ -49,14 +81,12 @@ export default function Account() {
           signal: controller.signal,
         }
       );
-      //console.log(response);
       setUpdatedDetails({});
       setUser((prevDetails) => ({
         ...prevDetails,
-        [name]: value,
+        ...updatedDetails,
       }));
       toast.success("details updated successfully");
-      //console.log(response.data.event);
     } catch (err) {
       console.log(err);
       toast.error(err.response.data.err);
@@ -66,15 +96,12 @@ export default function Account() {
   useEffect(() => {
     const controller = new AbortController();
 
-    // Fetch user's events from the backend
-
     const fetchUserDetails = async () => {
       try {
         const response = await axiosPrivate.get(`/users/${userId}/`, {
           signal: controller.signal,
         });
 
-        console.log(response.data.user);
         setUser(response.data.user);
       } catch (err) {
         console.log("Error: " + err.response);
@@ -97,6 +124,7 @@ export default function Account() {
       <h1 className="font-bold text-xl">User Profile</h1>
       <form onSubmit={handleSubmit} className="flex max-w-3xl flex-col gap-4">
         <div className="grid grid-cols-2">
+          {/* Every User */}
           <div className="pr-5">
             <div>
               <div className="mb-2 block">
@@ -124,55 +152,90 @@ export default function Account() {
                 placeholder={user.email}
               />
             </div>
-          </div>
-          {userRole == "Vendor" ? (
-            <div>
-              <div>
+            {/* Business Description */}
+            {userRole == "Vendor" ? (
+              <div className="">
                 <div className="mb-2 block">
-                  <Label htmlFor="type" value="Business type" />
+                  <Label
+                    htmlFor="businessDescription"
+                    value="Business description"
+                  />
                 </div>
-                <TextInput
-                  id="businessType"
-                  name="businessType"
+                <Textarea
+                  id="businessDescription"
+                  name="businessDescription"
                   type="text"
-                  value={updatedDetails.businessType}
+                  value={updatedDetails.businessDescription}
                   onChange={handleInputChange}
-                  placeholder={user.businessType}
+                  placeholder={user.businessDescription}
                 />
               </div>
+            ) : null}
+          </div>
+          {/* Only Vendors */}
+          {userRole == "Vendor" ? (
+            <div>
+              {/* Business Type */}
               <div>
                 <div className="mb-2 block">
-                  <Label htmlFor="type" value="Business location" />
+                  <Label htmlFor="businessType" value="Business type" />
                 </div>
-                <TextInput
-                  id="businessLocation"
-                  name="businessLocation"
-                  type="text"
-                  value={updatedDetails.businessLocation}
-                  onChange={handleInputChange}
-                  placeholder={user.businessLocation}
-                />
+                <ListGroup>
+                  {eventTypes.map((event) => (
+                    <ListGroup.Item
+                      key={event.value}
+                      className="flex items-center"
+                    >
+                      <Checkbox
+                        id={event.value}
+                        name="businessType"
+                        value={event.value}
+                        checked={
+                          updatedDetails.businessType.includes(event.value) ||
+                          user.businessType.includes(event.value)
+                        }
+                        onChange={handleInputChange}
+                        className="mr-2"
+                      />
+                      <label htmlFor={event.value}>{event.label}</label>
+                    </ListGroup.Item>
+                  ))}
+                </ListGroup>
+              </div>
+              {/* Business Location */}
+              <div>
+                <div className="mb-2 block">
+                  <Label htmlFor="businessLocation" value="Business location" />
+                </div>
+                <ListGroup>
+                  {locations.map((location) => (
+                    <ListGroup.Item
+                      key={location.value}
+                      className="flex items-center"
+                    >
+                      <Checkbox
+                        id={location.value}
+                        name="businessLocation"
+                        value={location.value}
+                        checked={
+                          updatedDetails.businessLocation.includes(
+                            location.value
+                          ) || user.businessLocation.includes(location.value)
+                        }
+                        onChange={handleInputChange}
+                        className="mr-2"
+                      />
+                      <label htmlFor={location.value}>{location.label}</label>
+                    </ListGroup.Item>
+                  ))}
+                </ListGroup>
               </div>
             </div>
           ) : null}
         </div>
-        {userRole == "Vendor" ? (
-          <div className="">
-            <div className="mb-2 block">
-              <Label htmlFor="type" value="Business description" />
-            </div>
-            <TextInput
-              id="businessDescription"
-              name="businessDescription"
-              type="text"
-              value={updatedDetails.businessDescription}
-              onChange={handleInputChange}
-              placeholder={user.businessDescription}
-            />
-          </div>
-        ) : null}
+
         <div className="self-center">
-          <Button className="mt-5" type="submit">
+          <Button className="mt-5" type="submit" color={"yellow"}>
             Save Changes
           </Button>
         </div>
