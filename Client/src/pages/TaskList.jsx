@@ -46,7 +46,6 @@ const Board = () => {
           }
         );
 
-        
         setCards(response.data.tasks);
         setSuggestedTasks(response.data.suggestedTasks);
       } catch (err) {
@@ -128,9 +127,10 @@ const Column = ({
 }) => {
   const [active, setActive] = useState(false);
 
-  const handleDragStart = (e, card) => {
-    e.dataTransfer.setData("cardId", card._id);
+  const handleDragStart = (e, cardId) => {
+    e.dataTransfer.setData("cardId", cardId);
   };
+
   const handleDragEnd = (e) => {
     const cardId = e.dataTransfer.getData("cardId");
 
@@ -156,7 +156,7 @@ const Column = ({
       if (moveToBack) {
         copy.push(cardToTransfer);
       } else {
-        const insertAtIndex = copy.findIndex((el) => el.id === before);
+        const insertAtIndex = copy.findIndex((el) => el._id === before);
         if (insertAtIndex === undefined) return;
 
         copy.splice(insertAtIndex, 0, cardToTransfer);
@@ -292,7 +292,7 @@ const Card = ({ title, _id, column, handleDragStart, setCards }) => {
         layout
         layoutId={_id}
         draggable={!isEditing}
-        onDragStart={(e) => handleDragStart(e, { title, _id, column })}
+        onDragStart={(e) => handleDragStart(e, _id)}
         className="cursor-grab rounded border border-neutral-50 bg-neutral-100 p-3 active:cursor-grabbing"
         onDoubleClick={handleDoubleClick}
       >
@@ -523,43 +523,6 @@ const AddCard = ({ column, setCards, userId, eventId }) => {
     </>
   );
 };
-
-const DEFAULT_CARDS = [
-  // BACKLOG
-  { title: "Create guest list for conference", id: "11", column: "backlog" },
-  {
-    title: "Design event program for charity fundraiser",
-    id: "12",
-    column: "backlog",
-  },
-  {
-    title: "Finalize agenda for marketing seminar",
-    id: "13",
-    column: "backlog",
-  },
-
-  // TODO
-  { title: "Book venue for annual company party", id: "14", column: "todo" },
-  {
-    title: "Coordinate logistics for product launch event",
-    id: "15",
-    column: "todo",
-  },
-
-  // DOING
-  {
-    title: "Arrange catering for team building event",
-    id: "16",
-    column: "doing",
-  },
-
-  // DONE
-  {
-    title: "Set up DD dashboards for Lambda listener",
-    id: "17",
-    column: "done",
-  },
-];
 
 // Prop types
 Column.propTypes = {
