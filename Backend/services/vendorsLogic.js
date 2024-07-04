@@ -4,7 +4,11 @@ import { GeneralServerError } from "../errors/GeneralServerError.js";
 import userModel from "../models/User.js";
 import vendorModel from "../models/Vendor.js";
 import { getUserById } from "./UserLogic.js";
-import { removeVendorDetails, vendorInvetationDetails } from "./emailLogic.js";
+import {
+  removeVendorDetails,
+  vendorExitEventDetails,
+  vendorInvetationDetails,
+} from "./emailLogic.js";
 import { getEventById } from "./eventsLogic.js";
 import { sendWebsiteEmail } from "./emailLogic.js";
 import { populate } from "dotenv";
@@ -38,7 +42,7 @@ export const getVendors = async (userId, eventId) => {
     const avoidVendors = vendors.map((vendorObj) => {
       if (vendorObj.registeredUser) return vendorObj.registeredUser._id;
     });
-    console.log(avoidVendors);
+
     const suggestedVendors = await getSuggestedVendors(
       type,
       location,
@@ -115,12 +119,11 @@ export const getSuggestedVendors = async (type, location, avoidVendors) => {
       },
       {
         $project: {
-          _id: 0,
-          vendorId: "$_id",
-          businessName: "$businessName",
-          email: "$email",
-          businessType: "$businessType",
-          leadCount: "$leadCount",
+          _id: 1,
+          businessName: 1,
+          email: 1,
+          businessType: 1,
+          leadCount: 1,
         },
       },
       {
@@ -224,8 +227,6 @@ export const updateRegisteredVendor = async (
       select: "upcomingEvents leadCount",
     };
     const vendor = await getUserById(vendorId, vendorOptions);
-    console.log(vendor);
-    console.log(vendor.upcomingEvents);
 
     vendor.upcomingEvents.push(event._id);
     vendor.leadCount++;
@@ -333,27 +334,28 @@ export const deleteVendor = async (userId, eventId, vendorObj) => {
 
 export const deleteVendorUpcomingEvent = async (userId, eventId) => {
   try {
-    console.log(userId, eventId);
-    // Update the vendor's upcoming events and decrement their lead count
-    const vendor = await userModel
-      .findOneAndUpdate(
-        { _id: userId },
-        {
-          $pull: { upcomingEvents: eventId },
-          $inc: { leadCount: -1 },
-        },
-        { new: true }
-      )
-      .select("upcomingEvents")
-      .exec();
+    // find vendor with userId and upcomingEvent eventId and remove it
 
-    if (!vendor)
-      throw new DataNotFoundError("Couldn't find a vendor with that ID");
+    const vendorOptions = {
+      select: "upcomingEvents leadCount businessName email",
+    };
+    const vendor = await getUserById(userId, vendorOptions);
+    // const vendor = await userModel
+    //   .findOne({ _id: userId, role: "Vendor" })
+    //   .select("upcomingEvents leadCount business")
+    //   .exec();
+
+    // if (!vendor)
+    //   throw new DataNotFoundError("Couldn't find a vendor with that ID");
+    vendor.upcomingEvents.pull(eventId);
+    vendor.leadCount--;
+    await vendor.save();
 
     // Update the event's vendors and budget
     const event = await eventModel
       .findOne({ _id: eventId })
-      .select("vendors budget")
+      .select("vendors budget name location type date")
+      .populate({ path: "owner", select: "email username" })
       .exec();
 
     if (!event)
@@ -362,16 +364,35 @@ export const deleteVendorUpcomingEvent = async (userId, eventId) => {
     const vendorObj = event.vendors.find(
       (ven) => ven.registeredUser.toString() === userId
     );
-
     if (!vendorObj)
       throw new DataNotFoundError("Vendor not associated with this event");
 
     event.budget += vendorObj.priceForService;
-    event.vendors.pull(vendorObj.registeredUser);
+    event.vendors.pull(vendorObj);
 
     await event.save();
 
     // Send mail to notify event planner (implement mailing logic here)
+    const ownerDetails = {
+      ownerName: event.owner.username,
+      ownerEmail: event.owner.email,
+    };
+    const vendorDetails = {
+      email: vendor.email,
+      businessName: vendor.businessName,
+    };
+    const eventDetails = {
+      name: event.name,
+      location: event.location,
+      type: event.type,
+      date: event.date,
+    };
+    const mailOptions = vendorExitEventDetails(
+      ownerDetails,
+      vendorDetails,
+      eventDetails
+    );
+    await sendWebsiteEmail(mailOptions);
   } catch (err) {
     if (err instanceof DataNotFoundError) throw err;
     throw new GeneralServerError(

@@ -5,7 +5,7 @@ import { Toaster, toast } from "react-hot-toast";
 import { Badge, Button, Card, ListGroup } from "flowbite-react";
 import moment from "moment-timezone";
 
-function UpcomingEvents({ userId }) {
+function UpcomingEvents({ userId, setUpcomingRefreshed }) {
   const [upcomingEvents, setUpcomingEvents] = useState([]);
   const axiosPrivate = useAxiosPrivate();
   const effectRun = useRef(false);
@@ -40,8 +40,9 @@ function UpcomingEvents({ userId }) {
       const response = await axiosPrivate.delete(
         `/users/${userId}/upcomingEvents/${eventId}`
       );
+      setUpcomingRefreshed((prev) => prev + 1);
       console.log(response);
-      toast.success("Event removed successfully");
+      toast.success(response.date.msg);
     } catch (err) {
       console.log(err.response.data);
       toast.error("Failed to remove event. Try again.");
@@ -85,6 +86,7 @@ function UpcomingEvents({ userId }) {
 
 UpcomingEvents.propTypes = {
   userId: PropTypes.string.isRequired,
+  setUpcomingRefreshed: PropTypes.func.isRequired,
 };
 
 export default UpcomingEvents;

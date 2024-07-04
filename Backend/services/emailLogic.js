@@ -3,6 +3,7 @@ import "../config/loadEnv.js";
 import { GeneralServerError } from "../errors/GeneralServerError.js";
 import moment from "moment-timezone";
 
+// Adding collaborator invitation
 export const collabAddingInvitationDetails = (ownerUsername, collabEmail) => {
   const collabName = collabEmail.split("@")[0];
   const subject = "Invitation To Collaborate";
@@ -15,6 +16,7 @@ export const collabAddingInvitationDetails = (ownerUsername, collabEmail) => {
   };
   return mailOptions;
 };
+// collaborator response for invitation (accpet/declined) - WORKS
 export const collabInvitationSResponseDetails = (
   ownerEmail,
   collabEmail,
@@ -32,6 +34,7 @@ export const collabInvitationSResponseDetails = (
   };
   return mailOptions;
 };
+// event planner delete his event - notify his collaborators.
 export const deletingEventlDetails = (
   ownerUsername,
   collabEmail,
@@ -48,6 +51,7 @@ export const deletingEventlDetails = (
   };
   return mailOptions;
 };
+// collaborator decide to leave the event - WORKS
 export const collabExitEventDetails = (
   ownerDetails,
   collabDetails,
@@ -65,6 +69,7 @@ export const collabExitEventDetails = (
   };
   return mailOptions;
 };
+// event planner owner decides to remove collaborator
 export const collabRemovalDetails = (ownerUsername, collabEmail, eventName) => {
   const collabName = collabEmail.split("@")[0];
   const subject = `Removal From "${eventName}" Event `;
@@ -77,6 +82,7 @@ export const collabRemovalDetails = (ownerUsername, collabEmail, eventName) => {
   };
   return mailOptions;
 };
+// email for vendor to let him know about hiring him - WORKS
 export const vendorInvetationDetails = (
   ownerdetails,
   vendorDetails,
@@ -92,8 +98,7 @@ export const vendorInvetationDetails = (
     .format("DD-MM-YYYY");
 
   const subject = `request to hire your services at an event`;
-  const text = `Hello ${businessName},\nthe event planner: ${ownerName} is interested in your services for his event,\nand would like to negotiate with you\n
-  here are some details on the event:\nname: ${name}\ntype: ${type}\nlocation: ${location}\ndate: ${formattedDate}\n\nYou can contact the event planner through his email: ${ownerEmail}\nBest regards, CelebrightEMS Team`;
+  const text = `Hello ${businessName},\nAfter negotiations, the event planner: ${ownerName} has decided to add you to be one of his vendors.\nHere are the details on the event:\nName: ${name}\nType: ${type}\nLocation: ${location}\nDate: ${formattedDate}\n\nYou can contact the event planner for more info through his email: ${ownerEmail}\nBest regards, CelebrightEMS Team`;
   const mailOptions = {
     from: process.env.EMAIL_USER,
     to: email,
@@ -102,13 +107,14 @@ export const vendorInvetationDetails = (
   };
   return mailOptions;
 };
+// email for vendor that he has been removed from the event.(his service is no longer needed)
 export const removeVendorDetails = (
-  ownerdetails,
+  ownerDetails,
   vendorDetails,
   eventDetails
 ) => {
   const { businessName, email } = vendorDetails;
-  const { ownerName, ownerEmail } = ownerdetails;
+  const { ownerName, ownerEmail } = ownerDetails;
   const { name, location, type, date } = eventDetails;
   const eventDate = new Date(date);
   const formattedDate = moment(eventDate * 1000)
@@ -125,6 +131,27 @@ export const removeVendorDetails = (
   };
   return mailOptions;
 };
+// vendor decided to cancel his service and notify the event owner
+export const vendorExitEventDetails = (ownerDetails, vendorDetails, eventDetails) => {
+  const { businessName, email } = vendorDetails;
+  const { ownerName, ownerEmail } = ownerDetails;
+  const { name, location, type, date } = eventDetails;
+  const eventDate = new Date(date);
+  const formattedDate = moment(eventDate * 1000)
+    .tz("Israel")
+    .format("DD-MM-YYYY");
+  const subject = `Cancel Of Service`;
+  const text = `Hello ${ownerName},\nthe vendor: ${businessName} has decided to cancel, thus will not provide service in your event.\nHere are some details on the event:\n
+  Name: ${name}\nType: ${type}\nLocation: ${location}\nDate: ${formattedDate}\n\nYou can contact the vendor through his email: ${email} for more details.\nBest regards, CelebrightEMS Team`;
+  const mailOptions = {
+    from: process.env.EMAIL_USER,
+    to: ownerEmail,
+    subject,
+    text,
+  };
+  return mailOptions;
+};
+// send the mail function
 export const sendWebsiteEmail = async (mailOptions) => {
   try {
     const transporter = nodemailer.createTransport({

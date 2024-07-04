@@ -71,7 +71,7 @@ function EventVendors() {
     );
     try {
       const res = await axiosPrivate.post(
-        `users/${userId}/events/${eventID}/vendors/${vendor.vendorId}`
+        `users/${userId}/events/${eventID}/vendors/${vendor._id}`
       );
       console.log(res.data);
       toast.success("Email Sent to Vendor!");
@@ -91,14 +91,13 @@ function EventVendors() {
 
   const AddVendorToMyVendors = async (vendor) => {
     try {
-      console.log(vendor);
       const res = await axiosPrivate.patch(
-        `users/${userId}/events/${eventID}/vendors/${vendor.vendorId}`,
-        { priceForServiceForService: vendor.priceForService }
+        `users/${userId}/events/${eventID}/vendors/${vendor._id}`,
+        { priceForService: vendor.priceForService }
       );
       console.log(res.data);
       toast.success("Vendor Added to Event Vendors!");
-      console.log(vendor);
+
       setEventVendors((pv) => [...pv, vendor]);
       setNegotiatedVendors((pv) =>
         pv.filter((v) => v.businessName !== vendor.businessName)
