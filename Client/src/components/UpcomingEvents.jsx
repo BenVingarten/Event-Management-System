@@ -36,7 +36,6 @@ function UpcomingEvents({ userId }) {
   const handleRemoveEvent = async (eventId) => {
     try {
       toast.loading("Removing event...", { duration: 2000 });
-      //console.log(eventId);
 
       const response = await axiosPrivate.delete(
         `/users/${userId}/upcomingEvents/${eventId}`
@@ -44,7 +43,7 @@ function UpcomingEvents({ userId }) {
       console.log(response);
       toast.success("Event removed successfully");
     } catch (err) {
-      console.log(err);
+      console.log(err.response.data);
       toast.error("Failed to remove event. Try again.");
     }
   };

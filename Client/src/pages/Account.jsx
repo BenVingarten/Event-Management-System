@@ -24,8 +24,7 @@ export default function Account() {
   const [user, setUser] = useState({
     username: "example_user",
     email: "example@example.com",
-    eventTypes: [],
-    businessLocation: [],
+
     businessType: "",
     businessDescription: "example_description",
   });
@@ -88,9 +87,15 @@ export default function Account() {
         }
       );
       setUpdatedDetails({});
-      setUser(response.data.user);
-      setSelectedEventTypes(response.data.user.eventTypes);
-      setSelectedBusinessLocation(response.data.user.businessLocation);
+      console.log(response);
+      setUser({
+        username: response.data.updatedUser.username,
+        email: response.data.updatedUser.email,
+        businessType: response.data.updatedUser.businessType,
+        businessDescription: response.data.updatedUser.businessDescription,
+      });
+      setSelectedEventTypes(response.data.updatedUser.eventTypes);
+      setSelectedBusinessLocation(response.data.updatedUser.businessLocation);
       toast.success("Details updated successfully");
     } catch (err) {
       console.log(err);
@@ -109,9 +114,16 @@ export default function Account() {
           signal: controller.signal,
         });
 
-        setUser(response.data.user);
+        setUser({
+          username: response.data.user.username,
+          email: response.data.user.email,
+          businessType: response.data.user.businessType,
+          businessDescription: response.data.user.businessDescription,
+        });
+        console.log(response.data.user);
         setSelectedEventTypes(response.data.user.eventTypes);
         setSelectedBusinessLocation(response.data.user.businessLocation);
+        toast.success("User details fetched successfully");
       } catch (err) {
         console.log("Error: " + err.response);
         console.log(err);
@@ -143,7 +155,7 @@ export default function Account() {
                 id="username"
                 name="username"
                 type="text"
-                defaultValue={user.username}
+                placeholder={user.username}
                 onChange={handleInputChange}
               />
             </div>
@@ -155,7 +167,7 @@ export default function Account() {
                 id="email1"
                 name="email"
                 type="email"
-                defaultValue={user.email}
+                placeholder={user.email}
                 onChange={handleInputChange}
               />
             </div>
@@ -172,7 +184,7 @@ export default function Account() {
                   id="businessDescription"
                   name="businessDescription"
                   type="text"
-                  defaultValue={user.businessDescription}
+                  placeholder={user.businessDescription}
                   onChange={handleInputChange}
                 />
 
@@ -183,7 +195,7 @@ export default function Account() {
                   id="businessType"
                   name="businessType"
                   type="text"
-                  defaultValue={user.businessType}
+                  placeholder={user.businessType}
                   onChange={handleInputChange}
                 />
               </div>

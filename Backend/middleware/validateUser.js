@@ -1,5 +1,7 @@
 import { checkSchema } from "express-validator";
 import { rolesEnum, validFilter } from "../constants/user.js";
+import { locations, eventType } from "../constants/event.js";
+
 function queryValidationSchema() {
   return {
     filter: {
@@ -61,7 +63,7 @@ function createUserValidation() {
       optional: true,
       custom: {
         options: (value, { req }) => {
-          return ((req.body.role === "Vendor" && value));
+          return req.body.role === "Vendor" && value;
         },
         errorMessage: "Business Name is required for vendors",
       },
@@ -70,7 +72,7 @@ function createUserValidation() {
       optional: true,
       custom: {
         options: (value, { req }) => {
-          return ((req.body.role === "Vendor" && value));
+          return req.body.role === "Vendor" && value;
         },
         errorMessage: "Business type is required for vendors",
       },
@@ -80,7 +82,7 @@ function createUserValidation() {
       isArray: { errorMessage: "locations needs to be sent as an array" },
       custom: {
         options: (value, { req }) => {
-          return ((req.body.role === "Vendor" && value));
+          return req.body.role === "Vendor" && value;
         },
         errorMessage: "Location is required for vendors",
       },
@@ -90,7 +92,7 @@ function createUserValidation() {
       isArray: { errorMessage: "types needs to be sent as an array" },
       custom: {
         options: (value, { req }) => {
-          return ((req.body.role === "Vendor" && value));
+          return req.body.role === "Vendor" && value;
         },
       },
     },
@@ -98,13 +100,13 @@ function createUserValidation() {
       optional: true,
       custom: {
         options: (value, { req }) => {
-          return ((req.body.role === "Vendor" && value));
+          return req.body.role === "Vendor" && value;
         },
         errorMessage: "Description is required for vendors",
       },
     },
   };
-} 
+}
 function patchUserValidation() {
   return {
     username: {
@@ -125,7 +127,7 @@ function patchUserValidation() {
       optional: { options: { nullable: true } },
       custom: {
         options: (value, { req }) => {
-          return ((req.body.role === "Vendor" && value));
+          return req.body.role === "Vendor" && value;
         },
         errorMessage: "businessName is required for vendors",
       },
@@ -134,7 +136,7 @@ function patchUserValidation() {
       optional: { options: { nullable: true } },
       custom: {
         options: (value, { req }) => {
-          return ((req.body.role === "Vendor" && value));
+          return req.body.role === "Vendor" && value;
         },
         errorMessage: "Business type is required for vendors",
       },
@@ -144,7 +146,7 @@ function patchUserValidation() {
       isArray: { errorMessage: "locations needs to be sent as an array" },
       custom: {
         options: (value, { req }) => {
-          return ((req.body.role === "Vendor" && value));
+          return value.some((val) => locations.includes(val));
         },
         errorMessage: "Location is required for vendors",
       },
@@ -154,7 +156,7 @@ function patchUserValidation() {
       isArray: { errorMessage: "types needs to be sent as an array" },
       custom: {
         options: (value, { req }) => {
-          return ((req.body.role === "Vendor" && value));
+          return value.some((val) => eventType.includes(val));
         },
       },
     },

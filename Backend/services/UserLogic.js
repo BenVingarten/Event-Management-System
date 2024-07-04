@@ -147,7 +147,7 @@ export const getUserById = async (id, options = {}) => {
     if (isPopulate) query.populate(options.populate);
     if (isSelect) query.select(options.select);
     if (isLean) query.lean();
-    
+
     const user = await query.exec();
     if (!user) throw new DataNotFoundError("User with that ID is not found");
     return user;
@@ -173,15 +173,24 @@ export const patchUser = async (id, updatedValues) => {
       if (foundUser)
         throw new DuplicateDataError("There is already a user with that email");
     }
-
+    console.log(updatedValues);
     const selectedFields =
-      "-_id username email businessType businessLocation businessDescription";
-    const updatedUser = await userModel
-      .findOneAndUpdate({ _id: id }, updatedValues, { new: true })
+      "username email businessType eventTypes businessLocation businessDescription";
+
+    const user = await userModel
+      .findOne({ _id: id })
       .select(selectedFields)
       .exec();
-    if (!updatedUser) throw new DataNotFoundError();
-    return updatedUser;
+
+    if (!user) throw new DataNotFoundError("User with that ID is not found");
+
+    for (const key in updatedValues) {
+      user[key] = updatedValues[key];
+    }
+
+    await user.save();
+
+    return user;
   } catch (err) {
     if (err instanceof DataNotFoundError || err instanceof DuplicateDataError)
       throw err;
@@ -213,7 +222,7 @@ export const authenticateUser = async (user) => {
 
     const isPasswordMatch = await bcrypt.compare(password, findUser.password);
     if (!isPasswordMatch) throw new UnauthorizedError("incorrect credentials");
-    
+
     const accessToken = issueAccessToken(findUser);
     const refreshToken = issueRefreshToken(findUser);
 

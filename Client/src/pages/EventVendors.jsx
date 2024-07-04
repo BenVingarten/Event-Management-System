@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Button, Card, Modal, TextInput } from "flowbite-react";
 import { CiCircleRemove } from "react-icons/ci";
 import { IoIosAddCircleOutline } from "react-icons/io";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import useAuth from "../hooks/useAuth";
 import useAxiosPrivate from "../hooks/useAxiosPrivate";
@@ -24,10 +24,11 @@ function EventVendors() {
     businessName: "",
     email: "",
     businessType: "",
-    price: 0,
+    priceForService: 0,
   });
 
-  const [priceModalOpen, setPriceModalOpen] = useState(false);
+  const [priceForServiceModalOpen, setpriceForServiceModalOpen] =
+    useState(false);
   const [selectedVendor, setSelectedVendor] = useState(null);
 
   useEffect(() => {
@@ -93,7 +94,7 @@ function EventVendors() {
       console.log(vendor);
       const res = await axiosPrivate.patch(
         `users/${userId}/events/${eventID}/vendors/${vendor.vendorId}`,
-        { priceForService: vendor.price }
+        { priceForServiceForService: vendor.priceForService }
       );
       console.log(res.data);
       toast.success("Vendor Added to Event Vendors!");
@@ -118,22 +119,50 @@ function EventVendors() {
     );
   };
 
-  const RemoveVendorFromEventVendors = (vendor) => {
-    console.log("Remove Vendor from Event Vendors");
-    toast.success("Vendor Removed from Event Vendors!");
-    console.log(vendor);
-    // Remove from Event Vendors
-    setEventVendors((pv) => pv.filter((v) => v.username !== vendor.username));
+  const RemoveVendorFromEventVendors = async (vendor) => {
+    try {
+      console.log(vendor);
+      const res = await axiosPrivate.delete(
+        `users/${userId}/events/${eventID}/vendors`,
+        { data: { vendor } }
+      );
+      console.log(res.data);
+      toast.success("Vendor Removed from Event Vendors!");
+
+      // Remove from Event Vendors
+      setEventVendors((pv) =>
+        pv.filter((v) => v.businessName !== vendor.businessName)
+      );
+    } catch (err) {
+      console.log(err.response.data);
+      toast.error("Failed to Remove Vendor from Event Vendors!");
+    }
   };
 
-  const AddVendorManually = () => {
-    console.log("Add Vendor Manually");
-    toast.success("Vendor Added Manually!");
-    console.log(newVendor);
-    // Add to Event Vendors
-    setEventVendors((pv) => [...pv, newVendor]);
-    // Close Modal
-    setModalOpen(false);
+  const AddVendorManually = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await axiosPrivate.post(
+        `users/${userId}/events/${eventID}/vendors`,
+        newVendor
+      );
+      console.log(res.data);
+      toast.success("Vendor Added Manually!");
+
+      // Add to Event Vendors
+      setEventVendors((pv) => [...pv, newVendor]);
+      setNewVendor({
+        businessName: "",
+        email: "",
+        businessType: "",
+        priceForService: 0,
+      });
+      // Close Modal
+      setModalOpen(false);
+    } catch (err) {
+      console.log(err);
+      toast.error(err.response.data.err);
+    }
   };
 
   const handleInputChange = (e) => {
@@ -143,7 +172,7 @@ function EventVendors() {
   const handleAddVendorToMyVendors = () => {
     if (selectedVendor) {
       AddVendorToMyVendors(selectedVendor);
-      setPriceModalOpen(false);
+      setpriceForServiceModalOpen(false);
       setSelectedVendor(null);
     }
   };
@@ -160,7 +189,8 @@ function EventVendors() {
               <div className="sm:overflow-x-scroll md:overflow-auto">
                 <p className="text-lg font-bold">{vendor.businessName}</p>
                 <p>{vendor.email}</p>
-                <p>{vendor.businessType}</p>
+                <p>Type: {vendor.businessType}</p>
+                <p>Price: {vendor.priceForService}</p>
                 {vendor.leadCount && <p>Leads: {vendor.leadCount}</p>}
               </div>
               <div className="flex justify-end items-center h-full">
@@ -177,63 +207,58 @@ function EventVendors() {
         <Button color={"green"} onClick={() => setModalOpen(true)}>
           Add Vendor Manually
         </Button>
-        <Modal show={modalOpen} onClose={() => setModalOpen(false)}>
-          {/* Add Vendor Manually */}
-
-          <form className="p-5 " onSubmit={AddVendorManually}>
-            <h1 className="text-2xl font-bold mb-2">Add Vendor Manually</h1>
-            <TextInput
-              id="username"
-              type="text"
-              className="p-2"
-              placeholder="Vendor Name"
-              onChange={handleInputChange}
-              required
-            />
-            <TextInput
-              id="email"
-              type="email"
-              placeholder="Vendor Email"
-              className="p-2"
-              required
-              onChange={handleInputChange}
-            />
-            <TextInput
-              id="businessType"
-              type="text"
-              className="p-2"
-              placeholder="Vendor Business Type"
-              onChange={handleInputChange}
-              required
-            />
-
-            <TextInput
-              id="price"
-              type="number"
-              className="p-2"
-              placeholder="Vendor Price"
-              onChange={handleInputChange}
-              required
-            />
-
-            <Button
-              color={"green"}
-              className="m-2"
-              //onClick={AddVendorManually}
-              type="submit"
-            >
-              Add Vendor
-            </Button>
-            <Button
-              color={"red"}
-              className="m-2"
-              onClick={() => setModalOpen(false)}
-            >
-              Cancel
-            </Button>
-          </form>
-        </Modal>
       </div>
+
+      {/* Add Vendor Manually */}
+      <Modal show={modalOpen} onClose={() => setModalOpen(false)}>
+        <form className="p-5 " onSubmit={AddVendorManually}>
+          <h1 className="text-2xl font-bold mb-2">Add Vendor Manually</h1>
+          <TextInput
+            id="businessName"
+            type="text"
+            className="p-2"
+            placeholder="Business Name"
+            onChange={handleInputChange}
+            required
+          />
+          <TextInput
+            id="email"
+            type="email"
+            placeholder="Vendor Email"
+            className="p-2"
+            required
+            onChange={handleInputChange}
+          />
+          <TextInput
+            id="businessType"
+            type="text"
+            className="p-2"
+            placeholder="Vendor Business Type"
+            onChange={handleInputChange}
+            required
+          />
+
+          <TextInput
+            id="priceForService"
+            type="number"
+            className="p-2"
+            placeholder="Vendor Price for Service"
+            onChange={handleInputChange}
+            required
+          />
+
+          <Button color={"green"} className="m-2" type="submit">
+            Add Vendor
+          </Button>
+          <Button
+            color={"red"}
+            className="m-2"
+            onClick={() => setModalOpen(false)}
+          >
+            Cancel
+          </Button>
+        </form>
+      </Modal>
 
       {/* Negotiated Vendors */}
       <div className="overflow-y-auto">
@@ -254,7 +279,7 @@ function EventVendors() {
                   className="mr-2"
                   onClick={() => {
                     setSelectedVendor(vendor);
-                    setPriceModalOpen(true);
+                    setpriceForServiceModalOpen(true);
                   }}
                 >
                   <IoIosAddCircleOutline size={25} />
@@ -273,18 +298,24 @@ function EventVendors() {
         ))}
       </div>
 
-      <Modal show={priceModalOpen} onClose={() => setPriceModalOpen(false)}>
+      {/* Add Vendor priceForService Modal */}
+      <Modal
+        show={priceForServiceModalOpen}
+        onClose={() => setpriceForServiceModalOpen(false)}
+      >
         <form className="p-5" onSubmit={(e) => e.preventDefault()}>
-          <h1 className="text-2xl font-bold mb-2">Add Price for Vendor</h1>
+          <h1 className="text-2xl font-bold mb-2">
+            Add priceForService for Vendor
+          </h1>
           <TextInput
-            id="price"
+            id="priceForService"
             type="number"
             className="p-2"
-            placeholder="Vendor Price"
+            placeholder="Vendor priceForService"
             onChange={(e) =>
               setSelectedVendor((prev) => ({
                 ...prev,
-                price: e.target.value,
+                priceForService: e.target.value,
               }))
             }
             required
@@ -300,7 +331,7 @@ function EventVendors() {
           <Button
             color={"red"}
             className="m-2"
-            onClick={() => setPriceModalOpen(false)}
+            onClick={() => setpriceForServiceModalOpen(false)}
           >
             Cancel
           </Button>
