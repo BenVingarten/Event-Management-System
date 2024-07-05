@@ -18,7 +18,7 @@ function OAuthLogin() {
 
   const navigate = useNavigate();
   const location = useLocation();
-  const from = location.state?.from?.pathname || "/";
+  const from = location.state?.from?.pathname || "/myEvents";
 
   const auth = getAuth(app); //google auth
   const { setAuth } = useAuth(); //axios auth -- context

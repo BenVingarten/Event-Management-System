@@ -95,7 +95,7 @@ const SignupPage = () => {
       navigate("/login");
     } catch (error) {
       if (!error?.response) toast.error("Error: No response from server.");
-      else toast.error("Error: " + error.message);
+      else toast.error("Error: " + error.response.data.error[0].msg);
     }
   }
 
