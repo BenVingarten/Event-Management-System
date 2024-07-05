@@ -23,6 +23,12 @@ function createEventValidation() {
     budget: {
       isDecimal: { errorMessage: "budget must be Decimal" },
       notEmpty: { errorMessage: "budget cant be empty" },
+      custom: {
+        options: (value) => {
+          return value && (value > 0);
+        },
+        errorMessage: "budget cant be negative",
+      },
     },
     location: {
       notEmpty: { errorMessage: "event must have a location" },
@@ -60,6 +66,12 @@ function patchEventValidation() {
       optional: { options: { nullable: true } },
       isDecimal: { errorMessage: "budget must be Decimal" },
       notEmpty: { errorMessage: "budget cant be empty" },
+      custom: {
+        options: (value) => {
+          return value && (value > 0);
+        },
+        errorMessage: "budget cant be negative",
+      },
     },
     location: {
       optional: { options: { nullable: true } },

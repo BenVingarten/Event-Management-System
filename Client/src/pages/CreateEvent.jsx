@@ -165,6 +165,7 @@ const CreateEventPage = () => {
           <input
             type="number"
             id="budget"
+            min="0"
             value={budget}
             onChange={handleBudgetChange}
             className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-500"

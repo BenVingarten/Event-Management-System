@@ -9,14 +9,17 @@ import guestModel from "../models/Guest.js";
 
 export const getGuests = async (userId, eventId) => {
   try {
-    const conditions = [{ owner: userId }, { "collaborators.id": userId }];
+    const conditions = [
+      { owner: userId },
+      { "collaborators.collaboratorId": userId },
+    ];
     const event = await eventModel
       .findOne({ _id: eventId, $or: conditions })
       .select("guestList")
       .populate({ path: "guestList" })
       .lean()
       .exec();
-    if (!event) throw new DataNotFoundError();
+    if (!event) throw new DataNotFoundError("coulnt find the event");
     return event.guestList;
   } catch (err) {
     if (err instanceof DataNotFoundError) throw err;

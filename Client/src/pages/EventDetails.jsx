@@ -225,7 +225,7 @@ export default function EventDetails() {
       toast.success("Event details updated successfully!");
     } catch (err) {
       console.log(err.response);
-      toast.error(err.response.data.err);
+      toast.error(err.response.data.error[0].msg);
     }
   };
 
@@ -486,6 +486,7 @@ export default function EventDetails() {
               </div>
               <TextInput
                 id="budget"
+                min="0"
                 type="number"
                 placeholder={eventInfo.budget}
                 name={"budget"}
