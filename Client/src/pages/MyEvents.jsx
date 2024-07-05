@@ -25,8 +25,9 @@ const MyEvents = () => {
   const userRole = jwtDecode(auth.accessToken).userInfo.role;
   const [invitationsRefresh, setInvitationsRefresh] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [upcomingRefreshed, setUpcomingRefreshed] = useState(0);
   //console.log(events);
-
+  console.log(upcomingRefreshed);
   useEffect(() => {
     const controller = new AbortController();
 
@@ -53,7 +54,7 @@ const MyEvents = () => {
       controller.abort();
       effectRun.current = true;
     };
-  }, [invitationsRefresh]);
+  }, [invitationsRefresh, upcomingRefreshed]);
 
   const handleDeleteConfirmation = (eventId) => {
     setSelectedEventId(eventId);
@@ -164,7 +165,12 @@ const MyEvents = () => {
             </div>
           )}
         </div>
-        {userRole === "Vendor" && <UpcomingEvents userId={userId} />}
+        {userRole === "Vendor" && (
+          <UpcomingEvents
+            userId={userId}
+            setUpcomingRefreshed={setUpcomingRefreshed}
+          />
+        )}
       </div>
 
       <Invitations

@@ -42,6 +42,7 @@ function EventVendors() {
           `users/${userId}/events/${eventID}/vendors`
         );
 
+        console.log(res.data);
         setEventVendors(res.data.addedVendors);
         setNegotiatedVendors(res.data.negotiatedVendors);
         setSuggestedVendors(res.data.suggestedVendors);
@@ -72,7 +73,9 @@ function EventVendors() {
       const res = await axiosPrivate.post(
         `users/${userId}/events/${eventID}/vendors/${vendor.vendorId}`
       );
+      console.log(res.data);
       toast.success("Email Sent to Vendor!");
+      console.log(vendor);
       // Add to Negotiated Vendors
       setNegotiatedVendors((pv) => [...pv, vendor]);
       // Remove from Suggested Vendors
@@ -88,11 +91,14 @@ function EventVendors() {
 
   const AddVendorToMyVendors = async (vendor) => {
     try {
+      console.log(vendor);
       const res = await axiosPrivate.patch(
         `users/${userId}/events/${eventID}/vendors/${vendor.vendorId}`,
         { priceForServiceForService: vendor.priceForService }
       );
+      console.log(res.data);
       toast.success("Vendor Added to Event Vendors!");
+      console.log(vendor);
       setEventVendors((pv) => [...pv, vendor]);
       setNegotiatedVendors((pv) =>
         pv.filter((v) => v.businessName !== vendor.businessName)
@@ -106,7 +112,7 @@ function EventVendors() {
   const RemoveVendorFromNegotiatedVendors = (vendor) => {
     console.log("Remove Vendor from Negotiated Vendors");
     toast.success("Vendor Removed from Negotiated Vendors!");
-
+    console.log(vendor);
     // Remove from Negotiated Vendors
     setNegotiatedVendors((pv) =>
       pv.filter((v) => v.username !== vendor.username)
@@ -115,11 +121,12 @@ function EventVendors() {
 
   const RemoveVendorFromEventVendors = async (vendor) => {
     try {
+      console.log(vendor);
       const res = await axiosPrivate.delete(
         `users/${userId}/events/${eventID}/vendors`,
         { data: { vendor } }
       );
-
+      console.log(res.data);
       toast.success("Vendor Removed from Event Vendors!");
 
       // Remove from Event Vendors

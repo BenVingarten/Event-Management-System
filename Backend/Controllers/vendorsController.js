@@ -23,9 +23,8 @@ export const handleGetVendors = async (req, res) => {
 
 export const handleAddCustomVendor = async (req, res) => {
   try {
-    console.log(req.body);
+    
     const errors = validationResult(req);
-    console.log(errors.array());
     if (!errors.isEmpty())
       return res.status(400).json({ error: errors.array() });
 
@@ -55,7 +54,7 @@ export const handleAddRegisteredVendor = async (req, res) => {
       vendorId
     );
     return res.status(200).json({
-      msg: `success, added ${newNegotiatedVendor.businessName} to your  negotiated vendors!`,
+      msg: `success, added vendor to your  negotiated vendors!`,
     });
   } catch (err) {
     return res.status(err.statusCode).json({ err: err.message });
@@ -78,7 +77,7 @@ export const handleUpdateRegisteredVendor = async (req, res) => {
       verifiedRegisteredVendor
     );
     return res.status(200).json({
-      success: `updated vendor: ${newAddedRegisteredVendor.businessName} successfully`,
+      success: `updated vendor successfully`,
     });
   } catch (err) {
     return res.status(err.statusCode).json({ err: err.message });
@@ -110,7 +109,6 @@ export const handleUpdateCustomVendor = async (req, res) => {
 
 export const handleDeleteVendor = async (req, res) => {
   try {
-    console.log(req.body);
     const { userId } = req;
     const { eventId, vendorId } = req.params;
     const { vendor } = req.body;
@@ -130,7 +128,7 @@ export const handleDeleteVendorEvent = async (req, res) => {
     const { userId } = req;
     const { eventId } = req.params;
     await deleteVendorUpcomingEvent(userId, eventId);
-    return res.status(200).json({ smg: "deleted event successfully" });
+    return res.status(200).json({ msg: `deleted event successfully` });
   } catch (err) {
     return res.status(err.statusCode).json({ err: err.message });
   }
