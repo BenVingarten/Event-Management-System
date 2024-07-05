@@ -26,8 +26,7 @@ const MyEvents = () => {
   const [invitationsRefresh, setInvitationsRefresh] = useState(0);
   const [loading, setLoading] = useState(false);
   const [upcomingRefreshed, setUpcomingRefreshed] = useState(0);
-  //console.log(events);
-  console.log(upcomingRefreshed);
+
   useEffect(() => {
     const controller = new AbortController();
 
@@ -39,7 +38,7 @@ const MyEvents = () => {
           signal: controller.signal,
         });
         setLoading(false);
-        console.log(response.data);
+
         setEvents(response.data.events);
       } catch (err) {
         console.log(err.response?.data);
@@ -54,6 +53,7 @@ const MyEvents = () => {
       controller.abort();
       effectRun.current = true;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [invitationsRefresh, upcomingRefreshed]);
 
   const handleDeleteConfirmation = (eventId) => {
@@ -66,13 +66,15 @@ const MyEvents = () => {
     toast.loading("Deleting event...", { duration: 2000 });
     try {
       const userId = jwtDecode(auth.accessToken).userInfo.id;
+      // The following line will make sure the resonse not used will not send an error
+      // eslint-disable-next-line no-unused-vars
       const response = await axiosPrivate.delete(
         `/users/${userId}/events/${selectedEventId}`,
         {
           signal: controller.signal,
         }
       );
-      console.log(response.data.events);
+
       toast.success("Event deleted successfully");
     } catch (err) {
       console.log("Error: " + err.response?.data.err);

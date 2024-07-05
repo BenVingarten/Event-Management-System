@@ -41,14 +41,9 @@ function App() {
               <Route path="myEvents" element={<MyEvents />} />
               <Route path="eventVendors" element={<EventVendors />} />
             </Route>
-            {/* Vendors */}
-            {/* will be added later */}
-            <Route element={<RequireAuth allowedRoles={roles[2]} />}>
-              <Route path="vendors" element={<h1>Only Vendors</h1>} />
-            </Route>
 
             {/* Admin */}
-            <Route element={<RequireAuth allowedRoles={roles[0]} />}>
+            <Route element={<RequireAuth allowedRoles={[roles[0]]} />}>
               <Route path="admin" element={<Admin />} />
             </Route>
           </Route>

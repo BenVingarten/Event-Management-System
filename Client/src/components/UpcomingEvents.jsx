@@ -2,7 +2,7 @@ import PropTypes from "prop-types";
 import { useEffect, useRef, useState } from "react";
 import useAxiosPrivate from "../hooks/useAxiosPrivate";
 import { Toaster, toast } from "react-hot-toast";
-import { Badge, Button, Card, ListGroup } from "flowbite-react";
+import { Badge, Button, Card } from "flowbite-react";
 import moment from "moment-timezone";
 
 function UpcomingEvents({ userId, setUpcomingRefreshed }) {
@@ -17,7 +17,6 @@ function UpcomingEvents({ userId, setUpcomingRefreshed }) {
         const response = await axiosPrivate.get(
           `/users/${userId}/upcomingEvents`
         );
-        console.log(response);
         setUpcomingEvents(response.data);
         toast.success("Upcoming events fetched successfully");
       } catch (err) {
@@ -31,6 +30,7 @@ function UpcomingEvents({ userId, setUpcomingRefreshed }) {
     return () => {
       effectRun.current = true;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId]);
 
   const handleRemoveEvent = async (eventId) => {
@@ -41,7 +41,7 @@ function UpcomingEvents({ userId, setUpcomingRefreshed }) {
         `/users/${userId}/upcomingEvents/${eventId}`
       );
       setUpcomingRefreshed((prev) => prev + 1);
-      console.log(response);
+
       toast.success(response.date.msg);
     } catch (err) {
       console.log(err.response.data);

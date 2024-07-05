@@ -39,6 +39,7 @@ const Invitations = ({ userId, setInvitationsRefresh }) => {
       controller.abort();
       effectRun.current = true;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   //console.log(invitations);
 

@@ -12,8 +12,6 @@ const useRefreshToken = () => {
       });
       const accessToken = response.data?.accessToken;
       setAuth((prev) => {
-        console.log(JSON.stringify(prev));
-        console.log(response.data.accessToken);
         return {
           ...prev,
           role: jwtDecode(accessToken).userInfo.role,

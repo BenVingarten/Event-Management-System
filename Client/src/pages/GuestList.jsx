@@ -67,6 +67,7 @@ const GuestListPage = () => {
       controller.abort();
       effectRun.current = true;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const addGuest = async () => {
@@ -130,6 +131,7 @@ const GuestListPage = () => {
     const selectedGuestsIDs = selectedGuests.map((index) => guests[index]._id);
     const controller = new AbortController();
     try {
+      // eslint-disable-next-line no-unused-vars
       const response = await axiosPrivate.delete(
         `/users/${userId}/events/${eventID}/guests`,
         {
@@ -168,6 +170,7 @@ const GuestListPage = () => {
     // Update guest status on the server
     const controller = new AbortController();
     try {
+      // eslint-disable-next-line no-unused-vars
       const response = await axiosPrivate.patch(
         `/users/${userId}/events/${eventID}/guests/${guests[index]._id}`,
         { status: status },
@@ -193,6 +196,7 @@ const GuestListPage = () => {
     // Update guest people count on the server
     const controller = new AbortController();
     try {
+      // eslint-disable-next-line no-unused-vars
       const response = await axiosPrivate.patch(
         `/users/${userId}/events/${eventID}/guests/${guests[index]._id}`,
         { peopleCount: peopleCount },
@@ -273,6 +277,7 @@ const GuestListPage = () => {
 
   useEffect(() => {
     presentList();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [guests]);
 
   return (

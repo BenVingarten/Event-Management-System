@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Button, Card, Modal, TextInput } from "flowbite-react";
 import { CiCircleRemove } from "react-icons/ci";
 import { IoIosAddCircleOutline } from "react-icons/io";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import useAuth from "../hooks/useAuth";
 import useAxiosPrivate from "../hooks/useAxiosPrivate";
@@ -42,7 +42,6 @@ function EventVendors() {
           `users/${userId}/events/${eventID}/vendors`
         );
 
-        console.log(res.data);
         setEventVendors(res.data.addedVendors);
         setNegotiatedVendors(res.data.negotiatedVendors);
         setSuggestedVendors(res.data.suggestedVendors);
@@ -60,6 +59,7 @@ function EventVendors() {
     return () => {
       effectRun.current = true;
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const StartNegotiationWithVendor = async (vendor) => {
@@ -70,12 +70,13 @@ function EventVendors() {
       }
     );
     try {
+      // eslint-disable-next-line no-unused-vars
       const res = await axiosPrivate.post(
         `users/${userId}/events/${eventID}/vendors/${vendor.vendorId}`
       );
-      console.log(res.data);
+
       toast.success("Email Sent to Vendor!");
-      console.log(vendor);
+
       // Add to Negotiated Vendors
       setNegotiatedVendors((pv) => [...pv, vendor]);
       // Remove from Suggested Vendors
@@ -91,14 +92,14 @@ function EventVendors() {
 
   const AddVendorToMyVendors = async (vendor) => {
     try {
-      console.log(vendor);
+      // eslint-disable-next-line no-unused-vars
       const res = await axiosPrivate.patch(
         `users/${userId}/events/${eventID}/vendors/${vendor.vendorId}`,
         { priceForServiceForService: vendor.priceForService }
       );
-      console.log(res.data);
+
       toast.success("Vendor Added to Event Vendors!");
-      console.log(vendor);
+
       setEventVendors((pv) => [...pv, vendor]);
       setNegotiatedVendors((pv) =>
         pv.filter((v) => v.businessName !== vendor.businessName)
@@ -112,7 +113,7 @@ function EventVendors() {
   const RemoveVendorFromNegotiatedVendors = (vendor) => {
     console.log("Remove Vendor from Negotiated Vendors");
     toast.success("Vendor Removed from Negotiated Vendors!");
-    console.log(vendor);
+
     // Remove from Negotiated Vendors
     setNegotiatedVendors((pv) =>
       pv.filter((v) => v.username !== vendor.username)
@@ -121,12 +122,12 @@ function EventVendors() {
 
   const RemoveVendorFromEventVendors = async (vendor) => {
     try {
-      console.log(vendor);
+      // eslint-disable-next-line no-unused-vars
       const res = await axiosPrivate.delete(
         `users/${userId}/events/${eventID}/vendors`,
         { data: { vendor } }
       );
-      console.log(res.data);
+
       toast.success("Vendor Removed from Event Vendors!");
 
       // Remove from Event Vendors
@@ -142,11 +143,12 @@ function EventVendors() {
   const AddVendorManually = async (e) => {
     e.preventDefault();
     try {
+      // eslint-disable-next-line no-unused-vars
       const res = await axiosPrivate.post(
         `users/${userId}/events/${eventID}/vendors`,
         newVendor
       );
-      console.log(res.data);
+
       toast.success("Vendor Added Manually!");
 
       // Add to Event Vendors

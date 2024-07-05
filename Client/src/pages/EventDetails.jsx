@@ -100,6 +100,7 @@ export default function EventDetails() {
       controller.abort();
       effectRun.current = true;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isDetailsModalOpen]);
 
   // Convert array to format required by Google Charts

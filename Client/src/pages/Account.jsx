@@ -74,7 +74,7 @@ export default function Account() {
     if (businessLocationChanged) {
       changedDetails.businessLocation = selectedBusinessLocation;
     }
-    console.log(changedDetails);
+
     const controller = new AbortController();
     try {
       const response = await axiosPrivate.patch(
@@ -87,7 +87,7 @@ export default function Account() {
         }
       );
       setUpdatedDetails({});
-      console.log(response);
+
       setUser({
         username: response.data.updatedUser.username,
         email: response.data.updatedUser.email,
@@ -102,8 +102,6 @@ export default function Account() {
       toast.error(err.response.data.err);
     }
   };
-
-  //console.log(user);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -120,7 +118,7 @@ export default function Account() {
           businessType: response.data.user.businessType,
           businessDescription: response.data.user.businessDescription,
         });
-        console.log(response.data.user);
+
         setSelectedEventTypes(response.data.user.eventTypes);
         setSelectedBusinessLocation(response.data.user.businessLocation);
         toast.success("User details fetched successfully");
@@ -137,6 +135,7 @@ export default function Account() {
       controller.abort();
       effectRun.current = true;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

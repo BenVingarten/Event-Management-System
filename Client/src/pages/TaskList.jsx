@@ -61,6 +61,7 @@ const Board = () => {
       controller.abort();
       effectRun.current = true;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
@@ -350,9 +351,7 @@ const BurnBarrel = ({ setCards, userId, eventId }) => {
 
       const controller = new AbortController();
       try {
-        //console.log("User ID:", userId);
-        //console.log(cards);
-
+        // eslint-disable-next-line no-unused-vars
         const response = await axiosPrivate.delete(
           `/users/${userId}/events/${eventId}/tasks/${cardId}`,
           {
@@ -364,8 +363,6 @@ const BurnBarrel = ({ setCards, userId, eventId }) => {
         toast.success("Task deleted successfully");
 
         setCards((pv) => pv.filter((c) => c._id !== cardId));
-        //console.log);
-        //console.log("tasks saved successfully:", response.data);
       } catch (error) {
         console.error("Error deleting task:", error.response?.data);
         if (!error?.response) toast.error("Error: No response from server.");
@@ -395,13 +392,12 @@ const BurnBarrel = ({ setCards, userId, eventId }) => {
 
 const SaveTasks = ({ userId, eventId, cards }) => {
   const axiosPrivate = useAxiosPrivate();
-  //console.log(userId);
+
   const handleSave = async (e) => {
     e.preventDefault();
     const controller = new AbortController();
     try {
-      //console.log("User ID:", userId);
-      console.log(cards);
+      // eslint-disable-next-line no-unused-vars
       const response = await axiosPrivate.put(
         `/users/${userId}/events/${eventId}/tasks`,
         { cards },
@@ -412,7 +408,6 @@ const SaveTasks = ({ userId, eventId, cards }) => {
         }
       );
       toast.success("tasks saved successfully");
-      //console.log("tasks saved successfully:", response.data);
     } catch (error) {
       console.error("Error saving tasks:", error.response?.data);
       if (!error?.response) toast.error("Error: No response from server.");
