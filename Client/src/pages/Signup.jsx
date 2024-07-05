@@ -78,7 +78,6 @@ const SignupPage = () => {
         userInfo.eventTypes = businessEventTypes;
         userInfo.businessDescription = businessInfo.businessDescription;
       }
-      console.log(userInfo);
       const response = await axios.post(
         SIGNUP_URL,
         JSON.stringify({
@@ -90,12 +89,12 @@ const SignupPage = () => {
         }
       );
 
-      console.log(JSON.stringify(response));
+      console.log(response);
       toast.success("Register successful");
       navigate("/login");
     } catch (error) {
       if (!error?.response) toast.error("Error: No response from server.");
-      else toast.error("Error: " + error.response.data.error[0].msg);
+      toast.error("Error: " + error.response.data.err);
     }
   }
 
@@ -213,124 +212,140 @@ const SignupPage = () => {
           Sign Up
         </button>
 
-        <OAuthSignUp role={role} />
+        <OAuthSignUp
+          role={role}
+          businessInfo={businessInfo}
+          businessLocation={businessLocation}
+          businessEventTypes={businessEventTypes}
+        />
       </form>
 
       {/*Popup Modal*/}
       <Modal show={isModalOpen} onClose={() => setIsModalOpen(false)}>
-        <div className="p-5 overflow-auto">
-          <h3 className="text-lg font-bold mb-3">
-            Tell us about your business!
-          </h3>
-          <div className="">
-            <div className="mr-5">
-              {/* Business Name */}
-              <div>
-                <div className="mb-2 block">
-                  <Label htmlFor="businessName" value="Business Name" />
-                </div>
-                <TextInput
-                  id="businessName"
-                  type="text"
-                  value={businessInfo.businessName}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-              {/* Business Type */}
-              <div>
-                <div className="mb-2 block">
-                  <Label htmlFor="businessType" value="Business type" />
-                </div>
-                <TextInput
-                  id="businessType"
-                  type="text"
-                  value={businessInfo.businessType}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-              {/* Business Service Location */}
-              <div>
-                <div className="mb-2 block">
-                  <Label
-                    htmlFor="businessLocation"
-                    value="Select the areas you provide service at"
+        <form onSubmit={() => setIsModalOpen(false)}>
+          <div className="p-5 overflow-auto">
+            <h3 className="text-lg font-bold mb-3">
+              Tell us about your business!
+            </h3>
+            <div className="">
+              <div className="mr-5">
+                {/* Business Name */}
+                <div>
+                  <div className="mb-2 block">
+                    <Label htmlFor="businessName" value="Business Name" />
+                  </div>
+                  <TextInput
+                    id="businessName"
+                    type="text"
+                    value={businessInfo.businessName}
+                    onChange={handleInputChange}
+                    required
                   />
                 </div>
-                <ListGroup>
-                  {locations.map((location) => (
-                    <ListGroup.Item
-                      key={location.value}
-                      className="flex items-center"
-                    >
-                      <Checkbox
-                        id={location.value}
-                        checked={businessLocation.includes(location.value)}
-                        onChange={() =>
-                          handleBusinessLoactionChange(location.value)
-                        }
-                        className="mr-2"
-                      />
-                      <label htmlFor={location.value}>{location.label}</label>
-                    </ListGroup.Item>
-                  ))}
-                </ListGroup>
-              </div>
-              {/* Business Event Types */}
-              <div>
-                <div className="mb-2 block">
-                  <Label
-                    htmlFor="businessEventTypes"
-                    value="Select the event types you provide service to"
+                {/* Business Type */}
+                <div>
+                  <div className="mb-2 block">
+                    <Label htmlFor="businessType" value="Business type" />
+                  </div>
+                  <TextInput
+                    id="businessType"
+                    type="text"
+                    value={businessInfo.businessType}
+                    onChange={handleInputChange}
+                    required
                   />
                 </div>
-                <ListGroup>
-                  {eventTypes.map((event) => (
-                    <ListGroup.Item
-                      key={event.value}
-                      className="flex items-center"
-                    >
-                      <Checkbox
-                        id={event.value}
-                        checked={businessEventTypes.includes(event.value)}
-                        onChange={() => handleEventTypesChange(event.value)}
-                        className="mr-2"
-                      />
-                      <label htmlFor={event.value}>{event.label}</label>
-                    </ListGroup.Item>
-                  ))}
-                </ListGroup>
-              </div>
-              {/* Business Description */}
-              <div>
-                <div className="mb-2 block">
-                  <Label
-                    htmlFor="businessDescription"
-                    value="Business description"
+                {/* Business Service Location */}
+                <div>
+                  <div className="mb-2 block">
+                    <Label
+                      htmlFor="businessLocation"
+                      value="Select the areas you provide service at"
+                    />
+                  </div>
+                  <ListGroup>
+                    {locations.map((location) => (
+                      <ListGroup.Item
+                        key={location.value}
+                        className="flex items-center"
+                      >
+                        <Checkbox
+                          id={location.value}
+                          checked={businessLocation.includes(location.value)}
+                          onChange={() =>
+                            handleBusinessLoactionChange(location.value)
+                          }
+                          className="mr-2"
+                        />
+                        <label htmlFor={location.value}>{location.label}</label>
+                      </ListGroup.Item>
+                    ))}
+                  </ListGroup>
+                </div>
+                {/* Business Event Types */}
+                <div>
+                  <div className="mb-2 block">
+                    <Label
+                      htmlFor="businessEventTypes"
+                      value="Select the event types you provide service to"
+                    />
+                  </div>
+                  <ListGroup>
+                    {eventTypes.map((event) => (
+                      <ListGroup.Item
+                        key={event.value}
+                        className="flex items-center"
+                      >
+                        <Checkbox
+                          id={event.value}
+                          checked={businessEventTypes.includes(event.value)}
+                          onChange={() => handleEventTypesChange(event.value)}
+                          className="mr-2"
+                        />
+                        <label htmlFor={event.value}>{event.label}</label>
+                      </ListGroup.Item>
+                    ))}
+                  </ListGroup>
+                </div>
+                {/* Business Description */}
+                <div>
+                  <div className="mb-2 block">
+                    <Label
+                      htmlFor="businessDescription"
+                      value="Business description"
+                    />
+                  </div>
+                  <TextInput
+                    id="businessDescription"
+                    type="text"
+                    value={businessInfo.businessDescription}
+                    onChange={handleInputChange}
+                    required
                   />
                 </div>
-                <TextInput
-                  id="businessDescription"
-                  type="text"
-                  value={businessInfo.businessDescription}
-                  onChange={handleInputChange}
-                  required
-                />
               </div>
-            </div>
-            <div className="items-center">
-              <Button
-                className="mt-5"
-                size="xl"
-                onClick={() => setIsModalOpen(false)}
-                gradientDuoTone="greenToBlue"
-              >
-                That&apos;s it!
-              </Button>
+              <div className="items-center">
+                <Button
+                  type="submit"
+                  className="mt-5"
+                  size="xl"
+                  gradientDuoTone="greenToBlue"
+                >
+                  That&apos;s it!
+                </Button>
+                <Button
+                  type="button"
+                  className="mt-5"
+                  size="xl"
+                  onClick={() => setIsModalOpen(false)}
+                  gradientDuoTone="redToOrange"
+                >
+                  Cancel
+                </Button>
+              </div>
             </div>
           </div>
-        </div>
+        </form>
       </Modal>
     </div>
   );

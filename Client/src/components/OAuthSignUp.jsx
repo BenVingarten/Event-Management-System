@@ -9,7 +9,12 @@ import { Toaster, toast } from "react-hot-toast";
 import axios from "../api/axios";
 const GOOGLE_SIGNUP_URL = "http://localhost:4000/google/register";
 
-function OAuthSignUp({ role }) {
+function OAuthSignUp({
+  role,
+  businessInfo,
+  businessLocation,
+  businessEventTypes,
+}) {
   const navigate = useNavigate();
 
   const auth = getAuth(app);
@@ -18,12 +23,24 @@ function OAuthSignUp({ role }) {
     provider.setCustomParameters({ prompt: "select_account" });
     try {
       const resultsFromGoogle = await signInWithPopup(auth, provider);
+
+      const userInfo = {
+        username: resultsFromGoogle.user.displayName,
+        email: resultsFromGoogle.user.email,
+        role: role,
+      };
+      if (role === "Vendor") {
+        userInfo.businessName = businessInfo.businessName;
+        userInfo.businessType = businessInfo.businessType;
+        userInfo.businessLocation = businessLocation;
+        userInfo.eventTypes = businessEventTypes;
+        userInfo.businessDescription = businessInfo.businessDescription;
+      }
+
       const response = await axios.post(
         GOOGLE_SIGNUP_URL,
         JSON.stringify({
-          username: resultsFromGoogle.user.displayName,
-          email: resultsFromGoogle.user.email,
-          role: role,
+          ...userInfo,
         }),
         {
           headers: { "Content-Type": "application/json" },
@@ -35,6 +52,7 @@ function OAuthSignUp({ role }) {
       toast.success("Register successful");
       navigate("/login");
     } catch (error) {
+      console.error(error);
       if (!error?.response) toast.error("Error: No response from server.");
       else toast.error("Error: " + error.message);
     }
@@ -62,4 +80,7 @@ export default OAuthSignUp;
 
 OAuthSignUp.propTypes = {
   role: PropTypes.string,
+  businessInfo: PropTypes.object,
+  businessLocation: PropTypes.array,
+  businessEventTypes: PropTypes.array,
 };
