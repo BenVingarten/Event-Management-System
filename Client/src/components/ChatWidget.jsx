@@ -64,7 +64,7 @@ const ChatWidget = ({ suggestions, setCards, userId, eventId }) => {
     <div
       ref={containerRef}
       className={`fixed bottom-4 right-4 w-64 bg-white shadow-lg rounded-lg overflow-hidden transition-all duration-300 ${
-        isOpen ? "h-auto" : "h-12"
+        isOpen ? "h-64" : "h-12"
       }`}
       style={{ transition: "height 0.3s ease" }}
     >

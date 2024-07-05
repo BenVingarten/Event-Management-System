@@ -12,7 +12,7 @@ const CreateEventPage = () => {
   const { auth } = useAuth();
   const navigate = useNavigate();
 
-  const [eventType, setEventType] = useState("");
+  const [eventType, setEventType] = useState(eventTypes[0].value);
   const [eventDate, setEventDate] = useState("");
   const [eventName, setEventName] = useState("");
   const [budget, setBudget] = useState("");
@@ -79,9 +79,10 @@ const CreateEventPage = () => {
       console.log("Event created successfully:", response.data);
       navigate("/myEvents", { replace: true });
     } catch (error) {
+      console.error(error);
       console.error("Error creating event:", error.response?.data.err);
       if (!error?.response) toast.error("Error: No response from server.");
-      else toast.error("Error: " + error.response?.data.err);
+      else toast.error("Error: " + error.response?.data.error[0].msg);
     }
   };
 

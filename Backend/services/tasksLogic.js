@@ -8,7 +8,10 @@ import mongoose from "mongoose";
 import suggestedTasksModel from "../models/SuggestedTask.js";
 export const getTasks = async (userId, eventId) => {
   try {
-    const conditions = [{ owner: userId }, { "collaborators.collaboratorId": userId }];
+    const conditions = [
+      { owner: userId },
+      { "collaborators.collaboratorId": userId },
+    ];
     const event = await eventModel
       .findOne({ _id: eventId, $or: conditions })
       .populate({ path: "cards" })
@@ -44,7 +47,7 @@ export const createTask = async (userId, eventId, taskData, suggested) => {
 export const updateTasks = async (userId, eventId, cards) => {
   try {
     const options = {
-      select: "cards"
+      select: "cards",
     };
     const event = await getEventById(userId, eventId, options);
     for (const card of cards) {
@@ -54,7 +57,7 @@ export const updateTasks = async (userId, eventId, cards) => {
       );
       if (!task) throw new DataNotFoundError();
     }
-    event.cards = cards.map(card => card._id);
+    event.cards = cards.map((card) => card._id);
     await event.save();
   } catch (err) {
     if (err instanceof DataNotFoundError) throw err;
@@ -122,7 +125,10 @@ export const getTasksAnalytics = async (userId, eventId) => {
 
 export const deleteTask = async (userId, eventId, taskId) => {
   try {
-    const conditions = [{ owner: userId }, { "collaborators.collaboratorId": userId }];
+    const conditions = [
+      { owner: userId },
+      { "collaborators.collaboratorId": userId },
+    ];
     const event = await eventModel.updateOne(
       { _id: eventId, $or: conditions },
       { $pull: { cards: taskId } }
@@ -145,8 +151,8 @@ export const getSuggestedTasks = async (userId, eventId) => {
   try {
     const options = {
       select: "type",
-      lean: true
-    }
+      lean: true,
+    };
     const event = await getEventById(userId, eventId, options);
     const { location, type } = event;
     const pipeLine = [
@@ -160,7 +166,7 @@ export const getSuggestedTasks = async (userId, eventId) => {
         $project: {
           _id: 0,
           category: "$_id",
-          tasks: 1,
+          tasks: { $slice: ["$tasks", 6] },
         },
       },
     ];

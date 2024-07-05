@@ -96,7 +96,7 @@ const GuestListPage = () => {
     } catch (error) {
       console.error("Error Adding Guest:", error.response?.data);
       if (!error?.response) toast.error("Error: No response from server.");
-      else toast.error("Error: " + error.response?.data.err);
+      else toast.error("Error: " + error.response?.data.errors[0].msg);
     }
 
     // Reset input fields

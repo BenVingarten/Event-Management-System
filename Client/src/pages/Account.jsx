@@ -96,6 +96,8 @@ export default function Account() {
       });
       setSelectedEventTypes(response.data.updatedUser.eventTypes);
       setSelectedBusinessLocation(response.data.updatedUser.businessLocation);
+      localStorage.setItem("userName", response.data.updatedUser.username);
+      localStorage.setItem("email", response.data.updatedUser.email);
       toast.success("Details updated successfully");
     } catch (err) {
       console.log(err);
