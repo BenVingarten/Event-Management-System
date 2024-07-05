@@ -241,7 +241,10 @@ const GuestListPage = () => {
       <Table.Row key={index}>
         <Table.Cell>
           {" "}
-          <Checkbox onChange={() => handleSelectGuest(index)} />{" "}
+          <Checkbox
+            onChange={() => handleSelectGuest(index)}
+            checked={selectedGuests.includes(index)}
+          />{" "}
         </Table.Cell>
         <Table.Cell className="px-4 py-2">{guest.name}</Table.Cell>
         <Table.Cell className="px-4 py-2 ">
