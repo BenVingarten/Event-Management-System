@@ -97,7 +97,7 @@ export const deleteEventByOwner = async (userId, eventId) => {
     // first we want to delete its tasks and guests
     const event = await eventModel
       .findOne({ _id: eventId, owner: userId })
-      .select("collaborators name")
+      .select("collaborators name vendors")
       .populate({ path: "owner", select: "username" })
       .exec();
     if (!event)
@@ -108,7 +108,7 @@ export const deleteEventByOwner = async (userId, eventId) => {
     await taskModel.deleteMany({ event: eventId });
     await guestModel.deleteMany({ event: eventId });
 
-    // now we will delete the event from all the collaborators:
+    // Delete the event from all the collaborators:
     for (const collaborator of event.collaborators) {
       await deleteUserEvent(collaborator.collaboratorId, eventId);
       const mailOptions = deletingEventlDetails(
@@ -118,8 +118,25 @@ export const deleteEventByOwner = async (userId, eventId) => {
       );
       await sendWebsiteEmail(mailOptions);
     }
-    
-    // delete the event itself:
+
+    // Delete event from vendors upcoming events
+    const eventVendors = event.vendors.map((vendor) => vendor.registeredUser);
+    for (const vendor of eventVendors) {
+      await userModel.findByIdAndUpdate(vendor, {
+        $pull: { upcomingEvents: eventId },
+        $inc: { leadCount: -1 },
+      });
+
+      // Send email to vendor
+      const mailOptions = deletingEventlDetails(
+        event.owner.username,
+        vendor.email,
+        event.name
+      );
+      await sendWebsiteEmail(mailOptions);
+    }
+
+    // Delete the event itself:
     const deletedEvent = await eventModel.deleteOne({ _id: eventId });
     if (deletedEvent.deletedCount === 0)
       throw new DataNotFoundError("could not find the event with that ID");
@@ -169,9 +186,8 @@ export const deleteEvent = async (userId, eventId) => {
     const event = await getEventById(userId, eventId, eventOptions);
     if (event.owner.toString() === userId) {
       await deleteEventByOwner(userId, eventId);
-    } 
-    else {
-      console.log('here');
+    } else {
+      console.log("here");
       await collaboratorEventExit(userId, eventId);
     }
   } catch (err) {

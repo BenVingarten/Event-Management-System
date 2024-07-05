@@ -341,13 +341,7 @@ export const deleteVendorUpcomingEvent = async (userId, eventId) => {
       select: "upcomingEvents leadCount businessName email",
     };
     const vendor = await getUserById(userId, vendorOptions);
-    // const vendor = await userModel
-    //   .findOne({ _id: userId, role: "Vendor" })
-    //   .select("upcomingEvents leadCount business")
-    //   .exec();
 
-    // if (!vendor)
-    //   throw new DataNotFoundError("Couldn't find a vendor with that ID");
     vendor.upcomingEvents.pull(eventId);
     vendor.leadCount--;
     await vendor.save();
