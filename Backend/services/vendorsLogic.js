@@ -209,11 +209,12 @@ export const updateRegisteredVendor = async (
     };
 
     const event = await getEventById(userId, eventId, eventOptions); //check access control
+    console.log(event);
     //update event's budget
     event.budget -= verifiedVendor.priceForService;
     // update the vendor's price in the array
     const findVendor = event.vendors.find(
-      (ven) => ven.registeredUser.toString() === vendorId
+      (ven) => ven.registeredUser?.toString() === vendorId
     );
     if (!findVendor)
       throw new DataNotFoundError("couldnt find vendor with that ID");

@@ -67,8 +67,8 @@ function updateRegisteredVendorValidation() {
   return {
     priceForService: {
       custom: {
-        options: (value, { req }) => {
-          return value && value > 0;
+        options: (value) => {
+          return value && (value > 0);
         },
         errorMessage: "Price must be greater than 0",
       },

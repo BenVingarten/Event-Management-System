@@ -59,7 +59,7 @@ function EventVendors() {
     return () => {
       effectRun.current = true;
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const StartNegotiationWithVendor = async (vendor) => {
@@ -72,7 +72,7 @@ function EventVendors() {
     try {
       // eslint-disable-next-line no-unused-vars
       const res = await axiosPrivate.post(
-        `users/${userId}/events/${eventID}/vendors/${vendor.vendorId}`
+        `users/${userId}/events/${eventID}/vendors/${vendor._id}`
       );
 
       toast.success("Email Sent to Vendor!");
@@ -85,17 +85,18 @@ function EventVendors() {
       );
       // Send Email
     } catch (err) {
-      console.log(err.response.data.err);
-      toast.error("Failed to Send Email to Vendor!");
+      console.log(err.response.data.error);
+      toast.error(err.response.data.error);
     }
   };
 
   const AddVendorToMyVendors = async (vendor) => {
     try {
+      console.log(vendor);
       // eslint-disable-next-line no-unused-vars
       const res = await axiosPrivate.patch(
-        `users/${userId}/events/${eventID}/vendors/${vendor.vendorId}`,
-        { priceForServiceForService: vendor.priceForService }
+        `users/${userId}/events/${eventID}/vendors/${vendor._id}`,
+        { priceForService: vendor.priceForService }
       );
 
       toast.success("Vendor Added to Event Vendors!");
@@ -105,8 +106,9 @@ function EventVendors() {
         pv.filter((v) => v.businessName !== vendor.businessName)
       );
     } catch (err) {
-      console.log(err.response.data);
-      toast.error("Failed to Add Vendor to Event Vendors!");
+      console.error(err);
+      console.log(err.response.data.error[0].msg);
+      toast.error(err.response.data.error[0].msg);
     }
   };
 

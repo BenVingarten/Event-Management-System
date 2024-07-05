@@ -118,6 +118,7 @@ export const deleteEventByOwner = async (userId, eventId) => {
       );
       await sendWebsiteEmail(mailOptions);
     }
+    
     // delete the event itself:
     const deletedEvent = await eventModel.deleteOne({ _id: eventId });
     if (deletedEvent.deletedCount === 0)
