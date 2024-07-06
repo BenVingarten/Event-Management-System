@@ -2,17 +2,15 @@ import { DataNotFoundError } from "../errors/DataNotFoundError.js";
 import { DuplicateDataError } from "../errors/DuplicateDataError.js";
 import { GeneralServerError } from "../errors/GeneralServerError.js";
 import userModel from "../models/User.js";
-import vendorModel from "../models/Vendor.js";
 import { getUserById } from "./UserLogic.js";
 import {
   removeVendorDetails,
   vendorExitEventDetails,
   vendorInvetationDetails,
 } from "./emailLogic.js";
-import { getEventById } from "./eventsLogic.js";
+import { getEventById, removeVendorFromVendorsArrayByPlanner, removeVendorFromVendorsArrayByVendor } from "./eventsLogic.js";
 import { sendWebsiteEmail } from "./emailLogic.js";
-import { populate } from "dotenv";
-import eventModel from "../models/Event.js";
+
 
 export const getVendors = async (userId, eventId) => {
   try {
@@ -284,43 +282,26 @@ export const updateCustomVendor = async (
 
 export const deleteVendor = async (userId, eventId, vendorObj) => {
   try {
-    const eventOptions = {
-      select: "vendors budget name type location date",
-      populate: { path: "owner", select: "username email" },
-    };
-    const event = await getEventById(userId, eventId, eventOptions);
-    event.vendors.pull(vendorObj);
-    event.budget += vendorObj.priceForService;
-    await event.save();
-    // if the vendor is registered we need to remove his event and decrament his lead count
-
-    if (vendorObj.registeredUser) {
-      const vendor = await userModel
-        .findOneAndUpdate(
-          { _id: vendorObj.registeredUser },
-          {
-            $pull: { upcomingEvents: eventId },
-            $inc: { leadCount: -1 },
-          }
-        )
-        .select("email")
-        .exec();
-      if (!vendor)
-        throw new DataNotFoundError("could not find Vendor with that Id");
+    console.log(vendorObj);
+    // remove vendor from vendors array:
+    const updatedEvent = await removeVendorFromVendorsArrayByPlanner(userId, eventId, vendorObj);
+    // if the vendor is registered and added we need to remove his event and decrament his lead count
+    if (vendorObj._id && vendorObj.status === "Added") {
+        const updatedVendor = await removeUpcomingEventFromArrayByPlanner(eventId, vendorObj);
       //send email to notify the vendor
       const ownerdetails = {
-        ownerName: event.owner.username,
-        ownerEmail: event.owner.email,
+        ownerName: updatedEvent.owner.username,
+        ownerEmail: updatedEvent.owner.email,
       };
       const vendorDetails = {
         businessName: vendorObj.businessName,
-        email: vendor.email,
+        email: updatedVendor.email,
       };
       const eventDetails = {
-        name: event.name,
-        location: event.location,
-        type: event.type,
-        date: event.date,
+        name:updatedEvent.name,
+        location: updatedEvent.location,
+        type: updatedEvent.type,
+        date: updatedEvent.date,
       };
       const mailOptions = removeVendorDetails(
         ownerdetails,
@@ -330,57 +311,30 @@ export const deleteVendor = async (userId, eventId, vendorObj) => {
       await sendWebsiteEmail(mailOptions);
     }
     return vendorObj;
-  } catch (err) {}
+  } catch (err) {
+    if(err instanceof DataNotFoundError) throw err;
+    throw new GeneralServerError(`unexpected error in deleting vendor: ${err.message}`);
+  }
 };
 
 export const deleteVendorUpcomingEvent = async (userId, eventId) => {
   try {
-    // find vendor with userId and upcomingEvent eventId and remove it
-
-    const vendorOptions = {
-      select: "upcomingEvents leadCount businessName email",
-    };
-    const vendor = await getUserById(userId, vendorOptions);
-
-    vendor.upcomingEvents.pull(eventId);
-    vendor.leadCount--;
-    await vendor.save();
-
-    // Update the event's vendors and budget
-    const event = await eventModel
-      .findOne({ _id: eventId })
-      .select("vendors budget name location type date")
-      .populate({ path: "owner", select: "email username" })
-      .exec();
-
-    if (!event)
-      throw new DataNotFoundError("Couldn't find an event with that ID");
-
-    const vendorObj = event.vendors.find(
-      (ven) => ven.registeredUser.toString() === userId
-    );
-    if (!vendorObj)
-      throw new DataNotFoundError("Vendor not associated with this event");
-
-    event.budget += vendorObj.priceForService;
-    event.vendors.pull(vendorObj);
-
-    await event.save();
-
+    const updatedVendor = await removeUpcomingEventFromArrayByVendor(userId, eventId);
+    const updatedEvent = await removeVendorFromVendorsArrayByVendor(userId, eventId)
     // Send mail to notify event planner (implement mailing logic here)
     const ownerDetails = {
-      ownerName: event.owner.username,
-      ownerEmail: event.owner.email,
+      ownerName: updatedEvent.owner.username,
+      ownerEmail: updatedEvent.email,
     };
     const vendorDetails = {
-      email: vendor.email,
-      businessName: vendor.businessName,
+      email: updatedVendor.email,
+      businessName: updatedVendor.businessName,
     };
     const eventDetails = {
-      name: event.name,
-      location: event.location,
-      type: event.type,
-      date: event.date,
+      name: updatedEvent.name,
+      location: updatedEvent.location,
+      type: updatedEvent.type,
+      date: updatedEvent.date,
     };
     const mailOptions = vendorExitEventDetails(
       ownerDetails,
@@ -412,5 +366,37 @@ export const getUpcomingEvents = async (userId) => {
     throw new GeneralServerError(
       `unexpected error in getting upcoming events: ${err.message}`
     );
+  }
+};
+
+export const removeUpcomingEventFromArrayByVendor = async (userId, eventId) => {
+  try {
+    const vendorOptions = {
+      select: "upcomingEvents leadCount businessName email",
+    };
+    const vendor = await getUserById(userId, vendorOptions);
+    vendor.upcomingEvents.pull(eventId);
+    vendor.leadCount--;
+    await vendor.save();
+    return vendor;
+  } catch(err) {
+    if(err instanceof DataNotFoundError) throw err;
+    throw new GeneralServerError(`unexpected error in deletinh upcoming event: ${err.message}`)
+  }
+};
+
+export const removeUpcomingEventFromArrayByPlanner = async (eventId, vendorObj) => {
+  try {
+    const vendorOptions = {
+      select: "upcomingEvents leadCount businessName email",
+    };
+    const vendor = await getUserById(vendorObj._id, vendorOptions);
+    vendor.upcomingEvents.pull(eventId);
+    vendor.leadCount--;
+    await vendor.save();
+    return vendor;
+  } catch(err) {
+    if(err instanceof DataNotFoundError) throw err;
+    throw new GeneralServerError(`unexpected error in deletinh upcoming event: ${err.message}`)
   }
 };

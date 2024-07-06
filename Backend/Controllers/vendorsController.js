@@ -23,7 +23,6 @@ export const handleGetVendors = async (req, res) => {
 
 export const handleAddCustomVendor = async (req, res) => {
   try {
-    
     const errors = validationResult(req);
     if (!errors.isEmpty())
       return res.status(400).json({ error: errors.array() });
@@ -63,7 +62,6 @@ export const handleAddRegisteredVendor = async (req, res) => {
 
 export const handleUpdateRegisteredVendor = async (req, res) => {
   try {
-    console.log(req.body);
     const errors = validationResult(req);
     if (!errors.isEmpty())
       return res.status(400).json({ error: errors.array() });
@@ -111,7 +109,7 @@ export const handleUpdateCustomVendor = async (req, res) => {
 export const handleDeleteVendor = async (req, res) => {
   try {
     const { userId } = req;
-    const { eventId, vendorId } = req.params;
+    const { eventId } = req.params;
     const { vendor } = req.body;
     if (!vendor)
       return res.status(400).json({ msg: "no vendor specified for deleting" });
@@ -120,6 +118,7 @@ export const handleDeleteVendor = async (req, res) => {
       msg: `success, ${deletedVendor.businessName} has been deleted!`,
     });
   } catch (err) {
+    console.error(err);
     return res.status(err.statusCode).json({ err: err.message });
   }
 };

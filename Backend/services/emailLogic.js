@@ -98,7 +98,7 @@ export const vendorInvetationDetails = (
     .format("DD-MM-YYYY");
 
   const subject = `request to hire your services at an event`;
-  const text = `Hello ${businessName},\nAfter negotiations, the event planner: ${ownerName} has decided to add you to be one of his vendors.\nHere are the details on the event:\nName: ${name}\nType: ${type}\nLocation: ${location}\nDate: ${formattedDate}\n\nYou can contact the event planner for more info through his email: ${ownerEmail}\nBest regards, CelebrightEMS Team`;
+  const text = `Hello ${businessName},\nthe event planner: ${ownerName} is interested in your service for his event.\nHere are the details on the event:\nName: ${name}\nType: ${type}\nLocation: ${location}\nDate: ${formattedDate}\n\nYou can contact the event planner for more info through his email: ${ownerEmail}\nBest regards, CelebrightEMS Team`;
   const mailOptions = {
     from: process.env.EMAIL_USER,
     to: email,
@@ -132,7 +132,11 @@ export const removeVendorDetails = (
   return mailOptions;
 };
 // vendor decided to cancel his service and notify the event owner
-export const vendorExitEventDetails = (ownerDetails, vendorDetails, eventDetails) => {
+export const vendorExitEventDetails = (
+  ownerDetails,
+  vendorDetails,
+  eventDetails
+) => {
   const { businessName, email } = vendorDetails;
   const { ownerName, ownerEmail } = ownerDetails;
   const { name, location, type, date } = eventDetails;

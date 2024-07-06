@@ -112,19 +112,31 @@ function EventVendors() {
     }
   };
 
-  const RemoveVendorFromNegotiatedVendors = (vendor) => {
-    console.log("Remove Vendor from Negotiated Vendors");
-    toast.success("Vendor Removed from Negotiated Vendors!");
+  const RemoveVendorFromNegotiatedVendors = async (vendor) => {
+    try {
+      // eslint-disable-next-line no-unused-vars
+      vendor.status = "Negotiated"
+      const res = await axiosPrivate.delete(
+        `users/${userId}/events/${eventID}/vendors`,
+        { data: { vendor } }
+      );
 
-    // Remove from Negotiated Vendors
-    setNegotiatedVendors((pv) =>
-      pv.filter((v) => v.username !== vendor.username)
-    );
+      toast.success("Vendor Removed from Event Vendors!");
+
+      // Remove from Negotiated Vendors
+      setNegotiatedVendors((pv) =>
+        pv.filter((v) => v.username !== vendor.username)
+      );
+    } catch (err) {
+      console.log(err.response.data);
+      toast.error("Failed to Remove Vendor from Event Vendors!");
+    }
   };
 
   const RemoveVendorFromEventVendors = async (vendor) => {
     try {
       // eslint-disable-next-line no-unused-vars
+      vendor.status = "Added"
       const res = await axiosPrivate.delete(
         `users/${userId}/events/${eventID}/vendors`,
         { data: { vendor } }

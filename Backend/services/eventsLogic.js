@@ -212,3 +212,53 @@ export const deleteEvent = async (userId, eventId) => {
     );
   }
 };
+
+export const removeVendorFromVendorsArrayByPlanner = async(userId, eventId, vendorObj) => {
+  try {
+    const eventOptions = {
+      select: "vendors budget name type location date",
+      populate: { path: "owner", select: "username email" },
+    };
+    const event = await getEventById(userId, eventId, eventOptions);
+    // Find the specific vendor object in the vendors array
+    const findVendor = event.vendors.find(ven => 
+    (ven.registeredUser && (ven.registeredUser).toString() === vendorObj._id) ||
+    (ven.custom && ven.custom.email === vendorObj.email)); 
+  
+    if (!findVendor) {
+      throw new DataNotFoundError("Could not find a vendor with that ID in the event");
+    }
+    // Remove the vendor object from the vendors array
+    event.vendors.pull(findVendor);
+    if(findVendor.status === "Added")
+      event.budget += vendorObj.priceForService;
+    await event.save();
+    return event;
+  } catch(err) {
+    if(err instanceof DataNotFoundError) throw err;
+    throw new GeneralServerError(`unexpected error in removing vendor from the event: ${err.message}`);
+  }
+};
+export const removeVendorFromVendorsArrayByVendor = async(vendorId, eventId) => {
+  try {
+   const event = await eventModel
+   .findById(eventId)
+   .select("vendors budget name type location date")
+   .populate({ path: "owner", select: "username email" })
+   if(!event) throw new DataNotFoundError("could not find an event with that ID");
+
+   const vendorObj = event.vendors.find((ven) => 
+    ven.registeredUser && ven.registeredUser.toString() === vendorId);
+   if(!vendorObj) throw new DataNotFoundError("could not find a vendor with that Id");
+
+   event.vendors.pull(vendorObj);
+   if(vendorObj.status === "Added")
+      event.budget += vendorObj.priceForService;
+
+   await event.save();
+   return event;
+  } catch(err) {
+    if(err instanceof DataNotFoundError) throw err;
+    throw new GeneralServerError(`unexpected error in removing vendor from the event: ${err.message}`);
+  }
+};
