@@ -209,7 +209,7 @@ export const updateRegisteredVendor = async (
     };
 
     const event = await getEventById(userId, eventId, eventOptions); //check access control
-    console.log(event);
+
     //update event's budget
     event.budget -= verifiedVendor.priceForService;
     // update the vendor's price in the array

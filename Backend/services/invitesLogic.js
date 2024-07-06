@@ -71,7 +71,8 @@ export const updateByInviteResponse = async (userId, inviteId, answer) => {
     const invite = await InvitesModel.findByIdAndDelete(inviteId).select(
       "event email"
     );
-    if (!invite) throw new DataNotFoundError("couldnt find invite with this id");
+    if (!invite)
+      throw new DataNotFoundError("couldnt find invite with this id");
     if (answer === true) {
       response = "accepted";
       // if the user accepted the invite add the event to his event list

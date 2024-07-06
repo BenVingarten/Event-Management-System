@@ -77,8 +77,8 @@ const MyEvents = () => {
 
       toast.success("Event deleted successfully");
     } catch (err) {
-      console.log("Error: " + err.response?.data.err);
-      toast.error("No Events Found!");
+      console.log(err.response?.data.err);
+      toast.error(err.response?.data.err);
     }
     setIsModalOpen(false); // Close the modal after deletion
   };

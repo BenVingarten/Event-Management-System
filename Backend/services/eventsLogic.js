@@ -7,6 +7,7 @@ import taskModel from "../models/Task.js";
 import guestModel from "../models/Guest.js";
 import { deletingEventlDetails, sendWebsiteEmail } from "./emailLogic.js";
 import { collaboratorEventExit } from "./collaboratorsLogic.js";
+import { deleteInvite } from "./invitesLogic.js";
 
 export const getEvents = async (id) => {
   try {
@@ -110,30 +111,44 @@ export const deleteEventByOwner = async (userId, eventId) => {
 
     // Delete the event from all the collaborators:
     for (const collaborator of event.collaborators) {
-      await deleteUserEvent(collaborator.collaboratorId, eventId);
-      const mailOptions = deletingEventlDetails(
-        event.owner.username,
-        collaborator.email,
-        event.name
-      );
-      await sendWebsiteEmail(mailOptions);
+      if (collaborator.collaboratorId) {
+        await deleteUserEvent(collaborator.collaboratorId, eventId);
+
+        const mailOptions = deletingEventlDetails(
+          event.owner.username,
+          collaborator.email,
+          event.name
+        );
+        await sendWebsiteEmail(mailOptions);
+      } else {
+        // Delete event invites to the collaborator
+        if (collaborator.status === "Pending") {
+          await deleteInvite(collaborator.email, eventId);
+        }
+      }
     }
 
     // Delete event from vendors upcoming events
-    const eventVendors = event.vendors.map((vendor) => vendor.registeredUser);
-    for (const vendor of eventVendors) {
-      await userModel.findByIdAndUpdate(vendor, {
-        $pull: { upcomingEvents: eventId },
-        $inc: { leadCount: -1 },
-      });
+    for (const vendor of event.vendors) {
+      if (vendor.registeredUser) {
+        const user = await userModel
+          .findById(vendor.registeredUser)
+          .select("upcomingEvents leadCount email");
 
-      // Send email to vendor
-      const mailOptions = deletingEventlDetails(
-        event.owner.username,
-        vendor.email,
-        event.name
-      );
-      await sendWebsiteEmail(mailOptions);
+        if (!user) throw new DataNotFoundError("could not find the user");
+
+        user.upcomingEvents.pull(eventId);
+        user.leadCount--;
+        await user.save();
+
+        // Send email to vendor
+        const mailOptions = deletingEventlDetails(
+          event.owner.username,
+          user.email,
+          event.name
+        );
+        await sendWebsiteEmail(mailOptions);
+      }
     }
 
     // Delete the event itself:
@@ -184,10 +199,10 @@ export const deleteEvent = async (userId, eventId) => {
       select: "owner",
     };
     const event = await getEventById(userId, eventId, eventOptions);
+
     if (event.owner.toString() === userId) {
       await deleteEventByOwner(userId, eventId);
     } else {
-      console.log("here");
       await collaboratorEventExit(userId, eventId);
     }
   } catch (err) {

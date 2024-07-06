@@ -173,7 +173,7 @@ export const patchUser = async (id, updatedValues) => {
       if (foundUser)
         throw new DuplicateDataError("There is already a user with that email");
     }
-    console.log(updatedValues);
+
     const selectedFields =
       "username email businessType eventTypes businessLocation businessDescription";
 
