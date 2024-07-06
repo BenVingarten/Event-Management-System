@@ -222,8 +222,8 @@ const SignupPage = () => {
 
       {/*Popup Modal*/}
       <Modal show={isModalOpen} onClose={() => setIsModalOpen(false)}>
-        <form onSubmit={() => setIsModalOpen(false)}>
-          <div className="p-5 overflow-auto">
+        <form onSubmit={() => setIsModalOpen(false)} className="overflow-auto">
+          <div className="p-5 ">
             <h3 className="text-lg font-bold mb-3">
               Tell us about your business!
             </h3>
@@ -338,7 +338,7 @@ const SignupPage = () => {
                   className="mt-5"
                   size="xl"
                   onClick={() => setIsModalOpen(false)}
-                  gradientDuoTone="redToOrange"
+                  color={"red"}
                 >
                   Cancel
                 </Button>
