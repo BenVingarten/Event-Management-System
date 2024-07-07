@@ -70,7 +70,7 @@ export const issueAccessToken = (user) => {
         },
       },
       process.env.ACCESS_TOKEN_SECRET,
-      { expiresIn: "60s" }
+      { expiresIn: "300s" }
     );
     return accessToken;
   } catch (err) {
@@ -277,7 +277,7 @@ export const assignNewAccessToken = async (refreshToken) => {
         },
       },
       process.env.ACCESS_TOKEN_SECRET,
-      { expiresIn: "60s" }
+      { expiresIn: "300s" }
     );
     return accessToken;
   } catch (err) {
