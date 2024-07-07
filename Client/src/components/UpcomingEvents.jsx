@@ -41,10 +41,9 @@ function UpcomingEvents({ userId, setUpcomingRefreshed }) {
         `/users/${userId}/upcomingEvents/${eventId}`
       );
       setUpcomingRefreshed((prev) => prev + 1);
-
       toast.success(response.date.msg);
     } catch (err) {
-      console.log(err.response.data);
+      console.log(err);
       toast.error("Failed to remove event. Try again.");
     }
   };

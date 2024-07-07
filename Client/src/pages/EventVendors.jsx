@@ -114,8 +114,8 @@ function EventVendors() {
 
   const RemoveVendorFromNegotiatedVendors = async (vendor) => {
     try {
+      vendor.status = "Negotiated";
       // eslint-disable-next-line no-unused-vars
-      vendor.status = "Negotiated"
       const res = await axiosPrivate.delete(
         `users/${userId}/events/${eventID}/vendors`,
         { data: { vendor } }
@@ -125,7 +125,7 @@ function EventVendors() {
 
       // Remove from Negotiated Vendors
       setNegotiatedVendors((pv) =>
-        pv.filter((v) => v.username !== vendor.username)
+        pv.filter((v) => v.businessName !== vendor.businessName)
       );
     } catch (err) {
       console.log(err.response.data);
@@ -135,8 +135,8 @@ function EventVendors() {
 
   const RemoveVendorFromEventVendors = async (vendor) => {
     try {
+      vendor.status = "Added";
       // eslint-disable-next-line no-unused-vars
-      vendor.status = "Added"
       const res = await axiosPrivate.delete(
         `users/${userId}/events/${eventID}/vendors`,
         { data: { vendor } }
