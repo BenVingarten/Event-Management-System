@@ -12,7 +12,6 @@ export const handleGetTasks = async (req, res) => {
     const { eventId } = req.params;
     const tasks = await getTasks(userId, eventId);
     const suggestedTasks = await getSuggestedTasks(userId, eventId);
-    console.log(suggestedTasks);
     const allTasks = { tasks, suggestedTasks };
     return res.status(200).json(allTasks);
   } catch (err) {

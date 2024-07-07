@@ -282,7 +282,6 @@ export const updateCustomVendor = async (
 
 export const deleteVendor = async (userId, eventId, vendorObj) => {
   try {
-    console.log(vendorObj);
     // remove vendor from vendors array:
     const updatedEvent = await removeVendorFromVendorsArrayByPlanner(userId, eventId, vendorObj);
     // if the vendor is registered and added we need to remove his event and decrament his lead count
@@ -324,7 +323,7 @@ export const deleteVendorUpcomingEvent = async (userId, eventId) => {
     // Send mail to notify event planner (implement mailing logic here)
     const ownerDetails = {
       ownerName: updatedEvent.owner.username,
-      ownerEmail: updatedEvent.email,
+      ownerEmail: updatedEvent.owner.email,
     };
     const vendorDetails = {
       email: updatedVendor.email,
@@ -341,9 +340,11 @@ export const deleteVendorUpcomingEvent = async (userId, eventId) => {
       vendorDetails,
       eventDetails
     );
+    
     await sendWebsiteEmail(mailOptions);
   } catch (err) {
-    if (err instanceof DataNotFoundError) throw err;
+    console.error(err);
+    if (err instanceof DataNotFoundError || err instanceof GeneralServerError) throw err;
     throw new GeneralServerError(
       `Unexpected error in deleting vendor's upcoming event: ${err.message}`
     );

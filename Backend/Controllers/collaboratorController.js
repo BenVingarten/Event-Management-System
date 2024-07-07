@@ -30,7 +30,6 @@ export const handleDeleteCollaborator = async (req, res) => {
     const { userId } = req;
     const { eventId } = req.params;
     const collaborator = req.body;
-    console.log(collaborator);
     const deletedCollab = await deleteCollaborator(
       userId,
       eventId,

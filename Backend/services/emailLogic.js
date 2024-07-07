@@ -89,7 +89,6 @@ export const vendorInvetationDetails = (
   eventDetails
 ) => {
   const { businessName, email } = vendorDetails;
-  console.log(businessName);
   const { ownerName, ownerEmail } = ownerdetails;
   const { name, location, type, date } = eventDetails;
   const eventDate = new Date(date);
@@ -145,8 +144,7 @@ export const vendorExitEventDetails = (
     .tz("Israel")
     .format("DD-MM-YYYY");
   const subject = `Cancel Of Service`;
-  const text = `Hello ${ownerName},\nthe vendor: ${businessName} has decided to cancel, thus will not provide service in your event.\nHere are some details on the event:\n
-  Name: ${name}\nType: ${type}\nLocation: ${location}\nDate: ${formattedDate}\n\nYou can contact the vendor through his email: ${email} for more details.\nBest regards, CelebrightEMS Team`;
+  const text = `Hello ${ownerName},\nthe vendor: ${businessName} has decided to cancel, thus will not provide service in your event.\nHere are some details on the event:\nName: ${name}\nType: ${type}\nLocation: ${location}\nDate: ${formattedDate}\n\nYou can contact the vendor through his email: ${email} for more details.\nBest regards, CelebrightEMS Team`;
   const mailOptions = {
     from: process.env.EMAIL_USER,
     to: ownerEmail,
@@ -173,6 +171,7 @@ export const sendWebsiteEmail = async (mailOptions) => {
     });
     await transporter.sendMail(mailOptions);
   } catch (err) {
+    console.error(err);
     throw new GeneralServerError(
       `unexpected error in sending email ${err.message}`
     );
