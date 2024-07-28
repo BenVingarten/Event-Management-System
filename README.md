@@ -49,3 +49,14 @@ The primary goal of this project is to develop a platform that allows users to p
 
 ## Why We Chose This Project 🌟
 We chose this project because of our interest in solving real-world problems through technology. Event planning can be a complex and stressful task, and we saw an opportunity to create a solution that would make it easier and more efficient. Through this project, we learned valuable lessons in project management, collaboration, and the use of modern web and mobile development technologies. It has also given us insight into user experience design, database management, and the importance of scalability and security in software development.
+
+![דף הבית](https://github.com/user-attachments/assets/2aac76d3-2783-457d-9837-69d1e7a85d5f)
+![דף אירוע מלא](https://github.com/user-attachments/assets/3395e8c0-d08a-4c71-856f-d146461c832e)
+![ספקים לאחר הוספה](https://github.com/user-attachments/assets/6649a457-c3ee-4b89-a674-2462cb6daaed)
+![משימות](https://github.com/user-attachments/assets/c9e8b5b0-b512-401d-85cb-3779d7d74552)
+![רשימת אורחים](https://github.com/user-attachments/assets/9e32a539-710c-4029-9bb2-a6c4cc233930)
+
+
+
+
+
